@@ -129,3 +129,9 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - The report drawer now waits for a successfully loaded preview document before enabling finalization. Finalized reports and exports omit the receipt. Receipt issuance establishes that the preview was served; it cannot prove that a human read it.
 - Expanded the real API review/report interaction test and added receipt-boundary coverage. All 30 tests passed locally and the production build passed. Browser-saved a synthetic review, loaded its preview, verified finalization became enabled and finalized version 1. No live model result or carrier submission was involved.
 - The next source commit needs CI packaging verification. Live Ring, labeled Bedrock evaluation and deployed AWS checks remain outstanding.
+
+### Storage-independent report fingerprints
+
+- Preview receipts now bind report contents, so their identity must not depend on the property order of serialized storage maps. Canonicalized object keys for content fingerprints while preserving array order and exact values.
+- Existing frozen reports keep their original IDs, fingerprints and contents. Semantic matching recognizes legacy fingerprint versions instead of creating a new report solely because storage key order changed.
+- Added a meaningful storage-round-trip test that reverses nested object-key order, checks unchanged report identity, preserves a legacy snapshot and verifies a real recipient statement still creates version 2. All 31 tests and the production build passed locally. This is a tested storage invariant, not a claim that a live DynamoDB round trip has been performed.

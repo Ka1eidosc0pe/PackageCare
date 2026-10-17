@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { createHash } from "node:crypto";
 import {
   validateAnalysis,
   validateReview,
@@ -146,5 +147,36 @@ describe("recipient review and report provenance", () => {
     d.review.complete = true;
     d.state = "failed";
     expect(() => snapshot(d)).toThrow();
+  });
+  it("keeps report identity stable across storage key ordering and preserves older fingerprint versions", () => {
+    const d = delivery();
+    d.review.complete = true;
+    const original = snapshot(d);
+    const reorder = (v: any): any =>
+      Array.isArray(v)
+        ? v.map(reorder)
+        : v && typeof v === "object"
+          ? Object.fromEntries(
+              Object.entries(v)
+                .reverse()
+                .map(([k, value]) => [k, reorder(value)]),
+            )
+          : v;
+    const restored = reorder(d);
+    expect(snapshot(restored).fingerprint).toBe(original.fingerprint);
+    const legacy = structuredClone(original);
+    const { delivery: reference, analysis, review, assets, runs } = legacy;
+    legacy.fingerprint = createHash("sha256")
+      .update(
+        JSON.stringify({ delivery: reference, analysis, review, assets, runs }),
+      )
+      .digest("hex");
+    expect(legacy.fingerprint).not.toBe(original.fingerprint);
+    restored.reports = [reorder(legacy)];
+    expect(snapshot(restored).id).toBe(legacy.id);
+    expect(snapshot(restored).fingerprint).toBe(legacy.fingerprint);
+    restored.review.notes = "New recipient statement";
+    expect(snapshot(restored).version).toBe(2);
+    expect(legacy.review.notes).not.toBe(restored.review.notes);
   });
 });

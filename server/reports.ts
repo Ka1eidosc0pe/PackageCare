@@ -5,6 +5,20 @@ import {
   sourceLabels,
   timecode,
 } from "../shared/domain.js";
+const fingerprintOf = (value: unknown) =>
+  createHash("sha256")
+    .update(
+      JSON.stringify(value, (_key, value) =>
+        value && typeof value === "object" && !Array.isArray(value)
+          ? Object.fromEntries(
+              Object.keys(value)
+                .sort()
+                .map((key) => [key, value[key]]),
+            )
+          : value,
+      ),
+    )
+    .digest("hex");
 export function snapshot(d: Delivery): Report {
   if (d.state !== "ready" || !d.analysis || !d.review.complete)
     throw Object.assign(
@@ -26,10 +40,19 @@ export function snapshot(d: Delivery): Report {
     assets: d.assets,
     runs: d.runs,
   };
-  const fingerprint = createHash("sha256")
-    .update(JSON.stringify(basis))
-    .digest("hex");
-  const previous = d.reports.find((r) => r.fingerprint === fingerprint);
+  const fingerprint = fingerprintOf(basis);
+  // Preserve existing frozen reports written before canonical fingerprints were introduced.
+  const previous = d.reports.find(
+    (r) =>
+      r.fingerprint === fingerprint ||
+      fingerprintOf({
+        delivery: r.delivery,
+        analysis: r.analysis,
+        review: r.review,
+        assets: r.assets,
+        runs: r.runs,
+      }) === fingerprint,
+  );
   if (previous) return previous;
   return structuredClone({
     id: randomUUID(),

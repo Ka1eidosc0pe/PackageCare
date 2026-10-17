@@ -2,13 +2,13 @@
 
 Updated October 16, 2026. This file is an evidence map, not a completion claim.
 
-Latest continuation checkpoint: the running app still reports Ring disconnected, no recorded live model invocation, local storage and the local worker. A resumed local audit closed the preview-before-finalization gap; the new 30-test source is awaiting its own CI result. Live acceptance remains dependent on account setup and authorized evaluation footage. The owner previously chose to connect accounts later; no credentials or paid cloud resources were created during this checkpoint.
+Latest continuation checkpoint: the running app still reports Ring disconnected, no recorded live model invocation, local storage and the local worker. A resumed local audit closed the preview-before-finalization gap and made report fingerprints independent of storage key order; the new 31-test source is awaiting its own CI result. Live acceptance remains dependent on account setup and authorized evaluation footage. The owner previously chose to connect accounts later; no credentials or paid cloud resources were created during this checkpoint.
 
 | Requirement | Current evidence | Status |
 |---|---|---|
 | Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `e673a2c` pushed to `main` | Verified |
 | Local app builds | TypeScript/Vite production build passed; `npm start` and bundled frontend sample loading verified on port 3002 | Locally verified |
-| Meaningful tests | 30 tests across seven files passed locally, including preview receipts/revision binding, real FFmpeg restart/retry, portable archive, stale writes, model inputs, direct uploads, cleanup and execution/generation races | Passed locally; latest CI pending |
+| Meaningful tests | 31 tests across seven files passed locally, including preview receipts, canonical/legacy report identity, restart/retry, portable archive, stale writes, model inputs, direct uploads, cleanup and execution/generation races | Passed locally; latest CI pending |
 | Recipient review | Browser confirmed observation decision, no-damage status, notes/reference, save and preview | Verified locally |
 | Report finalization/export | Browser created v1 and downloaded ZIP; archive includes HTML, JSON and seven evidence files | Verified locally |
 | Preview before finalization | Server requires a signed receipt for the previewed saved revision/content; UI waits for the actual preview document; browser preview → finalization succeeds; tampering/expiry/staleness/repetition covered by API tests | Verified locally; latest CI pending |
