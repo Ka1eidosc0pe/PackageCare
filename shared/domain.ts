@@ -181,8 +181,14 @@ export function validateAnalysis(
     }
   }
   // The server derives the overall result from verified observations, not an unchecked model headline.
-  const supported = result.observations.some(
+  const supported = result.observations.find(
     (o) => o.concern && o.verification === "supported",
+  );
+  const placement = result.observations.find(
+    (o) =>
+      o.label === "controlled_placement" &&
+      o.verification === "supported" &&
+      !o.concern,
   );
   result.observations.sort(
     (a, b) =>
@@ -196,9 +202,16 @@ export function validateAnalysis(
     );
   result.assessment = supported
     ? "possible_rough_handling"
-    : unclear
+    : unclear || !placement
       ? "unable_to_assess"
       : "no_concern_observed";
+  // Never retain an unchecked model headline after weakening its assessment.
+  // Arrival/landing/rest alone cannot establish that placement was controlled.
+  result.summary = supported
+    ? supported.description
+    : result.assessment === "no_concern_observed"
+      ? placement!.description
+      : "The available sequence does not support a handling assessment.";
   return result;
 }
 export function validateReview(d: Delivery, input: unknown): Review {

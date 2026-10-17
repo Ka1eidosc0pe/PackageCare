@@ -103,7 +103,9 @@ it("retains a completed observation pass and actionable quota failure through th
     await runWorkerTask(resumed, { ...next, phase: "verify" });
     const ready = await store.get(d.id);
     expect(ready?.state).toBe("ready");
-    expect(ready?.analysis).toEqual(analysis);
+    expect(ready?.analysis?.assessment).toBe("possible_rough_handling");
+    expect(ready?.analysis?.summary).toBe("The package appears airborne.");
+    expect(ready?.analysis?.observations).toEqual(analysis.observations);
     expect(ready?.runs.map((r) => r.id)).toEqual([
       "observation-run",
       "verification-run",

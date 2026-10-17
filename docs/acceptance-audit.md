@@ -6,11 +6,11 @@ October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requ
 
 | Requirement | Evidence now | What remains |
 |---|---|---|
-| 1. Working accepted Ring source | Backend adapter, probe and connection/import UI exist; official Playground redirects to Amazon Developer sign-in | Gate A: authenticated discovery, suitable recording, playback, supported scenario/custom-media feasibility |
+| 1. Working accepted Ring source | Real authenticated discovery of one simulator, capabilities/history HTTP 200; no events available | Gate A: suitable recording, playback, supported scenario/custom-media feasibility |
 | 2. Ordered visual handling analysis | Real media extraction tests; dense/sparse/native adapters; input-window and chronological-reference tests | Gate B: real model calls, labeled clips, measured quality and strategy selection |
 | 3. Linked handling timeline | Browser playback and timeline seek verified; source offsets validated | Verify with actual Ring/model output |
 | 4. Supported rough-handling flags | Structured schema, evidence verification and recipient-review path implemented; synthetic concern journey verified | Useful real-world drop/throw detection is unproven |
-| 5. Unclear footage | Explicit abstention rules and scripted ambiguous example; no fixture fallback on provider failure | Measure abstention on real ambiguous/occluded clips |
+| 5. Unclear footage | Arrival/landing/rest alone abstain; supported controlled placement is required before clearing a clip; rejected headlines are replaced. Domain checks and scripted ambiguous example; no fixture fallback | Measure abstention on real ambiguous/occluded clips |
 | 6. Recipient review | Confirm/correct/dismiss/unresolved decisions, stale-write rejection, saved review and independent source analysis | Repeat the real-source journey after Gate A/B |
 | 7. Damage statements/photos | Damage separated from handling; actual image decoding/metadata removal and destination tests; notes and damage status browser-checked | Live cloud upload/CORS and real-source walkthrough |
 | 8. Preview/export | Browser preview → finalized version → downloaded ZIP; actual archive inspected; immutable snapshots and escaped statements tested. Successful preview receipt is required for the saved revision; stale/tampered/expired receipts and repeated requests tested | Live S3 export and maximum supported-size verification |
@@ -39,6 +39,7 @@ October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requ
 - Original upload bytes are durable before acknowledgment. A process-recreation test runs real FFmpeg, preserves the source, fails inference, and retries without replacing prepared evidence.
 - A successfully served preview is bound to the saved revision and report contents before API finalization. Canonical object-key ordering keeps content identity stable across storage serialization; legacy snapshots retain their IDs/fingerprints. Re-finalizing an unchanged pre-update report preserved version 1 in the browser after a server restart.
 - Direct cloud upload policy uses exact size, checksum, type, encryption and key; signed-ticket expiry/tampering and repeated completion are tested. Actual S3 policy acceptance and CORS are pending.
+- Cloud worker failures preserve a completed observation pass and a safe, actionable error; repeated/late catchers cannot replace an existing failure or a ready result. Quota failure resumes with verification only, stale generations are ignored, and exhausted Ring readiness retries become media-unavailable in local task-executor tests.
 - Whole-execution status reconciliation makes stopped cloud work retryable. Atomic retry/generation checks reject delayed status and in-flight model results from an older attempt. Actual Step Functions timeout/abort checks are pending.
 - Whole-case retention and deletion exist. Orphan reconciliation protects current and frozen-report references, waits a day, completes paginated inventory before deleting, and has real local-file and simulated S3 coverage. Actual cloud permissions remain pending.
 - Private storage, short-lived downloads, finite retention, secret placeholders and ignored runtime data are implemented. Source inspection/tests do not prove live account configuration.
@@ -50,7 +51,7 @@ October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requ
 - `npm run fixtures` creates original labeled synthetic footage. `ring:probe` and `evaluate` are ready for authorized accounts; neither has produced live provider validation or performance metrics.
 - Desktop/mobile journeys, source playback, timeline seeking, unsaved-change protection, keyboard dialog focus and report download were checked. New failure-state layouts also had document width equal to the 1440/390-pixel viewports. Screenshots live outside source control.
 - Private GitHub repository, incremental commits, README, PRD, deployment/validation notes and development/friction logs exist. Required reviewer invitations are not sent.
-- The initial 12-clip labeled evaluation set, held-out comparison, observed latency/usage/cost, actual AWS demo, final per-tool feedback, public demo video, eligibility/registration and final submission are outstanding. See `submission.md`.
+- A 12-scene capture/labeling plan and empty-data manifest template are prepared. The initial 12-clip labeled evaluation set, held-out comparison, observed latency/usage/cost, actual AWS demo, final per-tool feedback, public demo video, eligibility/registration and final submission are outstanding. See `submission.md`.
 
 ## Completion decision
 

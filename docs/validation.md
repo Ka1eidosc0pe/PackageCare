@@ -39,7 +39,7 @@ Create a JSON manifest using footage the owner has rights to use:
 ]
 ```
 
-Start with at least 12 distinct cases as described in the PRD. Do not count minor variants of a synthetic scene as independent real-world evidence. Keep tuning and held-out cases separate.
+Use [the capture and labeling plan](evaluation-capture-plan.md) and [manifest template](../evaluation/manifest.template.json) to prepare the initial dataset. The template is not a collected or labeled dataset. Start with at least 12 distinct cases as described in the PRD. Do not count minor variants of a synthetic scene as independent real-world evidence. Keep tuning and held-out cases separate.
 
 Run the evaluation harness separately with `ANALYSIS_STRATEGY=dense_frames`, `sparse_frames`, and `native_video`. Each run makes real billable Bedrock calls. Set a budget first. Record false alarms, misses, abstention, action-window coverage, usage, latency, and unsupported statements. The harness saves detailed local JSON and does not claim production accuracy.
 

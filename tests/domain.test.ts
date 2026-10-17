@@ -65,6 +65,58 @@ export const delivery = (): Delivery => ({
   reports: [],
 });
 describe("evidence validation", () => {
+  it("abstains when a parcel is only visible, landing or at rest, and requires supported placement before clearing a clip", () => {
+    for (const label of [
+      "package_visible",
+      "landing_visible",
+      "package_at_rest",
+    ] as const) {
+      const candidate = structuredClone(analysis);
+      candidate.assessment = "no_concern_observed";
+      candidate.summary = "The package was handled perfectly.";
+      Object.assign(candidate.observations[0], { label, concern: false });
+      const result = validateAnalysis(candidate, assets, 8000);
+      expect(result.assessment).toBe("unable_to_assess");
+      expect(result.summary).toBe(
+        "The available sequence does not support a handling assessment.",
+      );
+    }
+    const visiblePlacement = structuredClone(analysis);
+    Object.assign(visiblePlacement.observations[0], {
+      label: "controlled_placement",
+      concern: false,
+      description: "The parcel is lowered onto the doorstep.",
+    });
+    const result = validateAnalysis(visiblePlacement, assets, 8000);
+    expect(result.assessment).toBe("no_concern_observed");
+    expect(result.summary).toBe("The parcel is lowered onto the doorstep.");
+  });
+
+  it("removes rejected concern headlines and preserves abstention when placement evidence is ambiguous", () => {
+    const candidate = structuredClone(analysis);
+    candidate.summary = "The driver threw and damaged the package.";
+    candidate.observations[0].verification = "rejected";
+    candidate.observations.push({
+      ...candidate.observations[0],
+      id: "at-rest",
+      label: "package_at_rest",
+      concern: false,
+      verification: "supported",
+    });
+    const rejected = validateAnalysis(candidate, assets, 8000);
+    expect(rejected.assessment).toBe("unable_to_assess");
+    expect(rejected.summary).not.toContain("threw");
+    expect(rejected.summary).not.toContain("damaged");
+    Object.assign(candidate.observations[0], {
+      label: "controlled_placement",
+      concern: false,
+      verification: "ambiguous",
+    });
+    expect(validateAnalysis(candidate, assets, 8000).assessment).toBe(
+      "unable_to_assess",
+    );
+  });
+
   it("presents model observations in chronological order even when the provider returns them out of order", () => {
     const a = structuredClone(analysis);
     a.observations.push({

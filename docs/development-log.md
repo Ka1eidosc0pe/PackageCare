@@ -169,3 +169,12 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - The catch task now passes only its error code, never the raw provider Cause. Exhausted MediaPending retries produce an actionable media-unavailable state. Transient retrieval remains retryable; no inference is attempted before footage exists.
 - Two consequential local worker scenarios exercise observe → quota failure → repeated catcher → new generation → verification-only recovery, plus temporary Ring readiness → exhausted catcher. They verify preserved evidence/proposal, no repeated observation call, no sensitive provider text, no stale catcher writes and no replacement of a completed result.
 - All 36 local tests, production build and CDK synthesis passed. The synthesized payload carries the catcher Error code only. Live Step Functions behavior still requires an approved deployment.
+
+
+## October 16, 2026 — abstention before a handling assessment
+
+- The same audit found that a supported parcel-visible/landing/at-rest observation could yield `no_concern_observed` even if placement was never shown. A rejected or weakened model assessment could also retain its unchecked headline in the UI.
+- Derive a clear assessment only from supported controlled-placement evidence when no uncertainty remains; arrival, landing or rest alone abstain. Supported concerns still take precedence. Derive the displayed summary from the supported observation or explicit abstention rather than an unchecked model headline. Existing frozen reports are untouched.
+- Updated the input contract and prompt version to `packagecare-evidence-v2`. This establishes validation behavior, not measured model performance. The quota gate still prevents evaluation.
+- Added meaningful cases for at-rest/landing/arrival-only footage, supported placement, rejected accusatory headlines, and ambiguous placement. All 38 tests across nine files, the production build and Ohio synthesis passed locally. No further live inference ran.
+- Prepared a 12-scene capture/labeling plan and a clearly marked manifest template, with distinct development/held-out cases and no fabricated timestamps or results. Uploaded staged footage can support model work but cannot replace the required Ring demonstration or establish simulator custom-media support. Footage still needs to be collected with permission; evaluation needs its own approved cost scope.
