@@ -10,6 +10,7 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Steps:** Open the official Ring starter; follow its Playground link using the web-reading tool.
 - **Expected:** A readable description or simulator UI explaining scenes/media inputs.
 - **Actual:** Link returned an internal/unavailable-page error in that tool. The starter and API reference remained readable.
+- **Browser follow-up:** Opening `https://developer.amazon.com/ring/console/playground` in a real browser redirected to Amazon Developer sign-in. No account was created and no credentials were entered. Authenticated scene/media capabilities remain unknown.
 - **Severity:** Important; the project's custom-scene feasibility is unresolved.
 - **Workaround:** Implement a documented Ring adapter and local connection/probe tools; defer authenticated validation until the user connects the account. No claim of simulator support has been made.
 - **Suggestion:** Provide an unauthenticated capabilities page describing which simulator media/scenarios are supported, token behavior, and custom-upload limitations.
@@ -59,7 +60,7 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Expected:** An available runtime for an image build/test.
 - **Actual:** Docker CLI exists but the daemon socket is absent; no container execution is available.
 - **Severity:** Important for cloud-runtime verification; independent local Node/FFmpeg development continues.
-- **Workaround:** Keep deployment status unverified. Validate source with TypeScript and CDK synthesis. A future container build needs Docker running or an authorized CI build environment.
+- **Workaround:** Validated source with TypeScript and CDK synthesis, then built and smoke-tested the Linux container in the private repository's GitHub Actions. Run 38988422636 passed. Live AWS deployment remains unverified.
 - **Suggestion:** Document container prerequisites and distinguish template synthesis from runtime validation.
 - **Submission note:** Local environment state, not an AWS/Ring provider defect.
 
@@ -86,5 +87,6 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Actual:** The image built and FFmpeg ran, but the client exited with `_HANDLER environment variable is not set`.
 - **Severity:** Important; a correctly built image still could not serve an invocation through that startup path.
 - **Workaround:** Added an entrypoint that maps the image handler command to `_HANDLER` and launches the verified package executable. Smoke test now executes the same entrypoint as production.
+- **Verification:** Run 38988422636 passed the actual entrypoint smoke after supplying the function/log metadata normally provided by AWS to our test harness. The missing test metadata was our harness issue, not an AWS failure.
 - **Suggestion:** Version the startup examples and document the handler/environment contract explicitly for v4.
 - **Submission note:** This was found using an account-free local protocol simulation inside CI, not a deployed Lambda invocation.

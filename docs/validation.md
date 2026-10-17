@@ -43,4 +43,4 @@ Run the evaluation harness separately with `ANALYSIS_STRATEGY=dense_frames`, `sp
 
 ## AWS runtime
 
-CDK synthesis is only structural validation. Before claiming deployment works, build the Linux container, verify the runtime handler, deploy to the authorized account, and exercise authentication, source media download, Step Functions success/failure, persistence, and export. Confirm actual deployment limitations and document them rather than treating source code as evidence of success.
+CDK synthesis is only structural validation. The Linux container build, FFmpeg, packaged HTTP/frontend handler, and actual production entrypoint passed the account-free CI smoke in [run 38988422636](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38988422636). Before claiming deployment works, deploy to the authorized account and exercise authentication, source media download, Step Functions success/failure, persistence, and export. Confirm actual deployment limitations and document them rather than treating source code or the simulated Runtime API as evidence of live AWS success.

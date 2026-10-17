@@ -77,3 +77,11 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - The next runtime smoke failure was missing AWS-provided function/log metadata in our local protocol harness, not a production handler failure. Filled the required stand-in environment values from the published runtime client's validation contract. Pinned the CI runner to Ubuntu 24.04 to avoid the announced image migration during the hackathon week.
 - Local production command (`npm start`, isolated sample data, port 3002) and the production frontend's sample-loading flow were verified in the browser. The local Lambda HTTP adapter also returned 200 for session and built-homepage requests.
 - Bundled the font/icon/UI-runtime license notices with the frontend assets. Root production dependency audit reported zero advisories; this is not a separate audit of the native runtime image.
+
+## October 16, 2026 — verified local milestone
+
+- Source commit `4e7fa5b298afae98f5b74ca40e44c9ba60a05cc9` passed [CI run 38988422636](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38988422636): production build, all 22 meaningful tests, CDK synthesis, Linux Lambda image build, FFmpeg, packaged HTTP/frontend checks, and actual production entrypoint invocation against the Runtime API stand-in.
+- The container check required no AWS account and made no live AWS or Ring calls. It proves packaging/startup behavior; IAM, Step Functions, S3/DynamoDB and inference still require live validation.
+- Verified keyboard behavior in the production frontend's unsaved-changes dialog: initial focus on Keep editing, Tab to Discard changes, Tab wrap, Escape dismissal, and focus restoration. Discarded only the synthetic test draft and returned the preview to Deliveries.
+- Preserved the production preview on port 3002 with isolated synthetic fixtures, plus a screenshot outside the repository. Updated the current evidence map and deployment notes to distinguish passing container validation from pending live services.
+- Private source control and development/friction logs are maintained. Account connection, real labeled-footage evaluation, cloud release limits and final hackathon deliverables remain open; the overall goal is not complete.
