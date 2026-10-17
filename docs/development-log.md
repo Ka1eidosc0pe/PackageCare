@@ -56,6 +56,7 @@ Use this log for implementation decisions and verified milestones. `friction-log
 - Added local scheduled retention and a cloud maintenance schedule. Cloud exports use private S3 bundles rather than returning large ZIP payloads through Lambda.
 - Added a GitHub Actions workflow for build, meaningful tests, and infrastructure synthesis. Its remote result is pending the next push.
 - Docker CLI is installed, but its daemon socket is absent. Container/runtime validation remains unverified; no Docker daemon or cloud deployment was started.
+- Added an independent CI container build and Lambda HTTP/frontend smoke job so Linux runtime verification can proceed without local Docker or Ring/AWS credentials. Await its actual result before claiming the image works.
 - Latest local build and test results are recorded in `progress.md`; rerun whenever relevant source changes.
 
 ### Scope and next external gates remain unchanged

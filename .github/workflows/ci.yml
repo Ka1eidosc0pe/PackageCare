@@ -20,3 +20,14 @@ jobs:
       - run: npm run build
       - run: npm test
       - run: npm run infra:synth -- --quiet
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Linux Lambda runtime
+        run: docker build --platform linux/amd64 -f infra/Dockerfile.lambda -t packagecare-lambda .
+      - name: Verify FFmpeg in the runtime
+        run: docker run --rm --entrypoint ffmpeg packagecare-lambda -version
+      - name: Exercise Lambda HTTP adaptation and built frontend
+        run: docker run --rm -i --entrypoint node packagecare-lambda < scripts/container-smoke.cjs
