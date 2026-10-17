@@ -135,3 +135,9 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - Preview receipts now bind report contents, so their identity must not depend on the property order of serialized storage maps. Canonicalized object keys for content fingerprints while preserving array order and exact values.
 - Existing frozen reports keep their original IDs, fingerprints and contents. Semantic matching recognizes legacy fingerprint versions instead of creating a new report solely because storage key order changed.
 - Added a meaningful storage-round-trip test that reverses nested object-key order, checks unchanged report identity, preserves a legacy snapshot and verifies a real recipient statement still creates version 2. All 31 tests and the production build passed locally. This is a tested storage invariant, not a claim that a live DynamoDB round trip has been performed.
+
+### Preview milestone verification
+
+- Preview source `c8cdf99` passed both CI jobs in run 38990551816. Final source `7a4e7563dd548fd69b8d164b938762eca6c95dbe` passed [run 38990693461](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38990693461): all 31 tests, production build, CDK synthesis, Linux image build, FFmpeg and actual production runtime-entrypoint smoke.
+- Restarted the production server on the canonical-fingerprint source and repeated preview/finalization for the unchanged pre-update synthetic report. It retained report ID `757b0462-5d41-4ae3-adbb-ea8884ad0540`, generation timestamp and version 1. Captured `packagecare/finalized-report.png` outside the repository and preserved the local preview.
+- Account readiness remains unchanged. The goal is not complete: suitable Ring media, real Bedrock evaluation, live AWS behavior and submission artifacts are still unverified. No credentials, deployment, external complaint or reviewer invitation was created.

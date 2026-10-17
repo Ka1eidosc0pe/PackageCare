@@ -37,6 +37,7 @@ October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requ
 
 - Raw webhook HMAC, account binding, local host/origin restrictions, remote password authentication, session and logout have meaningful API coverage.
 - Original upload bytes are durable before acknowledgment. A process-recreation test runs real FFmpeg, preserves the source, fails inference, and retries without replacing prepared evidence.
+- A successfully served preview is bound to the saved revision and report contents before API finalization. Canonical object-key ordering keeps content identity stable across storage serialization; legacy snapshots retain their IDs/fingerprints. Re-finalizing an unchanged pre-update report preserved version 1 in the browser after a server restart.
 - Direct cloud upload policy uses exact size, checksum, type, encryption and key; signed-ticket expiry/tampering and repeated completion are tested. Actual S3 policy acceptance and CORS are pending.
 - Whole-execution status reconciliation makes stopped cloud work retryable. Atomic retry/generation checks reject delayed status and in-flight model results from an older attempt. Actual Step Functions timeout/abort checks are pending.
 - Whole-case retention and deletion exist. Orphan reconciliation protects current and frozen-report references, waits a day, completes paginated inventory before deleting, and has real local-file and simulated S3 coverage. Actual cloud permissions remain pending.
