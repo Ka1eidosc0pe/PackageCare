@@ -154,3 +154,8 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - Free Service Quotas checks confirmed Nova Lite daily tokens = 0 (`L-45E0AD92`, non-adjustable); other Nova daily entries checked are also zero. This is a runtime quota issue despite authorized model metadata. No plan upgrades, quota changes, cloud uploads or resource provisioning were performed. Prepared an unsent AWS support draft and detailed readiness/cost evidence.
 - Added actionable local quota-failure handling. Meaningful tests cover the Region/profile/model boundary and preserve failure, evidence and zero automatic retry without inventing an assessment. All 34 tests, the production build and Ohio synthesis passed locally. Fresh private-repository CI remains to be checked after commit.
 - Real Ring recordings/custom scenes, successful model output and labeled quality evaluation, live cloud runtime and submission deliverables remain unverified. The active goal is not complete. Quota resolution and a newly approved inference attempt are the next AWS steps.
+
+### Ohio readiness milestone verified
+
+- Source `724c7734703a8d827b150f963ebb693f88ef80ae` passed [CI run 38996783402](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38996783402): 34 tests, production build, CDK synthesis, Linux Lambda image build, FFmpeg and actual production-entrypoint smoke. Both jobs succeeded. Repository remained private; credentials and runtime evidence were excluded from source control.
+- The following documentation-only checkpoint records these results. No additional inference was performed. Await owner/AWS quota resolution before preparing the next approved live attempt.

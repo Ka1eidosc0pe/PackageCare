@@ -1,6 +1,6 @@
 # AWS deployment notes
 
-**Status:** The owner connected AWS project credentials under `pkgcare` and confirmed `us-east-2`. Free metadata checks verify Nova Lite authorization/availability, and the application's SDK resolves the temporary login credentials. The owner-approved smoke attempt reached Bedrock but its first request was throttled by zero daily-token quota; no model result returned. No AWS upload, deployment or resource creation has been performed. Earlier source passed the Linux Lambda runtime smoke in [CI](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38990693461); current Region restrictions are locally synthesized and await fresh CI verification.
+**Status:** The owner connected AWS project credentials under `pkgcare` and confirmed `us-east-2`. Free metadata checks verify Nova Lite authorization/availability, and the application's SDK resolves the temporary login credentials. The owner-approved smoke attempt reached Bedrock but its first request was throttled by zero daily-token quota; no model result returned. No AWS upload, deployment or resource creation has been performed. Earlier source passed the Linux Lambda runtime smoke in [CI](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38990693461); current Ohio-only source `724c773` passed all checks and the container runtime smoke in [CI run 38996783402](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38996783402).
 
 ## Intended topology
 
