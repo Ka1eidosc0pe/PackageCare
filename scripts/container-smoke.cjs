@@ -27,7 +27,7 @@ function event(path) {
         }
       });
       server.listen(0,'127.0.0.1',()=>{
-        child=spawn(process.execPath,['node_modules/aws-lambda-ric/index.mjs','lambda/lambda.handler'],{cwd:'/var/task',env:{...process.env,AWS_LAMBDA_RUNTIME_API:`127.0.0.1:${server.address().port}`,AWS_LAMBDA_FUNCTION_NAME:'packagecare-smoke',AWS_REGION:'us-east-1'},stdio:['ignore','pipe','pipe']});
+        child=spawn('/var/task/entrypoint.sh',['lambda/lambda.handler'],{cwd:'/var/task',env:{...process.env,AWS_LAMBDA_RUNTIME_API:`127.0.0.1:${server.address().port}`,AWS_LAMBDA_FUNCTION_NAME:'packagecare-smoke',AWS_REGION:'us-east-1'},stdio:['ignore','pipe','pipe']});
         let logs='';child.stdout.on('data',c=>logs+=c);child.stderr.on('data',c=>logs+=c);child.on('error',reject);child.on('exit',code=>{if(code)reject(new Error(`Runtime exited ${code}: ${logs.slice(-3000)}`));});
       });
       timeout=setTimeout(()=>reject(new Error('Packaged runtime did not return an invocation response within 30 seconds.')),30000);

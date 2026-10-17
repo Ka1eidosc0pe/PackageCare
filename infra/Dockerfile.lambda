@@ -13,6 +13,7 @@ WORKDIR /var/task
 COPY --from=build /build/node_modules ./node_modules
 COPY --from=build /build/lambda ./lambda
 COPY --from=build /build/dist ./dist
+COPY --chmod=755 infra/entrypoint.sh /var/task/entrypoint.sh
 ENV DATA_DIR=/tmp/packagecare
-ENTRYPOINT ["/usr/local/bin/node", "node_modules/aws-lambda-ric/index.mjs"]
+ENTRYPOINT ["/var/task/entrypoint.sh"]
 CMD ["lambda/lambda.handler"]

@@ -76,3 +76,15 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Workaround:** Add autoconf/automake/libtool/pkg-config; align runtime versions; use the verified current runtime client. Rebuild and await actual smoke-test results.
 - **Suggestion:** Include autotools requirements and a current engine compatibility matrix in the alternative-base-image example.
 - **Submission note:** Separate the runtime-client prerequisites from our own initial Node-version mismatch when writing provider feedback.
+
+## PC-F007 — runtime client v4 handler startup contract
+
+- **Date:** October 16, 2026
+- **Tool:** AWS Lambda Node.js runtime interface client 4.0.2
+- **Task:** Invoke our packaged handler in a container against a local Runtime API stand-in.
+- **Expected:** Passing the handler as the container command, following the alternative-base-image pattern, would start the handler.
+- **Actual:** The image built and FFmpeg ran, but the client exited with `_HANDLER environment variable is not set`.
+- **Severity:** Important; a correctly built image still could not serve an invocation through that startup path.
+- **Workaround:** Added an entrypoint that maps the image handler command to `_HANDLER` and launches the verified package executable. Smoke test now executes the same entrypoint as production.
+- **Suggestion:** Version the startup examples and document the handler/environment contract explicitly for v4.
+- **Submission note:** This was found using an account-free local protocol simulation inside CI, not a deployed Lambda invocation.
