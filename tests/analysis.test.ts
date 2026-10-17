@@ -18,7 +18,7 @@ describe("analysis input contracts", () => {
         ...d.assets[1],
         id: `f${i}`,
         offsetMs: 200 + i * 500,
-      })),
+      })).reverse(),
     ];
     const adapter = new BedrockAnalyzer(media, "test-model", "dense_frames");
     const calls: any[] = [];
@@ -49,6 +49,12 @@ describe("analysis input contracts", () => {
     for (const call of calls) {
       const content = call.messages[0].content;
       expect(content.filter((c: any) => c.image).length).toBeLessThanOrEqual(5);
+      const offsets = content
+        .filter((c: any) => c.text?.startsWith("Evidence ID "))
+        .map((c: any) => Number(c.text.match(/offset (\d+) ms/)[1]));
+      expect(offsets).toEqual(
+        [...offsets].sort((a: number, b: number) => a - b),
+      );
       for (const c of content)
         if (c.text?.startsWith("Evidence ID "))
           cited.add(c.text.split(";")[0].slice(12));
@@ -89,6 +95,30 @@ describe("analysis input contracts", () => {
     expect(content.some((c: any) => c.video?.format === "mp4")).toBe(true);
     expect(content.some((c: any) => c.image)).toBe(false);
     expect(result.run.inputAssetIds).toEqual(["video"]);
+  });
+  it("rejects evidence that exists in the case but was not presented in this model window", async () => {
+    const media = new MediaStore("/tmp/not-used");
+    vi.spyOn(media, "read").mockResolvedValue(Buffer.from("test-image"));
+    const d = delivery();
+    d.assets = [
+      d.assets[0],
+      ...Array.from({ length: 8 }, (_, i) => ({
+        ...d.assets[1],
+        id: `f${i}`,
+        offsetMs: 100 + i * 900,
+      })),
+    ];
+    const proposed = structuredClone(analysis);
+    Object.assign(proposed.observations[0], {
+      evidenceIds: ["f7"],
+      startMs: 6000,
+      endMs: 7000,
+    });
+    const adapter = new BedrockAnalyzer(media, "test-model", "dense_frames");
+    vi.spyOn(adapter.client, "send").mockResolvedValue({
+      output: { message: { content: [{ text: JSON.stringify(proposed) }] } },
+    } as never);
+    await expect(adapter.analyze(d, "observe")).rejects.toThrow("missing");
   });
 });
 describe("job outcomes", () => {

@@ -62,3 +62,11 @@ Use this log for implementation decisions and verified milestones. `friction-log
 ### Scope and next external gates remain unchanged
 
 The owner explicitly chose to connect accounts later. Live Ring media/custom-scene support, live Bedrock evaluation, actual AWS execution/cost, and final submission materials remain outstanding. Local synthetic scenarios are not evidence for those gates.
+
+## October 16, 2026 — CI packaging correction
+
+- CI for `c1f81ab` passed the independent build/tests/CDK job, but the container build failed compiling the Lambda runtime client because `autoreconf` was missing.
+- The same log exposed the HTTP adapter's Node >=24 engine requirement. Standardized README, package engine, CI, and both containers on Node 24+ (local development currently uses Node 25).
+- Added the native runtime build prerequisites and selected the verified current official Lambda runtime client release. Updated GitHub Actions to their verified current releases.
+- Added a check that a model cannot cite a known case frame it did not receive in its current input window, and strengthened frame-order coverage.
+- No live provider/runtime success is inferred from these source fixes; the next CI result must confirm them.

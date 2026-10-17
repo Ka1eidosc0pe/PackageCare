@@ -62,3 +62,16 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Workaround:** Keep deployment status unverified. Validate source with TypeScript and CDK synthesis. A future container build needs Docker running or an authorized CI build environment.
 - **Suggestion:** Document container prerequisites and distinguish template synthesis from runtime validation.
 - **Submission note:** Local environment state, not an AWS/Ring provider defect.
+
+## PC-F006 — Lambda runtime client native build prerequisite
+
+- **Date:** October 16, 2026
+- **Tool:** AWS Lambda Node.js runtime interface client in our Debian container
+- **Task:** Build the actual deployment image in CI.
+- **Steps:** Follow the documented alternative-base-image approach and install the runtime client during the image build.
+- **Expected:** The documented native-build prerequisites would cover runtime-client compilation.
+- **Actual:** CI failed with `autoreconf: not found` in the runtime client's preinstall script. Its build needed additional autotools in this slim base image. The log also exposed our selected HTTP adapter's Node >=24 requirement.
+- **Severity:** Important; image could not build.
+- **Workaround:** Add autoconf/automake/libtool/pkg-config; align runtime versions; use the verified current runtime client. Rebuild and await actual smoke-test results.
+- **Suggestion:** Include autotools requirements and a current engine compatibility matrix in the alternative-base-image example.
+- **Submission note:** Separate the runtime-client prerequisites from our own initial Node-version mismatch when writing provider feedback.

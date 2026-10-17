@@ -13,7 +13,7 @@ PackageCare links handling observations to footage, lets the recipient correct o
 
 ## Local setup
 
-Requirements: Node.js 22+, npm, FFmpeg and FFprobe on PATH. Generated files are kept in ignored `data/`.
+Requirements: Node.js 24+, npm, FFmpeg and FFprobe on PATH. Generated files are kept in ignored `data/`.
 
 ```sh
 npm ci --ignore-scripts
