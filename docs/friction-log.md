@@ -101,3 +101,16 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Severity:** Important; recovery could fail even though receipt was acknowledged.
 - **Workaround:** Save the original before receipt, perform preparation in the persisted worker flow, and retain prepared evidence across model retries. Added a real-FFmpeg process-recreation test. Cloud file bytes now use bounded S3 POST uploads rather than the API body.
 - **Submission note:** Our implementation error, not an AWS/Ring defect. Live S3/IAM/CORS validation is still pending.
+
+
+## PC-F009 — authorized model with zero runtime quota
+
+- **Date:** October 16, 2026
+- **Tool:** Amazon Bedrock Converse, Service Quotas, AWS CLI 2.38.1 and SDK for JavaScript v3
+- **Task:** Run the first owner-approved, bounded Ohio-only multimodal smoke test.
+- **Expected:** An authorized/available on-demand model would accept a small five-frame request and return schema-checkable output.
+- **Actual:** The first request returned HTTP 429 `ThrottlingException: Too many tokens per day, please wait before trying again.` SDK attempts = 1; retry delay = 0. No second request or model output. Bedrock availability metadata had reported AUTHORIZED/AVAILABLE. Service Quotas then reported the Nova Lite daily allocation (`L-45E0AD92`) as 0, non-adjustable. Other Nova daily entries checked also showed 0.
+- **Severity:** Blocking for live model validation.
+- **Workaround/status:** No working runtime workaround established. Stopped inference, kept all processing in Ohio, recorded evidence, prepared an unsent support draft. No paid-plan upgrade or quota/permission changes made. Added a specific application error and tested preservation of source evidence on quota failure.
+- **Suggestion:** Include applied runtime-quota readiness alongside model authorization/availability, and expose a clear onboarding route when a new project has zero non-adjustable daily allocation.
+- **Submission note:** This is a directly observed provider onboarding constraint. Free-plan status is known, but its causal relationship to the quota is not established. Synthetic input only; no claim of model accuracy or successful production inference.

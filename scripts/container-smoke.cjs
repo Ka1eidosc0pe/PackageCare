@@ -88,7 +88,7 @@ function event(path) {
             AWS_LAMBDA_FUNCTION_MEMORY_SIZE: "1024",
             AWS_LAMBDA_LOG_GROUP_NAME: "/aws/lambda/packagecare-smoke",
             AWS_LAMBDA_LOG_STREAM_NAME: "local-smoke",
-            AWS_REGION: "us-east-1",
+            AWS_REGION: "us-east-2",
           },
           stdio: ["ignore", "pipe", "pipe"],
         });

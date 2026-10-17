@@ -19,8 +19,15 @@ import {
 } from "aws-cdk-lib";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import path from "node:path";
+import { APPLICATION_REGION, BEDROCK_MODEL } from "../server/aws.js";
 const app = new App();
-const stack = new Stack(app, "PackageCare");
+if (process.env.AWS_REGION && process.env.AWS_REGION !== APPLICATION_REGION)
+  throw new Error(
+    `Deploy PackageCare only in ${APPLICATION_REGION} using --profile pkgcare.`,
+  );
+const stack = new Stack(app, "PackageCare", {
+  env: { region: APPLICATION_REGION },
+});
 const password = new CfnParameter(stack, "WorkspacePassword", {
   type: "String",
   noEcho: true,
@@ -48,7 +55,8 @@ const source = new CfnParameter(stack, "RingSourceType", {
 });
 const model = new CfnParameter(stack, "BedrockModel", {
   type: "String",
-  default: "us.amazon.nova-2-lite-v1:0",
+  default: BEDROCK_MODEL,
+  allowedValues: [BEDROCK_MODEL],
 });
 const bucket = new s3.Bucket(stack, "Evidence", {
   blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -197,8 +205,7 @@ worker.addToRolePolicy(
   new iam.PolicyStatement({
     actions: ["bedrock:InvokeModel"],
     resources: [
-      `arn:aws:bedrock:*::foundation-model/amazon.nova*`,
-      `arn:aws:bedrock:*:${stack.account}:inference-profile/*`,
+      `arn:aws:bedrock:${APPLICATION_REGION}::foundation-model/${BEDROCK_MODEL}`,
     ],
   }),
 );

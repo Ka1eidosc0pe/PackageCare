@@ -8,7 +8,7 @@ PackageCare links handling observations to footage, lets the recipient correct o
 
 - The local review, playback, persistence, report preview/finalization, and evidence-bundle workflow is implemented.
 - Sample deliveries are original **synthetic animations with scripted observations**. They are not real Ring footage, live AI output, or an accuracy evaluation.
-- Ring and Bedrock adapters plus AWS infrastructure source are included. **Live Ring media, simulator customization, Bedrock accuracy, and deployed AWS behavior are not yet verified.** The owner requested connecting accounts later.
+- Ring and Bedrock adapters plus AWS infrastructure source are included. **Live Ring media, simulator customization, Bedrock accuracy, and deployed AWS behavior are not yet verified.** AWS authentication/model authorization and Ring discovery are now checked; media, inference and deployment gates remain open.
 - Follow [the PRD](prd.md), [development log](docs/development-log.md), [verification status](docs/progress.md), and [acceptance audit](docs/acceptance-audit.md) for scope, evidence and remaining gates.
 
 ## Local setup
@@ -44,7 +44,7 @@ Imported source bytes are saved before processing starts, so a restart can resum
 
 Run the production build before `npm start`. The server binds only to loopback by default. Runtime media, records, credentials, reports, and local evaluations are never committed.
 
-## Connect accounts later
+## Connections
 
 ### Ring
 
@@ -56,7 +56,9 @@ For Gate A, follow [the validation checklist](docs/validation.md). A working ada
 
 ### AWS / Bedrock
 
-Use the standard AWS SDK credential chain (for example an authenticated AWS profile). Keep long-lived keys out of chat and source files. Set `AWS_REGION`, `BEDROCK_MODEL_ID`, and optionally `AWS_PROFILE` in your local environment. Ensure that the account/role can invoke the chosen model.
+Local clients use the named `pkgcare` AWS profile; Lambda uses its execution role. The application requires `AWS_REGION=us-east-2` and the in-Region model `amazon.nova-lite-v1:0`. Other profiles, Regions and model/inference-profile IDs are rejected. The CDK stack is pinned to Ohio and its worker permission covers that exact model only. Toolkit configuration in `us-east-1` is separate from application resources. Keep credentials out of chat and source files.
+
+The owner requires explicit approval before any potentially billable operation, even on the Free plan. Connection checks do not authorize inference or deployment. `npm run bedrock:smoke -- /path/to/clip.mp4` prepares five frames locally without inference. After specific spending approval, adding `--invoke` makes at most two model requests, with no automatic retries and at most 2,500 output tokens per request. It saves usage/results under ignored `data/bedrock-smoke/` and never uses S3 or Step Functions. A synthetic input tests connectivity/schema only, not model accuracy or Ring provenance.
 
 `ANALYSIS_STRATEGY=dense_frames` is the initial adapter default: up to four frames per second, capped at 120 across the full clip, analyzed in overlapping windows of at most five images. `sparse_frames` and `native_video` exist for comparison. These strategies have not been compared through live inference yet. Native video sampling may miss brief actions; denser inputs cost more and also need evaluation.
 

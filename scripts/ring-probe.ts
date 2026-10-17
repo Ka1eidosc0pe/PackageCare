@@ -21,7 +21,8 @@ if (device && timestamp) {
     12000,
     process.env.RING_PROBE_COMPONENT,
   );
-  const media = new MediaStore(path.resolve(process.env.DATA_DIR || "data"));
+  // Gate A is local even when cloud storage is configured for the application.
+  const media = new MediaStore(path.resolve(process.env.DATA_DIR || "data"), "");
   const prepared = await prepareVideo(clip.bytes, media, "gate-a-probe.mp4");
   console.log({
     downloaded: true,

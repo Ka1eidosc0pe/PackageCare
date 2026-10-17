@@ -1,6 +1,6 @@
 # PackageCare acceptance audit
 
-October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requirement-to-evidence map, not a claim that the hackathon entry is complete. The owner requested local development first and will connect accounts later.
+October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requirement-to-evidence map, not a claim that the hackathon entry is complete. The owner has connected Ring and AWS credentials. Authentication and model authorization are checked; usable Ring media, live inference and deployment remain pending. Explicit approval is required before any potentially billable operation.
 
 ## Agreed MVP (PRD §3.1)
 
@@ -54,4 +54,4 @@ October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requ
 
 ## Completion decision
 
-The full objective is **not achieved**. Gate A, Gate B and live AWS/submission requirements have no authoritative evidence yet. Synthetic scenarios and simulated transports establish product/contract behavior only. Continue from these external gates when the owner connects accounts; do not replace them with scripted demonstrations or infer accuracy from the passing test count.
+The full objective is **not achieved**. Gate A has authenticated discovery/capabilities/history evidence but no usable recording yet. Gate B and live AWS/submission requirements remain unverified. Synthetic scenarios and simulated transports establish product/contract behavior only. Continue from these external gates after the necessary footage and spending approval are available; do not replace them with scripted demonstrations or infer accuracy from the passing test count.

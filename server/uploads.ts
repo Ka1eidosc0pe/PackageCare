@@ -1,3 +1,4 @@
+import { awsConfig } from "./aws.js";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import {
@@ -58,7 +59,7 @@ export class CloudUploads {
   constructor(
     public bucket: string,
     private secret: string,
-    public client = new S3Client({}),
+    public client = new S3Client(awsConfig()),
   ) {
     if (secret.length < 32)
       throw new Error(

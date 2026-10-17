@@ -1,3 +1,4 @@
+import { awsConfig } from "./aws.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
@@ -63,7 +64,7 @@ export class LocalStore implements Store {
   }
 }
 export class CloudStore implements Store {
-  private db = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
+  private db = DynamoDBDocumentClient.from(new DynamoDBClient(awsConfig()), {
     marshallOptions: { removeUndefinedValues: true },
   });
   constructor(private table: string) {}

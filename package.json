@@ -14,6 +14,7 @@
     "maintenance": "node --import tsx scripts/maintenance.ts",
     "fixtures": "node --import tsx scripts/generate-fixtures.ts",
     "evaluate": "node --import tsx scripts/evaluate.ts",
+    "bedrock:smoke": "node --import tsx scripts/bedrock-smoke.ts",
     "ring:probe": "node --import tsx scripts/ring-probe.ts",
     "infra:synth": "cdk synth --app 'node --import tsx infra/app.ts'"
   },

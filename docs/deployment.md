@@ -1,6 +1,6 @@
 # AWS deployment notes
 
-**Status:** Infrastructure source synthesized successfully. CI built the Linux Lambda image, verified FFmpeg, exercised the bundled HTTP/frontend handler, and launched the production entrypoint against a Runtime API stand-in ([passing run](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38990693461)). No AWS account has been connected and no live deployment has been verified. The user requested local development first.
+**Status:** The owner connected AWS project credentials under `pkgcare` and confirmed `us-east-2`. Free metadata checks verify Nova Lite authorization/availability, and the application's SDK resolves the temporary login credentials. The owner-approved smoke attempt reached Bedrock but its first request was throttled by zero daily-token quota; no model result returned. No AWS upload, deployment or resource creation has been performed. Earlier source passed the Linux Lambda runtime smoke in [CI](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38990693461); current Region restrictions are locally synthesized and await fresh CI verification.
 
 ## Intended topology
 
@@ -12,8 +12,9 @@ The API retains each processing execution reference and reconciles terminal Step
 
 ## Prerequisites
 
-- Authorized AWS account/region and an agreed spending budget.
-- Bedrock access to a suitable multimodal model.
+- Explicit owner approval for the proposed operation and expected cost, as required by [AGENTS.md](../AGENTS.md). Credits and Free-plan eligibility do not replace approval.
+- Authenticated `pkgcare` profile; all application resources in `us-east-2`. The stack is pinned there. Use `--profile pkgcare` for eventual deployment. Toolkit-only control-plane setup in `us-east-1` does not authorize resources there.
+- In-Region `amazon.nova-lite-v1:0` access. Cross-Region inference profiles are prohibited. The worker policy grants invocation of this exact Ohio foundation-model ARN; the model parameter is allowlisted. Quality remains to be measured.
 - Docker/buildx for a Linux AMD64 Lambda container build.
 - AWS CDK bootstrap in the destination account.
 - Ring partner HMAC key/account binding for webhook use. Playground manual imports do not establish webhook onboarding.
@@ -28,7 +29,7 @@ npm test
 npm run infra:synth
 ```
 
-`infra/app.ts` defines CloudFormation parameters for workspace access, Ring credentials/account/source, and model selection. The secret parameters have `NoEcho`. Actual values belong in a protected deployment workflow or the AWS console. Obtain owner approval for deployment/account spending after the local implementation review.
+`infra/app.ts` defines CloudFormation parameters for workspace access, Ring credentials/account/source, and the allowlisted model. The secret parameters have `NoEcho`. Actual values belong in a protected deployment workflow or the AWS console. Obtain owner approval for each billable scope after preparation; do not bootstrap or deploy while approval is pending.
 
 `infra/Dockerfile.lambda` uses Debian with FFmpeg and the AWS Lambda Runtime Interface Client. Build the image for the Lambda architecture and test it before deployment. The ordinary `Dockerfile` is for a long-running local/container server and requires password/session configuration before binding to all interfaces.
 

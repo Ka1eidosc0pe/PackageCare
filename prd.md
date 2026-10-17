@@ -75,7 +75,9 @@ The presentation may illustrate this future flow, clearly labeled as a concept. 
 - The user has no Ring camera, Fire TV, Bee device, or Apple Watch available for the project.
 - The user is willing to create necessary accounts.
 - Ring simulator use is accepted by the hackathon, but the simulator's media capabilities have not been tested.
-- AWS credentials, model access, region, billing setup, and spending budget have not been confirmed.
+- October 16 readiness: the `pkgcare` browser-login credentials and application SDK resolve successfully. The owner confirmed `us-east-2`; the project is on the active Free plan. Bedrock metadata marks in-Region `amazon.nova-lite-v1:0` authorized and available. This is not evidence of successful inference or measured quality.
+- Explicit owner approval is required before every potentially billable scope, including inference, AWS media upload, CDK bootstrap or deployment. Follow `AGENTS.md`; credits and Free-plan eligibility do not replace approval. One smoke test was subsequently approved up to $0.05: its first inference request was rejected for zero daily token quota, with no retry or second pass. Further billable scopes remain unapproved.
+- Ring token authentication, one simulator device and capabilities/history endpoints were verified. History contained zero events; usable media and custom delivery-scene support remain unproven. Tokens are temporary and local connection-form tokens live in server memory.
 - Do not assume free AWS resources or promotional credits. The organizers announced on October 7 that credit codes had run out.
 - Never put credentials, personal footage, or account tokens in source control or tool output.
 

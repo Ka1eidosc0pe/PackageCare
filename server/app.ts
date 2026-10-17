@@ -1,3 +1,4 @@
+import { bedrockModel } from "./aws.js";
 import express from "express";
 import multer from "multer";
 import archiver from "archiver";
@@ -164,7 +165,7 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
       },
       analysis: {
         provider: "bedrock",
-        model: process.env.BEDROCK_MODEL_ID || "us.amazon.nova-2-lite-v1:0",
+        model: bedrockModel(),
         verified: records.some((d) =>
           d.runs.some((r) => r.provider === "bedrock" && r.finishedAt),
         ),

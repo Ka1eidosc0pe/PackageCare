@@ -1,3 +1,4 @@
+import { awsConfig } from "./aws.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
@@ -17,7 +18,7 @@ export class MediaStore {
   constructor(
     public root: string,
     public bucket = process.env.PACKAGECARE_BUCKET,
-    public s3 = new S3Client({}),
+    public s3 = new S3Client(awsConfig()),
   ) {}
   local(key: string) {
     if (!/^[a-zA-Z0-9_./-]+$/.test(key) || key.split("/").includes(".."))

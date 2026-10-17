@@ -1,3 +1,4 @@
+import { awsConfig, processingErrorMessage } from "./aws.js";
 import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -33,7 +34,7 @@ export class PackageCare {
     public media: MediaStore,
     public ring = new RingClient(),
     public analyzer: Analyzer = new BedrockAnalyzer(media),
-    public workflows = new SFNClient({}),
+    public workflows = new SFNClient(awsConfig()),
   ) {}
   async get(id: string) {
     return required(await this.store.get(id));
@@ -302,7 +303,7 @@ export class PackageCare {
       error:
         error instanceof RingError
           ? error.message
-          : "Processing failed. Check account access, media format, and server logs; then retry.",
+          : processingErrorMessage(error),
     }));
   }
   async retrieve(id: string) {

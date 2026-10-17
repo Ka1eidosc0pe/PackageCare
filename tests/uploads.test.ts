@@ -24,7 +24,7 @@ const secret = "test-only-session-secret-at-least-32-characters";
 const sha = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 const client = () =>
   new S3Client({
-    region: "us-east-1",
+    region: "us-east-2",
     credentials: {
       accessKeyId: "TESTONLY",
       secretAccessKey: "test-only-not-a-real-key",

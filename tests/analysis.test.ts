@@ -20,7 +20,11 @@ describe("analysis input contracts", () => {
         offsetMs: 200 + i * 500,
       })).reverse(),
     ];
-    const adapter = new BedrockAnalyzer(media, "test-model", "dense_frames");
+    const adapter = new BedrockAnalyzer(
+      media,
+      "amazon.nova-lite-v1:0",
+      "dense_frames",
+    );
     const calls: any[] = [];
     vi.spyOn(adapter.client, "send").mockImplementation(
       async (command: any) => {
@@ -67,7 +71,11 @@ describe("analysis input contracts", () => {
   it("rejects fabricated provider evidence and never substitutes a fixture", async () => {
     const media = new MediaStore("/tmp/not-used");
     vi.spyOn(media, "read").mockResolvedValue(Buffer.from("test-image"));
-    const adapter = new BedrockAnalyzer(media, "test-model", "dense_frames"),
+    const adapter = new BedrockAnalyzer(
+        media,
+        "amazon.nova-lite-v1:0",
+        "dense_frames",
+      ),
       bad = structuredClone(analysis);
     bad.observations[0].evidenceIds = ["invented"];
     vi.spyOn(adapter.client, "send").mockResolvedValue({
@@ -80,7 +88,11 @@ describe("analysis input contracts", () => {
   it("uses a real video input contract in native-video mode rather than relabeling frame input", async () => {
     const media = new MediaStore("/tmp/not-used");
     vi.spyOn(media, "read").mockResolvedValue(Buffer.from("test-video"));
-    const adapter = new BedrockAnalyzer(media, "test-model", "native_video");
+    const adapter = new BedrockAnalyzer(
+      media,
+      "amazon.nova-lite-v1:0",
+      "native_video",
+    );
     const send = vi.spyOn(adapter.client, "send").mockResolvedValue({
       output: {
         message: {
@@ -114,7 +126,11 @@ describe("analysis input contracts", () => {
       startMs: 6000,
       endMs: 7000,
     });
-    const adapter = new BedrockAnalyzer(media, "test-model", "dense_frames");
+    const adapter = new BedrockAnalyzer(
+      media,
+      "amazon.nova-lite-v1:0",
+      "dense_frames",
+    );
     vi.spyOn(adapter.client, "send").mockResolvedValue({
       output: { message: { content: [{ text: JSON.stringify(proposed) }] } },
     } as never);
@@ -122,30 +138,49 @@ describe("analysis input contracts", () => {
   });
 });
 describe("job outcomes", () => {
-  it("persists a provider failure as failed without creating a successful handling assessment", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "pc-job-"));
-    try {
-      const store = new LocalStore(root),
-        d = delivery();
-      d.state = "received";
-      d.analysis = undefined;
-      await store.change(d.id, () => d);
-      const analyzer = {
-        analyze: vi.fn().mockRejectedValue(new Error("Provider unavailable")),
-      };
-      const service = new PackageCare(
-        store,
-        new MediaStore(root),
-        undefined,
-        analyzer,
-      );
-      await service.process(d.id);
-      const result = await service.get(d.id);
-      expect(result.state).toBe("failed");
-      expect(result.analysis).toBeUndefined();
-      expect(result.runs).toHaveLength(0);
-    } finally {
-      await fs.rm(root, { recursive: true, force: true });
-    }
-  });
+  it.each([
+    {
+      name: "Error",
+      message: "Provider unavailable",
+      expected: "Processing failed",
+    },
+    {
+      name: "ThrottlingException",
+      message: "Too many tokens per day, please wait before trying again.",
+      expected: "daily token quota",
+    },
+  ])(
+    "persists $name as failed without a successful assessment or automatic retry",
+    async ({ name, message, expected }) => {
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), "pc-job-"));
+      try {
+        const store = new LocalStore(root),
+          d = delivery();
+        d.state = "received";
+        d.analysis = undefined;
+        await store.change(d.id, () => d);
+        const analyzer = {
+          analyze: vi
+            .fn()
+            .mockRejectedValue(Object.assign(new Error(message), { name })),
+        };
+        const service = new PackageCare(
+          store,
+          new MediaStore(root),
+          undefined,
+          analyzer,
+        );
+        await service.process(d.id);
+        const result = await service.get(d.id);
+        expect(result.state).toBe("failed");
+        expect(result.analysis).toBeUndefined();
+        expect(result.runs).toHaveLength(0);
+        expect(result.error).toContain(expected);
+        expect(result.assets).toEqual(d.assets);
+        expect(analyzer.analyze).toHaveBeenCalledTimes(1);
+      } finally {
+        await fs.rm(root, { recursive: true, force: true });
+      }
+    },
+  );
 });
