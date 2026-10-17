@@ -6,7 +6,7 @@ Latest checkpoint: Ring authentication previously verified one simulator device 
 
 | Requirement | Current evidence | Status |
 |---|---|---|
-| Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `d2ce3e6` pushed to `main` | Verified |
+| Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `f97e083` pushed to `main` | Verified |
 | Local app builds | TypeScript/Vite production build passed; `npm start` and bundled frontend sample loading verified on port 3002 | Locally verified |
 | Meaningful tests | 38 tests across nine files passed locally, including preview receipts, canonical/legacy report identity, restart/retry, portable archive, stale writes, model inputs, direct uploads, cleanup and execution/generation races | Passed locally and in CI |
 | Recipient review | Browser confirmed observation decision, no-damage status, notes/reference, save and preview | Verified locally |
@@ -22,7 +22,7 @@ Latest checkpoint: Ring authentication previously verified one simulator device 
 | Dense/sparse/native strategy comparison | Code, 12-scene capture/labeling plan and manifest template exist; actual footage and comparative results not available | Pending |
 | UI responsive and full journey checks | Browser review → preview → finalize → downloaded ZIP verified; playback/seek, unsaved changes, desktop and mobile checked; 390 px document = viewport. Dialog initial focus, Tab wrap, Escape and focus restoration verified | Verified for these local journeys |
 | Retention | Terminal cases expire with evidence; generated orphan files older than a day are reconciled against delivery and frozen report references. Local scheduled and daily cloud paths exist; dry-run found zero expired cases/orphans | Local filesystem and paginated S3 contract tested; cloud pending |
-| CI | [Run 38997334192](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38997334192) passed both jobs for source `d2ce3e6b4b114ed61b4373420839d1d29d30a5b2`: 38 tests, build, synthesis, Linux image, FFmpeg and runtime smoke | Passed |
+| CI | [Run 38997739309](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38997739309) passed both jobs for source `f97e08389f4b69395026e7d2e7c835ff88e38613`: 38 tests, build, synthesis, Linux image, FFmpeg and runtime smoke | Passed |
 | Feedback/friction log | Maintained in `docs/friction-log.md`; provider limitations separated from our own bugs | Maintained |
 | Submission video, registration and reviewer access | Not performed; require owner participation | Pending |
 
@@ -35,3 +35,9 @@ Screenshots saved outside the repository under the chat's visualization director
 See [the acceptance audit](acceptance-audit.md) for the mapping from agreed MVP requirements and acceptance scenarios to evidence and remaining external gates.
 
 Do not mark the overall product/hackathon goal complete while Gate A, Gate B, cloud runtime verification or required deliverables remain unproven. AWS sign-in is connected; quota access, a fresh Ring session and usable authorized footage are the current external dependencies.
+
+## Current external-gate decision
+
+The same access/media prerequisite has persisted through three consecutive goal turns. Local implementation fixes and checks are complete for this checkpoint. Overall completion remains unproven: Ring footage/custom-scene feasibility, successful labeled Bedrock evaluation, live AWS deployment and submission requirements remain open. The goal is ready to be marked blocked pending owner/AWS quota resolution and a fresh Ring session with usable authorized footage.
+
+Next inputs: follow the unsent AWS support draft for the zero daily-token quota; reconnect a fresh Playground token when a recording is available; collect/label authorized scenes using the capture plan. Prepare and approve each subsequent billable scope before running it. No further inference or cloud resources were used during this audit.
