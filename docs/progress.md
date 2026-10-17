@@ -2,6 +2,8 @@
 
 Updated October 16, 2026. This file is an evidence map, not a completion claim.
 
+Latest continuation checkpoint: the remaining acceptance work is blocked on account setup and authorized evaluation footage. The running app's readiness endpoint reported Ring disconnected, no recorded live model invocation, local storage and the local worker. No new source changes invalidate the passing 29-test/CI milestone. The owner previously chose to connect accounts later; no credentials or paid cloud resources were created during this checkpoint.
+
 | Requirement | Current evidence | Status |
 |---|---|---|
 | Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `e673a2c` pushed to `main` | Verified |

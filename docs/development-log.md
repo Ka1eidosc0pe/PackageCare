@@ -114,3 +114,10 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - Restarted the production preview on the latest source and confirmed the imported clip's persisted failure/retry state, preserved playback and disabled review until analysis completes. Pending-analysis copy makes no handling assessment. The new failure layout matched document/viewport widths at 1440 and 390 pixels. Reset the viewport and left the preview on the synthetic release example.
 - Added `acceptance-audit.md` mapping agreed MVP requirements and required scenarios to the current evidence. Gate A/B, real cloud integration/performance and human submission deliverables remain unproven; the full goal stays active.
 - Rechecked repository privacy and exact CI source hash. Re-ran the root production dependency audit after adding the official S3 upload helper: zero advisories. Native container dependencies were not separately audited.
+
+## October 16, 2026 — account dependency checkpoint
+
+- Re-read the current acceptance audit and verification map; the working tree was clean and the tested source remained `e673a2c` with documentation through `a95a108`.
+- Checked the running application's readiness endpoint, without displaying credentials: Ring disconnected, no recorded live model run, local storage and local worker. Environment readiness booleans also showed no configured Ring token or cloud resource references.
+- The same account dependency has persisted through three consecutive goal turns. Local implementation, contracts, runtime packaging and meaningful verification progressed in the preceding turns; the outstanding Ring media, real inference/evaluation and deployed AWS acceptance gates now require owner setup or an external-state change.
+- The full objective is not complete. Resume from Gate A/B and live AWS validation when accounts and authorized labeled clips are available; preserve the private repository, existing evidence and scope. Registration, reviewer access and final demo/submission remain human-owned steps.
