@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7.0.1
@@ -21,7 +21,7 @@ jobs:
       - run: npm test
       - run: npm run infra:synth -- --quiet
   container:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7.0.1

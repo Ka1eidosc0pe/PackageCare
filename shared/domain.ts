@@ -182,6 +182,10 @@ export function validateAnalysis(
   const supported = result.observations.some(
     (o) => o.concern && o.verification === "supported",
   );
+  result.observations.sort(
+    (a, b) =>
+      a.startMs - b.startMs || a.endMs - b.endMs || a.id.localeCompare(b.id),
+  );
   const unclear =
     result.observations.every((o) => o.verification === "rejected") ||
     result.observations.some(

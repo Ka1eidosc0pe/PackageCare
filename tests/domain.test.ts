@@ -64,6 +64,19 @@ export const delivery = (): Delivery => ({
   reports: [],
 });
 describe("evidence validation", () => {
+  it("presents model observations in chronological order even when the provider returns them out of order", () => {
+    const a = structuredClone(analysis);
+    a.observations.push({
+      ...a.observations[0],
+      id: "earlier",
+      startMs: 1000,
+      endMs: 2000,
+      evidenceIds: ["video"],
+    });
+    expect(
+      validateAnalysis(a, assets, 8000).observations.map((o) => o.id),
+    ).toEqual(["earlier", "o1"]);
+  });
   it("rejects invented evidence, damage photos as source evidence, and incorrect time ranges", () => {
     for (const change of [
       { evidenceIds: ["invented"] },

@@ -111,6 +111,13 @@ function Badge({ d }: { d: Delivery }) {
     </span>
   );
 }
+function matchesFilter(d: Delivery, filter: string) {
+  return (
+    filter === "all" ||
+    (filter === "review" && d.state === "ready" && !d.review.complete) ||
+    (filter === "complete" && d.review.complete)
+  );
+}
 export default function App() {
   const [page, setPage] = useState<"deliveries" | "reports" | "connections">(
       "deliveries",
@@ -193,9 +200,7 @@ export default function App() {
     ).length;
   const visible = deliveries.filter(
     (d) =>
-      (filter === "all" ||
-        (filter === "review" && !d.review.complete) ||
-        (filter === "complete" && d.review.complete)) &&
+      matchesFilter(d, filter) &&
       `${d.title} ${d.camera} ${d.review.shipment}`
         .toLowerCase()
         .includes(search.toLowerCase()),
@@ -437,7 +442,19 @@ export default function App() {
                       role="tab"
                       aria-selected={filter === id}
                       className={filter === id ? "chosen" : ""}
-                      onClick={() => setFilter(id)}
+                      onClick={() =>
+                        navigate(() => {
+                          setFilter(id);
+                          if (
+                            !deliveries.some(
+                              (d) => d.id === selected && matchesFilter(d, id),
+                            )
+                          )
+                            setSelected(
+                              deliveries.find((d) => matchesFilter(d, id))?.id,
+                            );
+                        })
+                      }
                     >
                       {name}
                       <span>
@@ -1195,6 +1212,7 @@ function DeliveryWorkspace({
             <input
               value={draft.shipment}
               placeholder="Order or tracking number"
+              disabled={d.state !== "ready"}
               maxLength={300}
               onChange={(e) => edit({ shipment: e.target.value })}
             />
@@ -1204,6 +1222,7 @@ function DeliveryWorkspace({
             <textarea
               rows={3}
               placeholder="What did you observe?"
+              disabled={d.state !== "ready"}
               maxLength={4000}
               value={draft.notes}
               onChange={(e) => edit({ notes: e.target.value })}
