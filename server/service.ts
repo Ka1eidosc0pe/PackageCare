@@ -147,6 +147,7 @@ export class PackageCare {
     }
   }
   async fail(id: string, error: any) {
+    console.error(JSON.stringify({event:'processing_failed',deliveryId:id,errorType:error?.name||'Error',...(error instanceof RingError?{ringStatus:error.status}:{})}));
     await this.store.change(id, (c) => ({
       ...required(c),
       state:

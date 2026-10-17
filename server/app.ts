@@ -34,12 +34,10 @@ export function createApp(service: PackageCare) {
       "Cache-Control": "no-store",
     });
     if (!password && !["localhost", "127.0.0.1", "::1"].includes(req.hostname))
-      return res
-        .status(403)
-        .json({
-          error:
-            "Local mode only. Configure access control before exposing the app.",
-        });
+      return res.status(403).json({
+        error:
+          "Local mode only. Configure access control before exposing the app.",
+      });
     if (
       !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
       req.headers.origin
@@ -48,7 +46,7 @@ export function createApp(service: PackageCare) {
         ? [process.env.APP_ORIGIN]
         : [
             `${req.protocol}://${req.headers.host}`,
-            ...(!password
+            ...(["localhost", "127.0.0.1", "::1"].includes(req.hostname)
               ? ["http://127.0.0.1:5173", "http://localhost:5173"]
               : []),
           ];
@@ -168,12 +166,20 @@ export function createApp(service: PackageCare) {
         ? "Step Functions"
         : "local worker",
       fixtureAvailable: !process.env.AWS_LAMBDA_FUNCTION_NAME,
+      sessionRequired: !!password,
       retentionDays: Number(process.env.RETENTION_DAYS || 30),
     });
   });
   app.get("/api/deliveries", async (_req, res) =>
     res.json(await service.store.list()),
   );
+  app.post("/api/logout", (_req, res) => {
+    res.setHeader(
+      "Set-Cookie",
+      "pc_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0",
+    );
+    res.status(204).end();
+  });
   app.get("/api/deliveries/:id", async (req, res) =>
     res.json(await service.get(String(req.params.id))),
   );
@@ -266,10 +272,19 @@ export function createApp(service: PackageCare) {
       const d = await service.get(String(req.params.id)),
         r = d.reports.find((r) => r.id === req.params.report);
       if (!r) return res.status(404).json({ error: "Report not found." });
-      res.attachment(`PackageCare-${d.id}-v${r.version}.zip`);
       const archive = archiver("zip", { zlib: { level: 6 } });
       archive.on("error", next);
-      archive.pipe(res);
+      const chunks: Buffer[] = [];
+      const end = new Promise<void>((resolve, reject) => {
+        archive.on("end", resolve);
+        archive.on("error", reject);
+      });
+      if (service.media.bucket)
+        archive.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+      else {
+        res.attachment(`PackageCare-${d.id}-v${r.version}.zip`);
+        archive.pipe(res);
+      }
       archive.append(renderReport(r, true), { name: "report.html" });
       archive.append(JSON.stringify(r, null, 2), { name: "manifest.json" });
       archive.append(
@@ -281,6 +296,11 @@ export function createApp(service: PackageCare) {
           name: `evidence/${a.id}.${a.key.split(".").pop()}`,
         });
       await archive.finalize();
+      await end;
+      if (service.media.bucket)
+        res.redirect(
+          await service.media.exportBundle(r.id, Buffer.concat(chunks)),
+        );
     },
   );
   app.delete("/api/deliveries/:id", async (req, res) => {
@@ -293,10 +313,18 @@ export function createApp(service: PackageCare) {
         .status(409)
         .json({ error: "Wait for processing to finish before deleting." });
     for (const a of d.assets) await service.media.remove(a);
+    for (const r of d.reports) await service.media.removeExport(r.id);
     await service.store.remove(d.id);
     res.status(204).end();
   });
   app.post("/api/ring/connect", async (req, res) => {
+    if (process.env.AWS_LAMBDA_FUNCTION_NAME)
+      return res
+        .status(409)
+        .json({
+          error:
+            "Set Ring credentials in the deployment configuration so API and processing workers share them.",
+        });
     const { token } = z
         .object({ token: z.string().min(20).max(10000) })
         .parse(req.body),
@@ -380,10 +408,10 @@ export function createApp(service: PackageCare) {
         err instanceof z.ZodError
           ? 400
           : err instanceof RingError
-            ? err.status === 401
-              ? 401
-              : 502
-            : err.status || 400;
+            ? 502
+            : err.$metadata
+              ? 503
+              : err.status || 400;
       // Do not echo SDK bodies, tokens, signed URLs, raw model payloads or stack traces.
       const message =
         err instanceof z.ZodError

@@ -110,7 +110,11 @@ export class BedrockAnalyzer implements Analyzer {
       const parsed = JSON.parse(
         raw.replace(/^\s*```(?:json)?\s*/, "").replace(/\s*```\s*$/, ""),
       );
-      const valid = validateAnalysis(parsed, d.assets, d.durationMs);
+      const valid = validateAnalysis(
+        parsed,
+        this.strategy === "native_video" ? [video!] : window,
+        d.durationMs,
+      );
       valid.observations = valid.observations.map((o, i) => ({
         ...o,
         id: `w${w}-${i}`,
@@ -149,7 +153,9 @@ export class BedrockAnalyzer implements Analyzer {
         summary:
           concern?.description ||
           unclear?.description ||
-          "No handling concern observed in the available sequence.",
+          (merged.some((o) => o.verification === "supported")
+            ? "No handling concern observed in the available sequence."
+            : "The available sequence does not support a handling assessment."),
         observations: merged,
         limitations: [
           ...new Set(outputs.flatMap((o) => o.limitations)),

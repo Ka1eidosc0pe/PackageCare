@@ -4,6 +4,9 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { createHmac } from "node:crypto";
+import sharp from "sharp";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { LocalStore } from "../server/store.js";
 import { MediaStore } from "../server/media.js";
 import { PackageCare } from "../server/service.js";
@@ -74,6 +77,8 @@ describe("durability and concurrency", () => {
         .send(raw)
         .expect(202);
     expect(await service.store.list()).toHaveLength(1);
+    expect((await service.store.list())[0].revision).toBe(0);
+    expect(service.dispatch).toHaveBeenCalledTimes(1);
     process.env.RING_ACCOUNT_ID = "different";
     await request(app)
       .post("/api/webhooks/ring")
@@ -146,9 +151,23 @@ describe("review/report interaction", () => {
       .send({ password: "long-secret" })
       .expect(200);
     await agent.get("/api/deliveries").expect(200);
+    await agent.post("/api/logout").expect(204);
+    await agent.get("/api/deliveries").expect(401);
   });
 });
 describe("Ring adapter", () => {
+  it("surfaces an expired Ring token as a connection error without logging the workspace out", async () => {
+    const ring = new RingClient(
+      "expired",
+      vi.fn().mockResolvedValue(new Response(null, { status: 401 })) as any,
+    );
+    service.ring = ring;
+    const result = await request(createApp(service))
+      .get("/api/ring/devices")
+      .expect(502);
+    expect(result.body.error).toContain("Reconnect");
+    expect(ring.token).toBe("");
+  });
   it("does not leak tokens across media redirects and preserves actual recording time", async () => {
     const transport = vi
       .fn()
@@ -177,16 +196,81 @@ describe("Ring adapter", () => {
     expect(transport.mock.calls[1][1].headers).toBeUndefined();
   });
   it("refuses redirects to an arbitrary host", async () => {
-    const transport = vi
-      .fn()
-      .mockResolvedValue(
-        new Response(null, {
-          status: 303,
-          headers: { Location: "http://127.0.0.1/secrets" },
-        }),
-      );
+    const transport = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 303,
+        headers: { Location: "http://127.0.0.1/secrets" },
+      }),
+    );
     await expect(
       new RingClient("secret", transport as any).clip("device", 1, 1000),
     ).rejects.toThrow("redirect");
+  });
+});
+describe("recipient photos and portable exports", () => {
+  it("decodes photos, preserves review provenance, exports all files, and rejects spoofed image input", async () => {
+    const source = await service.media.put(
+      Buffer.from("source video bytes"),
+      "original.mp4",
+      "video/mp4",
+      "video",
+    );
+    const d = delivery();
+    d.assets = [source];
+    d.analysis!.observations[0].evidenceIds = [source.id];
+    await service.store.change(d.id, () => d);
+    const app = createApp(service);
+    await request(app)
+      .post("/api/deliveries/test/photos")
+      .attach("file", Buffer.from("<svg>untrusted</svg>"), "fake.jpg")
+      .expect(400);
+    const image = await sharp({
+      create: { width: 20, height: 20, channels: 3, background: "#d8cfb6" },
+    })
+      .png()
+      .toBuffer();
+    const uploaded = await request(app)
+      .post("/api/deliveries/test/photos")
+      .attach("file", image, "damage.png")
+      .expect(201);
+    expect(
+      uploaded.body.assets.filter((a: any) => a.kind === "damage"),
+    ).toHaveLength(1);
+    expect(uploaded.body.review.complete).toBe(false);
+    const current = await service.get("test"),
+      saved = await service.review("test", {
+        ...current.review,
+        revision: current.revision,
+        complete: true,
+        damage: "observed",
+        decisions: { o1: { decision: "confirmed", statement: "" } },
+      });
+    const { report } = await service.finalize("test", saved.revision);
+    const exported = await request(app)
+      .get(`/api/deliveries/test/reports/${report.id}/download`)
+      .buffer(true)
+      .parse((res, callback) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => callback(null, Buffer.concat(chunks)));
+      })
+      .expect(200);
+    const archive = path.join(root, "export.zip");
+    await fs.writeFile(archive, exported.body);
+    const run = promisify(execFile),
+      html = (await run("unzip", ["-p", archive, "report.html"])).stdout;
+    const manifest = JSON.parse(
+      (await run("unzip", ["-p", archive, "manifest.json"])).stdout,
+    );
+    expect(manifest.review.damage).toBe("observed");
+    expect(html).toContain("Recipient reports damage observed");
+    for (const asset of manifest.assets) {
+      const entry = `evidence/${asset.id}.${asset.key.split(".").pop()}`;
+      const { stdout } = await run("unzip", ["-l", archive, entry]);
+      expect(stdout).toContain(entry);
+      expect(html).toContain(entry);
+    }
+    expect(html).not.toContain("/api/");
+    expect(html).not.toContain("amazonaws.com");
   });
 });

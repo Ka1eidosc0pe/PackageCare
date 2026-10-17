@@ -60,6 +60,7 @@ export class RingClient {
       },
     );
     if (!response.ok && ![301, 302, 303, 307, 308].includes(response.status)) {
+      if (response.status === 401) this.token = "";
       const messages: Record<number, string> = {
         401: "Ring token expired. Reconnect with a fresh token.",
         403: "Ring has not authorized this device or media.",

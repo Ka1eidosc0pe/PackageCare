@@ -32,11 +32,11 @@ npm run infra:synth
 
 ## Known limits to resolve before cloud release
 
-- Lambda/API Gateway payload and response limits differ from the local server. Large direct uploads and ZIP downloads need direct S3 transfer paths before promising support for the local 80 MB limit in cloud mode.
+- Lambda/API Gateway payload limits differ from the local server. Large direct uploads need a direct S3 upload path before promising support for the local 80 MB limit in cloud mode. Cloud ZIP exports use a private S3 object and a short-lived download link; this path still needs live verification.
 - Ring tokens entered in the local connection form live in process memory. For Lambda workers use deployment credentials; do not assume a token entered in one API invocation reaches other Lambda instances.
 - Synthetic fixtures are generated locally and not packaged into the Lambda image.
 - The initial dense adapter can make multiple model calls per clip. Measure cost and latency against the worker timeout; do not extrapolate from a local fixture.
-- Whole-case retention must delete metadata and all evidence together. Do not independently expire S3 objects referenced by retained reports.
+- Retention cleanup runs at local startup and daily while the local server runs; a daily Lambda schedule is defined in the cloud stack. It removes expired terminal cases and their source/report evidence together. Do not independently expire S3 objects referenced by retained reports.
 - S3 bucket and DynamoDB table are retained on stack deletion to avoid destroying evidence. Document intentional cleanup separately.
 
 ## Post-deployment verification

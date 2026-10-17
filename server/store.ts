@@ -45,6 +45,7 @@ export class LocalStore implements Store {
       await fs.mkdir(path.join(this.root, "records"), { recursive: true });
       const old = await this.get(id),
         next = fn(old && structuredClone(old));
+      if (old && JSON.stringify(old) === JSON.stringify(next)) return old;
       next.revision = (old?.revision ?? -1) + 1;
       const file = this.file(id),
         temp = `${file}.tmp`;
@@ -93,6 +94,7 @@ export class CloudStore implements Store {
     for (let attempt = 0; attempt < 5; attempt++) {
       const old = await this.get(id),
         record = fn(old && structuredClone(old));
+      if (old && JSON.stringify(old) === JSON.stringify(record)) return old;
       record.revision = (old?.revision ?? -1) + 1;
       if (Buffer.byteLength(JSON.stringify(record)) > 350000)
         throw new Error(

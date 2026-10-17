@@ -433,7 +433,7 @@ Run the three core user journeys end to end. Verify the finished UI visually and
 - Do not surface infrastructure jargon in customer copy unless it helps resolve an error.
 - Prefer a coherent desktop demo before broad responsive/mobile polish.
 
-Agents implementing the UI should consult applicable frontend skill/repository instructions when that work is authorized. This PRD does not authorize starting the UI now.
+Agents implementing the UI should consult applicable frontend skill/repository instructions. The latest implementation goal authorizes this work; the earlier PRD-only stop has been superseded.
 
 ## 13. Hackathon submission requirements and strategy
 

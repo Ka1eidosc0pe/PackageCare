@@ -34,11 +34,15 @@ export class MediaStore {
       extension =
         mime === "video/mp4"
           ? "mp4"
-          : mime === "image/png"
-            ? "png"
-            : mime === "image/webp"
-              ? "webp"
-              : "jpg";
+          : mime === "video/webm"
+            ? "webm"
+            : mime === "video/quicktime"
+              ? "mov"
+              : mime === "image/png"
+                ? "png"
+                : mime === "image/webp"
+                  ? "webp"
+                  : "jpg";
     const key = `${id}.${extension}`;
     if (this.bucket)
       await this.s3.send(
@@ -92,6 +96,37 @@ export class MediaStore {
       );
     else await fs.rm(this.local(a.key), { force: true });
   }
+  async exportBundle(reportId: string, bytes: Buffer) {
+    if (!this.bucket) throw new Error("Cloud storage is not configured.");
+    const key = `exports/${reportId}.zip`;
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: bytes,
+        ContentType: "application/zip",
+        ServerSideEncryption: "AES256",
+      }),
+    );
+    return getSignedUrl(
+      this.s3,
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        ResponseContentDisposition: `attachment; filename="PackageCare-${reportId}.zip"`,
+      }),
+      { expiresIn: 120 },
+    );
+  }
+  async removeExport(reportId: string) {
+    if (this.bucket)
+      await this.s3.send(
+        new DeleteObjectCommand({
+          Bucket: this.bucket,
+          Key: `exports/${reportId}.zip`,
+        }),
+      );
+  }
 }
 export async function inspectVideo(file: string) {
   const { stdout } = await run(
@@ -99,6 +134,8 @@ export async function inspectVideo(file: string) {
     [
       "-v",
       "error",
+      "-protocol_whitelist",
+      "file,pipe",
       "-show_entries",
       "format=duration:stream=codec_type,width,height",
       "-of",
@@ -128,6 +165,7 @@ export async function prepareVideo(
   await fs.mkdir(tmp, { recursive: true });
   const input = path.join(tmp, "input.mp4"),
     output = path.join(tmp, "source.mp4");
+  const saved: Asset[] = [];
   try {
     await fs.writeFile(input, bytes);
     const durationMs = await inspectVideo(input);
@@ -159,15 +197,21 @@ export async function prepareVideo(
     const original = await media.put(
       bytes,
       `original-${name}`,
-      "video/mp4",
+      bytes.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]))
+        ? "video/webm"
+        : bytes.toString("ascii", 8, 12) === "qt  "
+          ? "video/quicktime"
+          : "video/mp4",
       "video",
     );
+    saved.push(original);
     const playback = await media.put(
       await fs.readFile(output),
       `playback-${name}`,
       "video/mp4",
       "video",
     );
+    saved.push(playback);
     const frames: Asset[] = [];
     // Cover the whole clip; dense windows are chunked into <=5 images at the model boundary.
     const frameCount =
@@ -196,18 +240,19 @@ export async function prepareVideo(
         ],
         { timeout: 15000, maxBuffer: 100000 },
       );
-      frames.push(
-        await media.put(
-          await fs.readFile(frame),
-          `frame-${offsetMs}ms.jpg`,
-          "image/jpeg",
-          "frame",
-          offsetMs,
-        ),
+      const extracted = await media.put(
+        await fs.readFile(frame),
+        `frame-${offsetMs}ms.jpg`,
+        "image/jpeg",
+        "frame",
+        offsetMs,
       );
+      frames.push(extracted);
+      saved.push(extracted);
     }
     return { durationMs, assets: [original, playback, ...frames] };
   } catch {
+    await Promise.allSettled(saved.map((a) => media.remove(a)));
     throw new Error(
       "The video could not be decoded. Use a playable clip between 0.5 and 60 seconds.",
     );

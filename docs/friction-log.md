@@ -49,3 +49,16 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Workaround:** Quoted the FFmpeg expression correctly; explicitly allowed the loopback frontend origin in local mode while retaining foreign-origin rejection.
 - **Suggestion:** Keep media decoding and proxy-origin integration coverage in our test suite.
 - **Submission note:** These were our implementation errors, not provider defects. Retained for engineering history; do not misrepresent as platform friction.
+
+## PC-F005 — Docker runtime not active locally
+
+- **Date:** October 16, 2026
+- **Tool:** Local Docker installation
+- **Task:** Determine whether Lambda container builds can be verified on this machine.
+- **Steps:** Run `docker info` to inspect the daemon.
+- **Expected:** An available runtime for an image build/test.
+- **Actual:** Docker CLI exists but the daemon socket is absent; no container execution is available.
+- **Severity:** Important for cloud-runtime verification; independent local Node/FFmpeg development continues.
+- **Workaround:** Keep deployment status unverified. Validate source with TypeScript and CDK synthesis. A future container build needs Docker running or an authorized CI build environment.
+- **Suggestion:** Document container prerequisites and distinguish template synthesis from runtime validation.
+- **Submission note:** Local environment state, not an AWS/Ring provider defect.

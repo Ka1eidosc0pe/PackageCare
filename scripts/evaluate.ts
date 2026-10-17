@@ -90,7 +90,8 @@ await fs.writeFile(
   JSON.stringify(
     {
       warning:
-        "Small feasibility set; not production accuracy. Sparse-frame adapter; native-video comparison pending.",
+        "Small feasibility set; not production accuracy. Compare strategies using the same labeled and held-out data.",
+      strategy: process.env.ANALYSIS_STRATEGY || "dense_frames",
       results,
     },
     null,

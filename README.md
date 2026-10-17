@@ -38,6 +38,7 @@ Only sample generation and the explicit sample-loading action use scripted obser
 | `npm run ring:probe` | Exercise actual Ring device discovery and optional recording retrieval |
 | `npm run evaluate -- /path/to/manifest.json` | Evaluate labeled videos with real Bedrock calls |
 | `npm run infra:synth` | Generate the AWS deployment template; does not deploy |
+| `npm run maintenance` | Preview expired cases; add `-- --apply` to delete them |
 
 Run the production build before `npm start`. The server binds only to loopback by default. Runtime media, records, credentials, reports, and local evaluations are never committed.
 

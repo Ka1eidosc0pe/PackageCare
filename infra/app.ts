@@ -14,6 +14,8 @@ import {
   aws_stepfunctions_tasks as tasks,
   aws_logs as logs,
   aws_iam as iam,
+  aws_events as events,
+  aws_events_targets as targets,
 } from "aws-cdk-lib";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import path from "node:path";
@@ -85,7 +87,9 @@ const worker = new lambda.DockerImageFunction(stack, "Worker", {
   ephemeralStorageSize: Size.gibibytes(1),
   environment: common,
   reservedConcurrentExecutions: 2,
-  logRetention: logs.RetentionDays.ONE_WEEK,
+  logGroup: new logs.LogGroup(stack, "WorkerLogs", {
+    retention: logs.RetentionDays.ONE_WEEK,
+  }),
 });
 // Explicit task results replace input, keeping payload small and original footage in S3.
 function task(name: string, phase: string) {
@@ -139,7 +143,9 @@ const handler = new lambda.DockerImageFunction(stack, "Api", {
     ...common,
     PACKAGECARE_STATE_MACHINE: workflow.stateMachineArn,
   },
-  logRetention: logs.RetentionDays.ONE_WEEK,
+  logGroup: new logs.LogGroup(stack, "ApiLogs", {
+    retention: logs.RetentionDays.ONE_WEEK,
+  }),
 });
 api.addRoutes({
   path: "/{proxy+}",
@@ -155,6 +161,28 @@ for (const fn of [handler, worker]) {
   bucket.grantReadWrite(fn);
   table.grantReadWriteData(fn);
 }
+const maintenance = new lambda.DockerImageFunction(stack, "Retention", {
+  code: lambda.DockerImageCode.fromImageAsset(image, {
+    file: "infra/Dockerfile.lambda",
+    cmd: ["lambda/maintenance-worker.handler"],
+  }),
+  timeout: Duration.minutes(5),
+  memorySize: 512,
+  environment: {
+    PACKAGECARE_BUCKET: bucket.bucketName,
+    PACKAGECARE_TABLE: table.tableName,
+    RETENTION_DAYS: "30",
+  },
+  logGroup: new logs.LogGroup(stack, "RetentionLogs", {
+    retention: logs.RetentionDays.ONE_WEEK,
+  }),
+});
+bucket.grantReadWrite(maintenance);
+table.grantReadWriteData(maintenance);
+new events.Rule(stack, "DailyRetention", {
+  schedule: events.Schedule.rate(Duration.days(1)),
+  targets: [new targets.LambdaFunction(maintenance)],
+});
 worker.addToRolePolicy(
   new iam.PolicyStatement({
     actions: ["bedrock:InvokeModel"],
