@@ -9,7 +9,7 @@ PackageCare links handling observations to footage, lets the recipient correct o
 - The local review, playback, persistence, report preview/finalization, and evidence-bundle workflow is implemented.
 - Sample deliveries are original **synthetic animations with scripted observations**. They are not real Ring footage, live AI output, or an accuracy evaluation.
 - Ring and Bedrock adapters plus AWS infrastructure source are included. **Live Ring media, simulator customization, Bedrock accuracy, and deployed AWS behavior are not yet verified.** The owner requested connecting accounts later.
-- Follow [the PRD](prd.md), [development log](docs/development-log.md), and [verification status](docs/progress.md) for scope and remaining gates.
+- Follow [the PRD](prd.md), [development log](docs/development-log.md), [verification status](docs/progress.md), and [acceptance audit](docs/acceptance-audit.md) for scope, evidence and remaining gates.
 
 ## Local setup
 

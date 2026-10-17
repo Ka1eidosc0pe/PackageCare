@@ -1,6 +1,6 @@
 # AWS deployment notes
 
-**Status:** Infrastructure source synthesized successfully. CI built the Linux Lambda image, verified FFmpeg, exercised the bundled HTTP/frontend handler, and launched the production entrypoint against a Runtime API stand-in ([passing run](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38988422636)). No AWS account has been connected and no live deployment has been verified. The user requested local development first.
+**Status:** Infrastructure source synthesized successfully. CI built the Linux Lambda image, verified FFmpeg, exercised the bundled HTTP/frontend handler, and launched the production entrypoint against a Runtime API stand-in ([passing run](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38989750841)). No AWS account has been connected and no live deployment has been verified. The user requested local development first.
 
 ## Intended topology
 
