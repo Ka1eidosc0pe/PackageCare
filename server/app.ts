@@ -178,7 +178,7 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
     });
   });
   app.get("/api/deliveries", async (_req, res) =>
-    res.json(await service.store.list()),
+    res.json(await service.list()),
   );
   app.post("/api/logout", (_req, res) => {
     res.setHeader(
@@ -188,7 +188,7 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
     res.status(204).end();
   });
   app.get("/api/deliveries/:id", async (req, res) =>
-    res.json(await service.get(String(req.params.id))),
+    res.json(await service.reconcile(await service.get(String(req.params.id)))),
   );
   app.post("/api/samples", async (_req, res) => {
     await service.seed();

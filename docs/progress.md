@@ -6,12 +6,13 @@ Updated October 16, 2026. This file is an evidence map, not a completion claim.
 |---|---|---|
 | Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `4e7fa5b` pushed to `main` | Verified |
 | Local app builds | TypeScript/Vite production build passed; `npm start` and bundled frontend sample loading verified on port 3002 | Locally verified |
-| Meaningful tests | 27 tests across six files passed locally; includes actual FFmpeg restart/retry, portable archive, stale writes, model inputs, direct-upload completion and safe orphan cleanup. Latest source awaiting CI | Locally verified; latest CI pending |
+| Meaningful tests | 29 tests across seven files passed locally; includes real FFmpeg restart/retry, portable archive, stale writes, model inputs, direct-upload completion, orphan cleanup and execution/generation races. Latest source awaiting CI | Locally verified; latest CI pending |
 | Recipient review | Browser confirmed observation decision, no-damage status, notes/reference, save and preview | Verified locally |
 | Report finalization/export | Browser created v1 and downloaded ZIP; archive includes HTML, JSON and seven evidence files | Verified locally |
 | Evidence provenance | Source labels, immutable snapshot, manifest hashes; invalid references covered by tests | Locally implemented |
 | Upload durability | Source persisted before receipt; recreated worker prepares it, model failure is retried without replacing evidence; browser import preserved playback and showed missing-credentials failure without assessment | Verified locally |
 | Direct cloud uploads | Actual SDK policy inspected; exact size/type/checksum/key and ticket expiry enforced; simulated storage/API checks cover normalization, repeated completion and corrupt uploads; CORS/lifecycle synthesized | Contract verified; real S3 pending |
+| Cloud execution recovery | Terminal execution status becomes a retryable failure; provider-status failures preserve records; concurrent retries and delayed status/model results cannot overwrite a new generation | Contract tested; real Step Functions pending |
 | Real Ring integration / Gate A | Adapter/probe/UI source exists; official Playground redirects to Amazon Developer sign-in; no account/token or official simulator scene verified | Deferred: account access |
 | Real model quality / Gate B | Adapters and evaluation harness exist; no live model invocation or labeled real-footage evaluation | Deferred: account access/data |
 | AWS infrastructure | CDK synthesized; Linux Lambda image built, FFmpeg ran, packaged HTTP/frontend handler and actual production entrypoint passed Runtime API smoke in CI; deployment not validated | Container verified; live AWS pending |

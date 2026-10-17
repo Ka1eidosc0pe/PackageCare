@@ -106,6 +106,7 @@ function task(name: string, phase: string) {
     lambdaFunction: worker,
     payload: sfn.TaskInput.fromObject({
       id: sfn.JsonPath.stringAt("$.id"),
+      generation: sfn.JsonPath.stringAt("$.generation"),
       phase,
     }),
     payloadResponseOnly: true,
@@ -202,6 +203,7 @@ worker.addToRolePolicy(
   }),
 );
 workflow.grantStartExecution(handler);
+workflow.grantExecution(handler, "states:DescribeExecution");
 new CfnOutput(stack, "ApplicationUrl", { value: api.apiEndpoint });
 new CfnOutput(stack, "WebhookUrl", {
   value: `${api.apiEndpoint}/api/webhooks/ring`,

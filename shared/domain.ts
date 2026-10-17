@@ -105,6 +105,8 @@ export interface Delivery {
   eventId?: string;
   deviceId?: string;
   componentId?: string;
+  workflowExecutionArn?: string;
+  workflowGeneration?: string;
   source: Source;
   title: string;
   camera: string;

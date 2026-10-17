@@ -2,7 +2,11 @@ import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
-import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
+import {
+  SFNClient,
+  StartExecutionCommand,
+  DescribeExecutionCommand,
+} from "@aws-sdk/client-sfn";
 import {
   type Delivery,
   type Asset,
@@ -29,9 +33,54 @@ export class PackageCare {
     public media: MediaStore,
     public ring = new RingClient(),
     public analyzer: Analyzer = new BedrockAnalyzer(media),
+    public workflows = new SFNClient({}),
   ) {}
   async get(id: string) {
     return required(await this.store.get(id));
+  }
+  async reconcile(d: Delivery) {
+    const arn = d.workflowExecutionArn;
+    if (!arn || ["ready", "failed", "media_unavailable"].includes(d.state))
+      return d;
+    let execution;
+    try {
+      execution = await this.workflows.send(
+        new DescribeExecutionCommand({ executionArn: arn }),
+      );
+    } catch {
+      throw Object.assign(
+        new Error("Could not check processing status. Try again shortly."),
+        { status: 503 },
+      );
+    }
+    if (
+      ![
+        "SUCCEEDED",
+        "FAILED",
+        "TIMED_OUT",
+        "ABORTED",
+        "PENDING_REDRIVE",
+      ].includes(execution.status || "")
+    )
+      return d;
+    return this.store.change(d.id, (current) => {
+      const latest = required(current);
+      // A delayed status response must never overwrite a newer retry or a completed result.
+      if (
+        latest.workflowExecutionArn !== arn ||
+        ["ready", "failed", "media_unavailable"].includes(latest.state)
+      )
+        return latest;
+      return {
+        ...latest,
+        state: "failed",
+        error:
+          "Processing stopped before a result was saved. Retry this delivery.",
+      };
+    });
+  }
+  async list() {
+    return Promise.all((await this.store.list()).map((d) => this.reconcile(d)));
   }
   async review(id: string, input: unknown) {
     return this.store.change(id, (current) => {
@@ -186,13 +235,26 @@ export class PackageCare {
   }
   async dispatch(id: string) {
     if (process.env.PACKAGECARE_STATE_MACHINE) {
+      const generation = randomUUID();
+      await this.store.change(id, (c) => ({
+        ...required(c),
+        workflowGeneration: generation,
+        workflowExecutionArn: undefined,
+      }));
       try {
-        await new SFNClient({}).send(
+        const execution = await this.workflows.send(
           new StartExecutionCommand({
             stateMachineArn: process.env.PACKAGECARE_STATE_MACHINE,
             name: `delivery-${id}-${randomUUID().slice(0, 8)}`,
-            input: JSON.stringify({ id }),
+            input: JSON.stringify({ id, generation }),
           }),
+        );
+        if (!execution.executionArn)
+          throw new Error("Workflow did not return an execution reference.");
+        await this.store.change(id, (c) =>
+          required(c).workflowGeneration === generation
+            ? { ...required(c), workflowExecutionArn: execution.executionArn }
+            : required(c),
         );
       } catch (e: any) {
         await this.fail(
@@ -347,16 +409,20 @@ export class PackageCare {
     }
   }
   async retry(id: string) {
-    const d = await this.get(id);
-    if (!["failed", "media_unavailable"].includes(d.state))
-      throw Object.assign(new Error("This delivery is not awaiting retry."), {
-        status: 409,
-      });
-    await this.store.change(id, (c) => ({
-      ...required(c),
-      state: "received",
-      error: undefined,
-    }));
+    await this.store.change(id, (c) => {
+      const d = required(c);
+      if (!["failed", "media_unavailable"].includes(d.state))
+        throw Object.assign(new Error("This delivery is not awaiting retry."), {
+          status: 409,
+        });
+      return {
+        ...d,
+        state: "received",
+        error: undefined,
+        workflowExecutionArn: undefined,
+        workflowGeneration: undefined,
+      };
+    });
     await this.dispatch(id);
   }
   async seed() {

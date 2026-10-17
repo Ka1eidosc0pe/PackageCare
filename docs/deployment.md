@@ -8,6 +8,8 @@ API Gateway → Lambda API → Step Functions → Lambda media/analysis worker. 
 
 The frontend is bundled with the API container. A workspace password and signed, HttpOnly session cookie protect API/evidence access. Ring callbacks use their own raw-body HMAC and account check.
 
+The API retains each processing execution reference and reconciles terminal Step Functions status when refreshing an in-progress delivery. This covers whole-execution timeouts/abort conditions that cannot reach a task catcher. Each retry creates a new persisted generation, passed through every worker task; atomic generation checks reject late results from superseded workers. Concurrent retries accept one transition only. Live timeout/abort behavior and DescribeExecution permissions still need validation.
+
 ## Prerequisites
 
 - Authorized AWS account/region and an agreed spending budget.
@@ -45,9 +47,12 @@ npm run infra:synth
 1. Confirm login, secure session cookie, rejected anonymous access, and foreign-origin write rejection.
 2. Import real Ring footage and verify its source timestamp, playback, and provenance label.
 3. Inspect the actual Step Functions execution, retries, failure persistence, and Bedrock usage.
+   Stop or time out an execution; refresh the delivery and verify a retry action appears. Retry it and ensure an older worker/status response cannot overwrite the new attempt. Check provider-status failure leaves the underlying record unchanged.
 4. Review and export a case with its evidence and verify supported size limits.
    Verify direct video and photo upload through the browser, including CORS, checksum rejection, expired authorization and repeated completion. Interrupt a worker and confirm recovery from the persisted source.
 5. Record endpoints and non-secret findings in `docs/progress.md` and the friction log.
 6. Prepare teardown/recreation instructions and judge-access configuration; do not invite reviewers or submit the project automatically.
 
 The upload contracts follow the official [S3 POST policy](https://docs.aws.amazon.com/AmazonS3/latest/developerguide/sigv4-HTTPPOSTConstructPolicy.html) and [POST Object checksum fields](https://docs.aws.amazon.com/AmazonS3/latest/developerguide/RESTObjectPOST.html). Local tests inspect the actual SDK-signed policy and exercise API completion against simulated S3 responses; they do not establish live S3 acceptance.
+
+Execution recovery follows the documented [top-level error handling limits](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html) and [DescribeExecution contract](https://docs.aws.amazon.com/step-functions/latest/apireference/API_DescribeExecution.html). That API is eventually consistent, so status changes can take more than one refresh to appear.
