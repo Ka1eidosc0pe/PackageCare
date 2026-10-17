@@ -13,10 +13,10 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Asset } from "../shared/domain.js";
 const run = promisify(execFile);
 export class MediaStore {
-  private s3 = new S3Client({});
   constructor(
     public root: string,
     public bucket = process.env.PACKAGECARE_BUCKET,
+    public s3 = new S3Client({}),
   ) {}
   local(key: string) {
     if (!/^[a-zA-Z0-9_./-]+$/.test(key) || key.split("/").includes(".."))
@@ -29,8 +29,9 @@ export class MediaStore {
     mime: string,
     kind: Asset["kind"],
     offsetMs?: number,
+    assetId: string = randomUUID(),
   ): Promise<Asset> {
-    const id = randomUUID(),
+    const id = assetId,
       extension =
         mime === "video/mp4"
           ? "mp4"
@@ -40,9 +41,11 @@ export class MediaStore {
               ? "mov"
               : mime === "image/png"
                 ? "png"
-                : mime === "image/webp"
-                  ? "webp"
-                  : "jpg";
+                : mime === "application/octet-stream"
+                  ? "bin"
+                  : mime === "image/webp"
+                    ? "webp"
+                    : "jpg";
     const key = `${id}.${extension}`;
     if (this.bucket)
       await this.s3.send(
@@ -160,6 +163,7 @@ export async function prepareVideo(
   media: MediaStore,
   name: string,
   sampleFrames?: number,
+  sourceAsset?: Asset,
 ) {
   const tmp = path.join(media.root, "tmp", randomUUID());
   await fs.mkdir(tmp, { recursive: true });
@@ -194,17 +198,10 @@ export async function prepareVideo(
       ],
       { timeout: 90000, maxBuffer: 100000 },
     );
-    const original = await media.put(
-      bytes,
-      `original-${name}`,
-      bytes.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]))
-        ? "video/webm"
-        : bytes.toString("ascii", 8, 12) === "qt  "
-          ? "video/quicktime"
-          : "video/mp4",
-      "video",
-    );
-    saved.push(original);
+    const original =
+      sourceAsset ??
+      (await media.put(bytes, `original-${name}`, videoMime(bytes), "video"));
+    if (!sourceAsset) saved.push(original);
     const playback = await media.put(
       await fs.readFile(output),
       `playback-${name}`,
@@ -259,6 +256,13 @@ export async function prepareVideo(
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
+}
+export function videoMime(bytes: Buffer) {
+  return bytes.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]))
+    ? "video/webm"
+    : bytes.toString("ascii", 8, 12) === "qt  "
+      ? "video/quicktime"
+      : "video/mp4";
 }
 export function imageMime(b: Buffer): string {
   if (b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])))

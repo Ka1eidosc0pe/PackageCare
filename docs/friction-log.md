@@ -90,3 +90,14 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Verification:** Run 38988422636 passed the actual entrypoint smoke after supplying the function/log metadata normally provided by AWS to our test harness. The missing test metadata was our harness issue, not an AWS failure.
 - **Suggestion:** Version the startup examples and document the handler/environment contract explicitly for v4.
 - **Submission note:** This was found using an account-free local protocol simulation inside CI, not a deployed Lambda invocation.
+
+## PC-F008 — uploaded source was not durable before processing
+
+- **Date:** October 16, 2026
+- **Tool:** Our upload API and background processing implementation
+- **Task:** Audit restart and Lambda response-boundary behavior against the PRD.
+- **Expected:** Acknowledged uploads would survive a restart and be retryable.
+- **Actual:** Preparation started in a background task before the original bytes were persisted. An interrupted process could leave a delivery with no recoverable source. The same path was unsuitable for Lambda's response lifecycle.
+- **Severity:** Important; recovery could fail even though receipt was acknowledged.
+- **Workaround:** Save the original before receipt, perform preparation in the persisted worker flow, and retain prepared evidence across model retries. Added a real-FFmpeg process-recreation test. Cloud file bytes now use bounded S3 POST uploads rather than the API body.
+- **Submission note:** Our implementation error, not an AWS/Ring defect. Live S3/IAM/CORS validation is still pending.

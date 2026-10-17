@@ -1,16 +1,18 @@
 import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
 import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import {
   type Delivery,
+  type Asset,
   type Review,
   emptyReview,
   validateReview,
   validateAnalysis,
 } from "../shared/domain.js";
 import type { Store } from "./store.js";
-import { MediaStore, prepareVideo } from "./media.js";
+import { MediaStore, prepareVideo, imageMime, videoMime } from "./media.js";
 import { RingClient, RingError } from "./ring.js";
 import { BedrockAnalyzer, fixtureAnalysis, type Analyzer } from "./analysis.js";
 import { snapshot } from "./reports.js";
@@ -55,34 +57,93 @@ export class PackageCare {
     return { delivery: d, report: d.reports.find((r) => r.id === reportId)! };
   }
   async upload(bytes: Buffer, name: string) {
-    const id = randomUUID(),
+    const asset = await this.media.put(
+      bytes,
+      `original-${name}`,
+      videoMime(bytes),
+      "video",
+    );
+    try {
+      return await this.acceptUpload(asset);
+    } catch (e) {
+      if (!(await this.store.get(asset.id))) await this.media.remove(asset);
+      throw e;
+    }
+  }
+  async acceptUpload(asset: Asset) {
+    const id = asset.id,
       now = new Date().toISOString();
-    const d = await this.store.change(id, () => ({
-      id,
-      revision: 0,
-      source: "uploaded",
-      title: "Uploaded delivery",
-      camera: "Uploaded footage",
-      observedAt: now,
-      createdAt: now,
-      durationMs: 0,
-      state: "received",
-      assets: [],
-      runs: [],
-      review: emptyReview(),
-      reports: [],
-    }));
-    // Persist receipt before expensive preparation. Errors stay visible in the delivery list.
-    void this.prepareUploaded(d, bytes, name);
+    let created = false;
+    const d = await this.store.change(id, (current) => {
+      created = !current;
+      return (
+        current ?? {
+          id,
+          revision: 0,
+          source: "uploaded",
+          title: "Uploaded delivery",
+          camera: "Uploaded footage",
+          observedAt: now,
+          createdAt: now,
+          durationMs: 0,
+          state: "received",
+          assets: [asset],
+          runs: [],
+          review: emptyReview(),
+          reports: [],
+        }
+      );
+    });
+    // The source exists before receipt is acknowledged. Lambda only starts a persisted workflow.
+    if (created) await this.dispatch(id);
     return d;
   }
-  private async prepareUploaded(d: Delivery, bytes: Buffer, name: string) {
+  async addPhoto(id: string, bytes: Buffer, assetId?: string) {
+    const current = await this.get(id);
+    if (assetId && current.assets.some((a) => a.id === assetId)) return current;
+    if (current.state !== "ready")
+      throw Object.assign(
+        new Error("Wait for analysis before adding photos."),
+        { status: 409 },
+      );
+    if (bytes.length > 10 * 1024 * 1024)
+      throw new Error("Choose a photo under 10 MB.");
+    imageMime(bytes);
+    const photo = await sharp(bytes, { limitInputPixels: 25_000_000 })
+      .rotate()
+      .resize({
+        width: 2000,
+        height: 2000,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+    const asset = await this.media.put(
+      photo,
+      "recipient-photo.jpg",
+      "image/jpeg",
+      "damage",
+      undefined,
+      assetId,
+    );
     try {
-      const prepared = await prepareVideo(bytes, this.media, name);
-      await this.store.change(d.id, (c) => ({ ...required(c), ...prepared }));
-      await this.dispatch(d.id);
-    } catch (e: any) {
-      await this.fail(d.id, e);
+      return await this.store.change(id, (c) => {
+        const d = required(c);
+        if (d.assets.some((a) => a.id === asset.id)) return d;
+        if (d.state !== "ready")
+          throw Object.assign(
+            new Error("Wait for analysis before adding photos."),
+            { status: 409 },
+          );
+        d.assets.push(asset);
+        d.review.complete = false;
+        return d;
+      });
+    } catch (e) {
+      if (!(await this.store.get(id))?.assets.some((a) => a.id === asset.id))
+        await this.media.remove(asset);
+      throw e;
     }
   }
   async ingest(
@@ -147,7 +208,14 @@ export class PackageCare {
     }
   }
   async fail(id: string, error: any) {
-    console.error(JSON.stringify({event:'processing_failed',deliveryId:id,errorType:error?.name||'Error',...(error instanceof RingError?{ringStatus:error.status}:{})}));
+    console.error(
+      JSON.stringify({
+        event: "processing_failed",
+        deliveryId: id,
+        errorType: error?.name || "Error",
+        ...(error instanceof RingError ? { ringStatus: error.status } : {}),
+      }),
+    );
     await this.store.change(id, (c) => ({
       ...required(c),
       state:
@@ -163,7 +231,28 @@ export class PackageCare {
   }
   async retrieve(id: string) {
     const d = await this.get(id);
-    if (d.assets.some((a) => a.kind === "video")) return;
+    if (d.durationMs > 0 && d.assets.some((a) => a.kind === "video")) return;
+    if (d.source === "uploaded") {
+      const original = d.assets.find((a) => a.kind === "video");
+      if (!original)
+        throw new Error(
+          "No uploaded source is available. Import the video again.",
+        );
+      await this.store.change(id, (c) => ({
+        ...required(c),
+        state: "waiting_for_media",
+        error: undefined,
+      }));
+      const prepared = await prepareVideo(
+        await this.media.read(original),
+        this.media,
+        original.name,
+        undefined,
+        original,
+      );
+      await this.store.change(id, (c) => ({ ...required(c), ...prepared }));
+      return;
+    }
     if (!d.deviceId) throw new Error("No source media is available.");
     await this.store.change(id, (c) => ({
       ...required(c),

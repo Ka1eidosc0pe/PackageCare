@@ -12,6 +12,7 @@
 8. Preview, finalize, and download a report. Unzip and inspect relative evidence links and manifest hashes.
 9. Change recipient notes and create v2; verify v1 did not change.
 10. Reload/restart and verify persistence. Exercise list filters, search, report library, and connection failure states.
+    For an imported clip, stop after receipt but before decoding, restart, and verify the persisted original is prepared. Fail the model call, retry, and verify evidence identifiers do not change.
 11. Check narrow and desktop breakpoints, keyboard focus, reduced motion, and readable labels/errors.
 
 ## Gate A — actual Ring

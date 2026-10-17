@@ -68,6 +68,61 @@ async function api<T = any>(
   }
   return res.status === 204 ? (undefined as T) : res.json();
 }
+async function uploadFile(file: File, deliveryId?: string): Promise<Delivery> {
+  const max = (deliveryId ? 10 : 80) * 1024 * 1024;
+  if (!file.size || file.size > max)
+    throw new Error(
+      `Choose a ${deliveryId ? "photo under 10" : "video under 80"} MB.`,
+    );
+  const status = await api("/status");
+  if (status.uploadMode !== "direct") {
+    const body = new FormData();
+    body.append("file", file);
+    return api(deliveryId ? `/deliveries/${deliveryId}/photos` : "/uploads", {
+      method: "POST",
+      body,
+    });
+  }
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    await file.arrayBuffer(),
+  );
+  const sha256 = Array.from(new Uint8Array(digest), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
+  const grant = await api<{
+    url: string;
+    fields: Record<string, string>;
+    ticket: string;
+  }>("/uploads/authorize", {
+    method: "POST",
+    body: JSON.stringify({
+      purpose: deliveryId ? "photo" : "video",
+      name: file.name,
+      bytes: file.size,
+      mime: file.type,
+      sha256,
+      deliveryId,
+    }),
+  });
+  const body = new FormData();
+  for (const [key, value] of Object.entries(grant.fields))
+    body.append(key, value);
+  body.append("file", file); // S3 requires the file field last.
+  const result = await fetch(grant.url, {
+    method: "POST",
+    body,
+    credentials: "omit",
+  });
+  if (!result.ok)
+    throw new Error(
+      "The file could not be uploaded. Check your connection and choose it again.",
+    );
+  return api("/uploads/complete", {
+    method: "POST",
+    body: JSON.stringify({ ticket: grant.ticket }),
+  });
+}
 const date = (s: string) =>
   new Date(s).toLocaleString(undefined, {
     month: "short",
@@ -394,12 +449,7 @@ export default function App() {
                   const file = e.target.files?.[0];
                   if (file)
                     act("upload", async () => {
-                      const data = new FormData();
-                      data.append("file", file);
-                      const result = await api<Delivery>("/uploads", {
-                        method: "POST",
-                        body: data,
-                      });
+                      const result = await uploadFile(file);
                       await refresh();
                       setSelected(result.id);
                       setNotice(
@@ -1185,9 +1235,11 @@ function DeliveryWorkspace({
             ))
           ) : (
             <p className="subtle-copy">
-              {d.analysis?.assessment === "unable_to_assess"
-                ? "The footage is inconclusive. You can still add what you observed."
-                : "No handling concerns to confirm. Add your inspection below."}
+              {d.state !== "ready"
+                ? "Observations will be available after analysis finishes."
+                : d.analysis?.assessment === "unable_to_assess"
+                  ? "The footage is inconclusive. You can still add what you observed."
+                  : "No handling concerns to confirm. Add your inspection below."}
             </p>
           )}
           <div className="review-divider" />
@@ -1239,14 +1291,7 @@ function DeliveryWorkspace({
                 act("photo", async () => {
                   if (dirty)
                     throw new Error("Save your review before adding a photo.");
-                  const fd = new FormData();
-                  fd.append("file", file);
-                  update(
-                    await api(`/deliveries/${d.id}/photos`, {
-                      method: "POST",
-                      body: fd,
-                    }),
-                  );
+                  update(await uploadFile(file, d.id));
                 });
               e.target.value = "";
             }}

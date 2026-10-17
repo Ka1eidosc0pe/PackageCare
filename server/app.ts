@@ -1,7 +1,6 @@
 import express from "express";
 import multer from "multer";
 import archiver from "archiver";
-import sharp from "sharp";
 import path from "node:path";
 import {
   createHash,
@@ -12,14 +11,21 @@ import {
 import { z } from "zod";
 import type { PackageCare } from "./service.js";
 import { verifySignature, ringEventSchema, RingError } from "./ring.js";
-import { imageMime } from "./media.js";
+import { CloudUploads } from "./uploads.js";
 import { renderReport, snapshot } from "./reports.js";
 
-export function createApp(service: PackageCare) {
+export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
   const app = express();
   app.disable("x-powered-by");
   const secret = process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
     password = process.env.PACKAGECARE_PASSWORD;
+  if (service.media.bucket && !process.env.SESSION_SECRET)
+    throw new Error("Configure SESSION_SECRET before using cloud uploads.");
+  const directUploads =
+    cloudUploads ??
+    (service.media.bucket
+      ? new CloudUploads(service.media.bucket, secret)
+      : undefined);
   const uploads = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 80 * 1024 * 1024, files: 1 },
@@ -167,6 +173,7 @@ export function createApp(service: PackageCare) {
         : "local worker",
       fixtureAvailable: !process.env.AWS_LAMBDA_FUNCTION_NAME,
       sessionRequired: !!password,
+      uploadMode: directUploads ? "direct" : "multipart",
       retentionDays: Number(process.env.RETENTION_DAYS || 30),
     });
   });
@@ -188,12 +195,76 @@ export function createApp(service: PackageCare) {
     res.status(201).json({ ok: true });
   });
   app.post("/api/uploads", uploads.single("file"), async (req, res) => {
+    if (directUploads)
+      return res
+        .status(409)
+        .json({ error: "Use the direct upload workflow for cloud files." });
     if (!req.file) throw new Error("Choose a video file.");
     const d = await service.upload(
       req.file.buffer,
       req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_"),
     );
     res.status(202).json(d);
+  });
+  app.post("/api/uploads/authorize", async (req, res) => {
+    if (!directUploads)
+      return res
+        .status(409)
+        .json({ error: "Direct uploads are available with cloud storage." });
+    if (req.body?.purpose === "photo") {
+      const d = await service.get(z.string().parse(req.body.deliveryId));
+      if (d.state !== "ready")
+        return res
+          .status(409)
+          .json({ error: "Wait for analysis before adding photos." });
+    }
+    res.json(await directUploads.authorize(req.body));
+  });
+  app.post("/api/uploads/complete", async (req, res) => {
+    if (!directUploads)
+      return res
+        .status(409)
+        .json({ error: "Direct uploads are available with cloud storage." });
+    const { ticket: token } = z
+      .object({ ticket: z.string().max(4000) })
+      .parse(req.body);
+    const ticket = directUploads.verify(token),
+      input = ticket.request;
+    const existing = await service.store.get(
+      input.purpose === "video" ? ticket.id : input.deliveryId!,
+    );
+    if (
+      input.purpose === "video"
+        ? existing
+        : existing?.assets.some((a) => a.id === ticket.id)
+    )
+      return res.json(existing);
+    if (input.purpose === "photo" && existing?.state !== "ready")
+      return res
+        .status(409)
+        .json({ error: "Wait for analysis before adding photos." });
+    const asset = await directUploads.accept(ticket);
+    let accepted = false;
+    try {
+      const delivery =
+        input.purpose === "video"
+          ? await service.acceptUpload(asset)
+          : await service.addPhoto(
+              input.deliveryId!,
+              await service.media.read(asset),
+              ticket.id,
+            );
+      accepted = true;
+      res.status(input.purpose === "video" ? 202 : 201).json(delivery);
+    } finally {
+      // A dispatch failure leaves a retryable record with its source; never remove that source.
+      if (
+        input.purpose === "photo" ||
+        (!accepted && !(await service.store.get(ticket.id)))
+      )
+        await service.media.remove(asset);
+      await directUploads.discardIncoming(ticket).catch(() => {}); // S3 lifecycle also clears abandoned incoming objects.
+    }
   });
   app.put("/api/deliveries/:id/review", async (req, res) =>
     res.json(await service.review(String(req.params.id), req.body)),
@@ -208,34 +279,13 @@ export function createApp(service: PackageCare) {
     async (req, res) => {
       if (!req.file || req.file.size > 10 * 1024 * 1024)
         throw new Error("Choose a photo under 10 MB.");
-      imageMime(req.file.buffer);
-      const photo = await sharp(req.file.buffer, {
-        limitInputPixels: 25_000_000,
-      })
-        .rotate()
-        .resize({
-          width: 2000,
-          height: 2000,
-          fit: "inside",
-          withoutEnlargement: true,
-        })
-        .jpeg({ quality: 90 })
-        .toBuffer();
-      const id = String(req.params.id);
-      await service.get(id);
-      const asset = await service.media.put(
-        photo,
-        "recipient-photo.jpg",
-        "image/jpeg",
-        "damage",
-      );
-      const d = await service.store.change(id, (c) => {
-        if (!c) throw new Error("Delivery not found.");
-        c.assets.push(asset);
-        c.review.complete = false;
-        return c;
-      });
-      res.status(201).json(d);
+      if (directUploads)
+        return res
+          .status(409)
+          .json({ error: "Use the direct upload workflow for cloud files." });
+      res
+        .status(201)
+        .json(await service.addPhoto(String(req.params.id), req.file.buffer));
     },
   );
   app.get("/api/deliveries/:id/assets/:asset", async (req, res) => {
@@ -319,12 +369,10 @@ export function createApp(service: PackageCare) {
   });
   app.post("/api/ring/connect", async (req, res) => {
     if (process.env.AWS_LAMBDA_FUNCTION_NAME)
-      return res
-        .status(409)
-        .json({
-          error:
-            "Set Ring credentials in the deployment configuration so API and processing workers share them.",
-        });
+      return res.status(409).json({
+        error:
+          "Set Ring credentials in the deployment configuration so API and processing workers share them.",
+      });
     const { token } = z
         .object({ token: z.string().min(20).max(10000) })
         .parse(req.body),

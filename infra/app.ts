@@ -55,7 +55,10 @@ const bucket = new s3.Bucket(stack, "Evidence", {
   enforceSSL: true,
   encryption: s3.BucketEncryption.S3_MANAGED,
   removalPolicy: RemovalPolicy.RETAIN,
-  lifecycleRules: [{ abortIncompleteMultipartUploadAfter: Duration.days(1) }],
+  lifecycleRules: [
+    { abortIncompleteMultipartUploadAfter: Duration.days(1) },
+    { prefix: "incoming/", expiration: Duration.days(1) },
+  ],
 });
 const table = new dynamodb.Table(stack, "Deliveries", {
   partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
@@ -64,6 +67,12 @@ const table = new dynamodb.Table(stack, "Deliveries", {
   removalPolicy: RemovalPolicy.RETAIN,
 });
 const api = new apigw.HttpApi(stack, "HttpApi", { apiName: "PackageCare" });
+bucket.addCorsRule({
+  allowedOrigins: [api.apiEndpoint],
+  allowedMethods: [s3.HttpMethods.POST],
+  allowedHeaders: ["*"],
+  maxAge: 300,
+});
 const common = {
   PACKAGECARE_BUCKET: bucket.bucketName,
   PACKAGECARE_TABLE: table.tableName,

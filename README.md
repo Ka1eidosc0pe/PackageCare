@@ -26,6 +26,8 @@ Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Choose **Explore sample del
 
 Only sample generation and the explicit sample-loading action use scripted observations. Importing footage goes through the real Bedrock adapter and will show an operational failure when credentials/model access are unavailable; it does not fall back to a pretend analysis.
 
+Imported source bytes are saved before processing starts, so a restart can resume media preparation and a model failure can be retried. In cloud mode, the browser sends videos/photos directly to private S3 using a bounded authorization; large files do not travel through the API request body. The cloud upload contract is tested locally, with live S3/CORS validation pending account connection.
+
 ## Commands
 
 | Command | Purpose |

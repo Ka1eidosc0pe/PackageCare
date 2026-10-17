@@ -32,11 +32,12 @@ npm run infra:synth
 
 ## Known limits to resolve before cloud release
 
-- Lambda/API Gateway payload limits differ from the local server. Large direct uploads need a direct S3 upload path before promising support for the local 80 MB limit in cloud mode. Cloud ZIP exports use a private S3 object and a short-lived download link; this path still needs live verification.
+- Cloud video (up to 80 MB) and damage-photo (up to 10 MB) uploads use a five-minute presigned S3 POST. The policy binds the exact size, SHA-256, content type, encryption and object key. The completion API verifies S3 metadata, copies the source out of the one-day incoming prefix and persists it before starting the worker. The worker performs video decoding and evidence preparation. Browser S3 CORS, IAM, actual maximum-size uploads and worker performance still need live verification. Cloud ZIP exports use a private S3 object and a short-lived download link; this path also needs live verification.
 - Ring tokens entered in the local connection form live in process memory. For Lambda workers use deployment credentials; do not assume a token entered in one API invocation reaches other Lambda instances.
 - Synthetic fixtures are generated locally and not packaged into the Lambda image.
 - The initial dense adapter can make multiple model calls per clip. Measure cost and latency against the worker timeout; do not extrapolate from a local fixture.
 - Retention cleanup runs at local startup and daily while the local server runs; a daily Lambda schedule is defined in the cloud stack. It removes expired terminal cases and their source/report evidence together. Do not independently expire S3 objects referenced by retained reports.
+- Abandoned objects in `incoming/` expire after one day. A crash after copying a source but before persisting its record can still leave an unreferenced object outside that prefix; include an orphan inventory/reconciliation step in operational checks before cloud release. Do not expire all evidence keys blindly.
 - S3 bucket and DynamoDB table are retained on stack deletion to avoid destroying evidence. Document intentional cleanup separately.
 
 ## Post-deployment verification
@@ -45,5 +46,8 @@ npm run infra:synth
 2. Import real Ring footage and verify its source timestamp, playback, and provenance label.
 3. Inspect the actual Step Functions execution, retries, failure persistence, and Bedrock usage.
 4. Review and export a case with its evidence and verify supported size limits.
+   Verify direct video and photo upload through the browser, including CORS, checksum rejection, expired authorization and repeated completion. Interrupt a worker and confirm recovery from the persisted source.
 5. Record endpoints and non-secret findings in `docs/progress.md` and the friction log.
 6. Prepare teardown/recreation instructions and judge-access configuration; do not invite reviewers or submit the project automatically.
+
+The upload contracts follow the official [S3 POST policy](https://docs.aws.amazon.com/AmazonS3/latest/developerguide/sigv4-HTTPPOSTConstructPolicy.html) and [POST Object checksum fields](https://docs.aws.amazon.com/AmazonS3/latest/developerguide/RESTObjectPOST.html). Local tests inspect the actual SDK-signed policy and exercise API completion against simulated S3 responses; they do not establish live S3 acceptance.
