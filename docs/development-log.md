@@ -183,3 +183,14 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 
 - Both CI jobs passed for source `d2ce3e6b4b114ed61b4373420839d1d29d30a5b2` in [run 38997334192](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38997334192): 38 tests, production build, Ohio synthesis, Linux Lambda image, FFmpeg and production-entrypoint smoke. The prior documentation checkpoint also passed run 38996970401.
 - No live inference or AWS resource operations ran in this continuation. Ring authentication remains partial Gate A evidence; model quality, actual cloud behavior and final submission remain incomplete. The running token-bearing preview was kept on its prior process until live testing can resume with a fresh connection.
+
+
+## October 16, 2026 — applied preview and external-gate audit
+
+- Classified the preceding goal turn as progress: verified cloud-worker recovery and abstention corrections, 38 passing tests and CI, and concrete dataset preparation.
+- Rechecked authoritative state without billable calls: Nova Lite daily token quota remains 0 and non-adjustable; no successful live analysis exists. Ring device discovery no longer authenticates, then explicitly requests a current token and reports disconnected. The prior valid session had one simulator and no events. No recording or custom-scene support has been proven.
+- The private repository remains private. Documentation checkpoint `cb3c100` passed both CI jobs in run 38997522705.
+- Confirmed all four local records were terminal and no AWS bucket, table or workflow was configured, then restarted port 3002 on the tested source. Readiness reports in-Region Nova Lite, local storage/worker and no verified live analysis. The four records and frozen report remain intact.
+- The running Connections view revealed stale instructions recommending us-east-1 and an arbitrary profile. Replaced them with shared public setup constants also used by the server: pkgcare, us-east-2, amazon.nova-lite-v1:0. Replaced “Pending account connection” with “No successful analysis yet,” so authentication is not confused with successful inference.
+- All 38 existing tests, production build and Ohio synthesis pass. Browser verified the actual served screen, empty token field and corrected values; document width equals the 673 px viewport. Saved `packagecare/connections-readiness.png` outside source control. No extra tests were added for the reversible copy correction.
+- The same runtime access/usable-footage dependency has persisted through three consecutive goal turns. Local recovery, assessment and setup corrections are complete; full Ring/media, labeled inference, deployed AWS and submission acceptance cannot be established without the owner/AWS resolving access and supplying usable authorized footage. The support draft and capture plan are prepared. No further inference, cloud uploads, provisioning, quota changes or third-party messages were performed.

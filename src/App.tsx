@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  APPLICATION_REGION,
+  AWS_PROFILE_NAME,
+  BEDROCK_MODEL,
+} from "../shared/project";
+import {
   Package,
   LayoutDashboard,
   FileText,
@@ -1870,22 +1875,22 @@ function Connections({
               <dd>
                 {status?.analysis.verified
                   ? "Real invocation recorded"
-                  : "Pending account connection"}
+                  : "No successful analysis yet"}
               </dd>
             </div>
           </dl>
           <p>
-            AWS credentials use the server's standard SDK credential chain. Set
-            your profile, region, and model in the local environment before
-            analyzing real footage.
+            Local analysis uses the {AWS_PROFILE_NAME} profile in{" "}
+            {APPLICATION_REGION}. AWS deployments use an execution role. Check
+            model quotas and obtain spending approval before live analysis.
           </p>
           <div className="setup-code">
             <code>
-              AWS_PROFILE=your-profile
+              AWS_PROFILE={AWS_PROFILE_NAME}
               <br />
-              AWS_REGION=us-east-1
+              AWS_REGION={APPLICATION_REGION}
               <br />
-              BEDROCK_MODEL_ID=…
+              BEDROCK_MODEL_ID={BEDROCK_MODEL}
             </code>
           </div>
           <p className="subtle-copy">

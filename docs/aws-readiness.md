@@ -12,7 +12,7 @@
 
 The old Nova 2 Lite US inference profile could route outside Ohio. That conflicts with the owner's Region restriction. Application clients now require Ohio; local clients use `pkgcare`, Lambda uses its execution role. Model IDs/profiles are allowlisted to the in-Region Nova Lite candidate. CDK pins every Regional resource to Ohio and grants the worker invocation of that exact foundation model only. Quality still needs evaluation.
 
-The running server's Ring token remains in memory. It has not been restarted during these checks; applying backend changes will require restarting it and reconnecting a fresh token. Do not import/analyze from the previous server while preparing the first approved test.
+The Ring session later expired: the backend requires a current Playground token and reports disconnected. With four terminal records and no cloud storage/workflow configured, restarted the local preview on the tested worker/assessment source. Four records and the frozen report were preserved. The Connections screen now shows Ohio, pkgcare, the in-Region model and “No successful analysis yet.” Reconnect a fresh Ring token when live validation can resume.
 
 ## First paid test — approved, attempted, quota blocked
 

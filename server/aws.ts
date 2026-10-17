@@ -1,15 +1,18 @@
-// This project is restricted to Ohio. Toolkit configuration is separate.
-export const APPLICATION_REGION = "us-east-2";
-export const BEDROCK_MODEL = "amazon.nova-lite-v1:0";
+import {
+  APPLICATION_REGION,
+  AWS_PROFILE_NAME,
+  BEDROCK_MODEL,
+} from "../shared/project.js";
+export { APPLICATION_REGION, BEDROCK_MODEL } from "../shared/project.js";
 
 export function awsConfig() {
   if (process.env.AWS_REGION && process.env.AWS_REGION !== APPLICATION_REGION)
     throw new Error(`PackageCare requires AWS_REGION=${APPLICATION_REGION}.`);
   if (process.env.AWS_LAMBDA_FUNCTION_NAME)
     return { region: APPLICATION_REGION };
-  if (process.env.AWS_PROFILE && process.env.AWS_PROFILE !== "pkgcare")
+  if (process.env.AWS_PROFILE && process.env.AWS_PROFILE !== AWS_PROFILE_NAME)
     throw new Error("PackageCare requires the pkgcare AWS profile locally.");
-  return { region: APPLICATION_REGION, profile: "pkgcare" };
+  return { region: APPLICATION_REGION, profile: AWS_PROFILE_NAME };
 }
 
 export function bedrockModel(
