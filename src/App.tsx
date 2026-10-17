@@ -805,12 +805,15 @@ export default function App() {
           d={report.d}
           report={report.r}
           onClose={() => setReport(undefined)}
-          onFinalize={async () => {
+          onFinalize={async (previewAuthorization) => {
             const result = await api<{ delivery: Delivery; report: Report }>(
               `/deliveries/${report.d.id}/reports`,
               {
                 method: "POST",
-                body: JSON.stringify({ revision: report.d.revision }),
+                body: JSON.stringify({
+                  revision: report.d.revision,
+                  previewAuthorization,
+                }),
               },
             );
             update(result.delivery);
@@ -1453,12 +1456,17 @@ function ReportDrawer({
   d: Delivery;
   report?: Report;
   onClose: () => void;
-  onFinalize: () => Promise<void>;
+  onFinalize: (previewAuthorization: string) => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false),
+    [previewAuthorization, setPreviewAuthorization] = useState(""),
     [error, setError] = useState("");
   const close = useRef<HTMLButtonElement>(null),
     dialog = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    setPreviewAuthorization("");
+    setError("");
+  }, [d.id, d.revision, report?.id]);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement;
     close.current?.focus();
@@ -1531,6 +1539,25 @@ function ReportDrawer({
         <iframe
           title="Delivery report preview"
           sandbox="allow-same-origin"
+          onLoad={(e) => {
+            if (report) return;
+            const doc = e.currentTarget.contentDocument;
+            if (doc?.URL === "about:blank") return;
+            const authorization =
+              doc
+                ?.querySelector('meta[name="packagecare-preview"]')
+                ?.getAttribute("content") || "";
+            setPreviewAuthorization(authorization);
+            setError(
+              authorization
+                ? ""
+                : "The preview could not load. Close it and try again before finalizing.",
+            );
+          }}
+          onError={() => {
+            setPreviewAuthorization("");
+            setError("The preview could not load. Close it and try again.");
+          }}
           src={
             report
               ? `/api/deliveries/${d.id}/reports/${report.id}`
@@ -1550,11 +1577,11 @@ function ReportDrawer({
           ) : (
             <button
               className="button primary"
-              disabled={busy}
+              disabled={busy || !previewAuthorization}
               onClick={async () => {
                 setBusy(true);
                 try {
-                  await onFinalize();
+                  await onFinalize(previewAuthorization);
                 } catch (e: any) {
                   setError(e.message);
                 } finally {

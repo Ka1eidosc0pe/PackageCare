@@ -2,15 +2,16 @@
 
 Updated October 16, 2026. This file is an evidence map, not a completion claim.
 
-Latest continuation checkpoint: the remaining acceptance work is blocked on account setup and authorized evaluation footage. The running app's readiness endpoint reported Ring disconnected, no recorded live model invocation, local storage and the local worker. No new source changes invalidate the passing 29-test/CI milestone. The owner previously chose to connect accounts later; no credentials or paid cloud resources were created during this checkpoint.
+Latest continuation checkpoint: the running app still reports Ring disconnected, no recorded live model invocation, local storage and the local worker. A resumed local audit closed the preview-before-finalization gap; the new 30-test source is awaiting its own CI result. Live acceptance remains dependent on account setup and authorized evaluation footage. The owner previously chose to connect accounts later; no credentials or paid cloud resources were created during this checkpoint.
 
 | Requirement | Current evidence | Status |
 |---|---|---|
 | Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `e673a2c` pushed to `main` | Verified |
 | Local app builds | TypeScript/Vite production build passed; `npm start` and bundled frontend sample loading verified on port 3002 | Locally verified |
-| Meaningful tests | 29 tests across seven files passed locally and in CI; includes real FFmpeg restart/retry, portable archive, stale writes, model inputs, direct-upload completion, orphan cleanup and execution/generation races | Passed locally and in CI |
+| Meaningful tests | 30 tests across seven files passed locally, including preview receipts/revision binding, real FFmpeg restart/retry, portable archive, stale writes, model inputs, direct uploads, cleanup and execution/generation races | Passed locally; latest CI pending |
 | Recipient review | Browser confirmed observation decision, no-damage status, notes/reference, save and preview | Verified locally |
 | Report finalization/export | Browser created v1 and downloaded ZIP; archive includes HTML, JSON and seven evidence files | Verified locally |
+| Preview before finalization | Server requires a signed receipt for the previewed saved revision/content; UI waits for the actual preview document; browser preview → finalization succeeds; tampering/expiry/staleness/repetition covered by API tests | Verified locally; latest CI pending |
 | Evidence provenance | Source labels, immutable snapshot, manifest hashes; invalid references covered by tests | Locally implemented |
 | Upload durability | Source persisted before receipt; recreated worker prepares it, model failure is retried without replacing evidence; browser import preserved playback and showed missing-credentials failure without assessment | Verified locally |
 | Direct cloud uploads | Actual SDK policy inspected; exact size/type/checksum/key and ticket expiry enforced; simulated storage/API checks cover normalization, repeated completion and corrupt uploads; CORS/lifecycle synthesized | Contract verified; real S3 pending |

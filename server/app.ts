@@ -13,12 +13,14 @@ import type { PackageCare } from "./service.js";
 import { verifySignature, ringEventSchema, RingError } from "./ring.js";
 import { CloudUploads } from "./uploads.js";
 import { renderReport, snapshot } from "./reports.js";
+import { ReportPreviews } from "./report-preview.js";
 
 export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
   const app = express();
   app.disable("x-powered-by");
   const secret = process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
     password = process.env.PACKAGECARE_PASSWORD;
+  const previews = new ReportPreviews(secret);
   if (service.media.bucket && !process.env.SESSION_SECRET)
     throw new Error("Configure SESSION_SECRET before using cloud uploads.");
   const directUploads =
@@ -298,18 +300,23 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
     res.sendFile(path.resolve(service.media.local(a.key)));
   });
   app.post("/api/deliveries/:id/reports", async (req, res) => {
-    const { revision } = z
-      .object({ revision: z.number().int() })
+    const { revision, previewAuthorization } = z
+      .object({
+        revision: z.number().int().nonnegative(),
+        previewAuthorization: z.string().max(2000).optional(),
+      })
       .parse(req.body);
-    res
-      .status(201)
-      .json(await service.finalize(String(req.params.id), revision));
+    const id = String(req.params.id),
+      fingerprint = previews.verify(previewAuthorization, id, revision);
+    res.status(201).json(await service.finalize(id, revision, fingerprint));
   });
-  app.get("/api/deliveries/:id/preview", async (req, res) =>
+  app.get("/api/deliveries/:id/preview", async (req, res) => {
+    const delivery = await service.get(String(req.params.id)),
+      report = snapshot(delivery);
     res
       .type("html")
-      .send(renderReport(snapshot(await service.get(String(req.params.id))))),
-  );
+      .send(renderReport(report, false, previews.issue(delivery, report)));
+  });
   app.get("/api/deliveries/:id/reports/:report", async (req, res) => {
     const d = await service.get(String(req.params.id)),
       r = d.reports.find((r) => r.id === req.params.report);

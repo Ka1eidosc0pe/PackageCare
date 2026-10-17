@@ -89,16 +89,30 @@ export class PackageCare {
       return d;
     });
   }
-  async finalize(id: string, revision: number) {
+  async finalize(id: string, revision: number, previewFingerprint?: string) {
     let reportId = "";
     const d = await this.store.change(id, (current) => {
       const d = required(current);
+      const existing =
+        previewFingerprint &&
+        d.reports.find((r) => r.fingerprint === previewFingerprint);
+      if (existing && snapshot(d).fingerprint === previewFingerprint) {
+        reportId = existing.id;
+        return d;
+      }
       if (d.revision !== revision)
         throw Object.assign(
           new Error("Delivery changed. Save and preview again."),
           { status: 409 },
         );
       const report = snapshot(d);
+      if (previewFingerprint && report.fingerprint !== previewFingerprint)
+        throw Object.assign(
+          new Error(
+            "The review changed. Open a fresh preview before finalizing.",
+          ),
+          { status: 409 },
+        );
       if (!d.reports.some((r) => r.id === report.id)) d.reports.push(report);
       reportId = report.id;
       return d;

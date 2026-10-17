@@ -10,6 +10,7 @@
 6. Correct or dismiss an observation; verify that the original model record remains while the report excludes dismissed claims.
 7. Add a valid damage photo; reject a spoofed/non-image upload; verify dirty review changes are not silently lost.
 8. Preview, finalize, and download a report. Unzip and inspect relative evidence links and manifest hashes.
+   Finalization stays disabled until the preview loads successfully. The API requires its signed receipt for the same saved revision and report contents. Missing/tampered/expired or cross-delivery receipts fail; an unchanged repeated finalization returns the existing snapshot. Editing the review requires a new preview. Finalized/exported HTML must contain no preview receipt.
 9. Change recipient notes and create v2; verify v1 did not change.
 10. Reload/restart and verify persistence. Exercise list filters, search, report library, and connection failure states.
     For an imported clip, stop after receipt but before decoding, restart, and verify the persisted original is prepared. Fail the model call, retry, and verify evidence identifiers do not change.

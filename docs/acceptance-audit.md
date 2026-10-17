@@ -13,7 +13,7 @@ October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requ
 | 5. Unclear footage | Explicit abstention rules and scripted ambiguous example; no fixture fallback on provider failure | Measure abstention on real ambiguous/occluded clips |
 | 6. Recipient review | Confirm/correct/dismiss/unresolved decisions, stale-write rejection, saved review and independent source analysis | Repeat the real-source journey after Gate A/B |
 | 7. Damage statements/photos | Damage separated from handling; actual image decoding/metadata removal and destination tests; notes and damage status browser-checked | Live cloud upload/CORS and real-source walkthrough |
-| 8. Preview/export | Browser preview → finalized version → downloaded ZIP; actual archive inspected; immutable snapshots and escaped statements tested | Live S3 export and maximum supported-size verification |
+| 8. Preview/export | Browser preview → finalized version → downloaded ZIP; actual archive inspected; immutable snapshots and escaped statements tested. Successful preview receipt is required for the saved revision; stale/tampered/expired receipts and repeated requests tested | Live S3 export and maximum supported-size verification |
 | 9. Functioning AWS integration | CDK synthesized; packaged Linux image/FFmpeg/runtime entrypoint tested in CI; S3/SFN contracts tested locally | Actual account deployment, IAM, persistence, orchestration and Bedrock invocation |
 
 ## Product acceptance scenarios (PRD §11.2)

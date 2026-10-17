@@ -121,3 +121,11 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - Checked the running application's readiness endpoint, without displaying credentials: Ring disconnected, no recorded live model run, local storage and local worker. Environment readiness booleans also showed no configured Ring token or cloud resource references.
 - The same account dependency has persisted through three consecutive goal turns. Local implementation, contracts, runtime packaging and meaningful verification progressed in the preceding turns; the outstanding Ring media, real inference/evaluation and deployed AWS acceptance gates now require owner setup or an external-state change.
 - The full objective is not complete. Resume from Gate A/B and live AWS validation when accounts and authorized labeled clips are available; preserve the private repository, existing evidence and scope. Registration, reviewer access and final demo/submission remain human-owned steps.
+
+## October 16, 2026 — preview-before-finalization requirement
+
+- On a resumed goal, account readiness remained unchanged. A further local PRD audit identified that opening the report drawer did not require a successfully loaded preview before finalization, and the API could finalize a complete review without a preview request.
+- Added a ten-minute signed preview receipt binding delivery ID, saved revision and report-content fingerprint. The API rejects missing, modified, expired, cross-delivery and stale receipts. Repeating a successful finalization of unchanged content returns the existing snapshot without bumping its revision or creating another report.
+- The report drawer now waits for a successfully loaded preview document before enabling finalization. Finalized reports and exports omit the receipt. Receipt issuance establishes that the preview was served; it cannot prove that a human read it.
+- Expanded the real API review/report interaction test and added receipt-boundary coverage. All 30 tests passed locally and the production build passed. Browser-saved a synthetic review, loaded its preview, verified finalization became enabled and finalized version 1. No live model result or carrier submission was involved.
+- The next source commit needs CI packaging verification. Live Ring, labeled Bedrock evaluation and deployed AWS checks remain outstanding.

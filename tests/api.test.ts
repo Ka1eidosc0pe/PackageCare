@@ -108,15 +108,39 @@ describe("review/report interaction", () => {
       })
       .expect(200);
     expect(saved.body.review.damage).toBe("none_observed");
-    const first = await request(app)
+    const previewBeforeFinalizing = await request(app)
+      .get("/api/deliveries/test/preview")
+      .expect(200);
+    const authorization = previewBeforeFinalizing.text.match(
+      /name="packagecare-preview" content="([^"]+)"/,
+    )![1];
+    await request(app)
       .post("/api/deliveries/test/reports")
       .send({ revision: saved.body.revision })
+      .expect(409);
+    const first = await request(app)
+      .post("/api/deliveries/test/reports")
+      .send({
+        revision: saved.body.revision,
+        previewAuthorization: authorization,
+      })
       .expect(201);
     expect(first.body.report.version).toBe(1);
+    const repeated = await request(app)
+      .post("/api/deliveries/test/reports")
+      .send({
+        revision: saved.body.revision,
+        previewAuthorization: authorization,
+      })
+      .expect(201);
+    expect(repeated.body.report.id).toBe(first.body.report.id);
+    expect(repeated.body.delivery.revision).toBe(first.body.delivery.revision);
     const preview = await request(app)
       .get(`/api/deliveries/test/reports/${first.body.report.id}`)
       .expect(200);
     expect(preview.text).toContain("Recipient reports no damage observed");
+    expect(preview.text).not.toContain('name="packagecare-preview"');
+    expect(preview.text).not.toContain(authorization);
     const next = await service.get("test");
     const changed = await service.review("test", {
       ...next.review,
@@ -124,9 +148,62 @@ describe("review/report interaction", () => {
       notes: "Corner crushed",
       damage: "observed",
     });
-    const { report } = await service.finalize("test", changed.revision);
+    await request(app)
+      .post("/api/deliveries/test/reports")
+      .send({
+        revision: saved.body.revision,
+        previewAuthorization: authorization,
+      })
+      .expect(409);
+    const secondPreview = await request(app)
+      .get("/api/deliveries/test/preview")
+      .expect(200);
+    const nextAuthorization = secondPreview.text.match(
+      /name="packagecare-preview" content="([^"]+)"/,
+    )![1];
+    const finalized = await request(app)
+      .post("/api/deliveries/test/reports")
+      .send({
+        revision: changed.revision,
+        previewAuthorization: nextAuthorization,
+      })
+      .expect(201);
+    const report = finalized.body.report;
     expect(report.version).toBe(2);
     expect(first.body.report.review.damage).toBe("none_observed");
+  });
+  it("rejects tampered, cross-delivery and expired preview receipts without creating reports", async () => {
+    const d = delivery();
+    d.review.complete = true;
+    await service.store.change("test", () => d);
+    await service.store.change("other", () => ({ ...d, id: "other" }));
+    const app = createApp(service),
+      preview = await request(app)
+        .get("/api/deliveries/test/preview")
+        .expect(200);
+    const authorization = preview.text.match(
+      /name="packagecare-preview" content="([^"]+)"/,
+    )![1];
+    await request(app)
+      .post("/api/deliveries/test/reports")
+      .send({ revision: 0, previewAuthorization: `x${authorization}` })
+      .expect(409);
+    await request(app)
+      .post("/api/deliveries/other/reports")
+      .send({ revision: 0, previewAuthorization: authorization })
+      .expect(409);
+    const now = Date.now();
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now + 601000);
+    try {
+      await request(app)
+        .post("/api/deliveries/test/reports")
+        .send({ revision: 0, previewAuthorization: authorization })
+        .expect(409);
+    } finally {
+      clock.mockRestore();
+    }
+    expect((await service.get("test")).reports).toHaveLength(0);
+    expect((await service.get("other")).reports).toHaveLength(0);
   });
   it("rejects foreign-origin mutations, anonymous remote access, and password bypass", async () => {
     let app = createApp(service);
