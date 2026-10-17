@@ -83,7 +83,11 @@ export class CloudStore implements Store {
     const records: Delivery[] = [];
     do {
       const out = await this.db.send(
-        new ScanCommand({ TableName: this.table, ExclusiveStartKey: cursor }),
+        new ScanCommand({
+          TableName: this.table,
+          ExclusiveStartKey: cursor,
+          ConsistentRead: true,
+        }),
       );
       records.push(...(out.Items ?? []).map((x) => x.record as Delivery));
       cursor = out.LastEvaluatedKey;

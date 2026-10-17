@@ -6,7 +6,7 @@ Updated October 16, 2026. This file is an evidence map, not a completion claim.
 |---|---|---|
 | Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `4e7fa5b` pushed to `main` | Verified |
 | Local app builds | TypeScript/Vite production build passed; `npm start` and bundled frontend sample loading verified on port 3002 | Locally verified |
-| Meaningful tests | 26 tests across six files passed locally; includes actual FFmpeg restart/retry, portable archive, stale writes, model inputs and direct-upload completion. Previous 22-test source passed CI; new source awaiting CI | Locally verified; latest CI pending |
+| Meaningful tests | 27 tests across six files passed locally; includes actual FFmpeg restart/retry, portable archive, stale writes, model inputs, direct-upload completion and safe orphan cleanup. Latest source awaiting CI | Locally verified; latest CI pending |
 | Recipient review | Browser confirmed observation decision, no-damage status, notes/reference, save and preview | Verified locally |
 | Report finalization/export | Browser created v1 and downloaded ZIP; archive includes HTML, JSON and seven evidence files | Verified locally |
 | Evidence provenance | Source labels, immutable snapshot, manifest hashes; invalid references covered by tests | Locally implemented |
@@ -17,7 +17,7 @@ Updated October 16, 2026. This file is an evidence map, not a completion claim.
 | AWS infrastructure | CDK synthesized; Linux Lambda image built, FFmpeg ran, packaged HTTP/frontend handler and actual production entrypoint passed Runtime API smoke in CI; deployment not validated | Container verified; live AWS pending |
 | Dense/sparse/native strategy comparison | Code exists; live comparative results not available | Pending |
 | UI responsive and full journey checks | Browser review → preview → finalize → downloaded ZIP verified; playback/seek, unsaved changes, desktop and mobile checked; 390 px document = viewport. Dialog initial focus, Tab wrap, Escape and focus restoration verified | Verified for these local journeys |
-| Retention | Terminal cases expire with evidence; local scheduled cleanup and daily cloud source; dry-run preview removed zero existing cases | Locally tested; cloud pending |
+| Retention | Terminal cases expire with evidence; generated orphan files older than a day are reconciled against delivery and frozen report references. Local scheduled and daily cloud paths exist; dry-run found zero expired cases/orphans | Local filesystem and paginated S3 contract tested; cloud pending |
 | CI | [Run 38988422636](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38988422636) passed both jobs for source `4e7fa5b`. Upload recovery/direct-upload revision is pending its own remote result | Previous source passed; latest pending |
 | Feedback/friction log | Maintained in `docs/friction-log.md`; provider limitations separated from our own bugs | Maintained |
 | Submission video, registration and reviewer access | Not performed; require owner participation | Pending |

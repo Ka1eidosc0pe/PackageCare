@@ -8,6 +8,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Asset } from "../shared/domain.js";
@@ -92,12 +93,48 @@ export class MediaStore {
         )
       : undefined;
   }
-  async remove(a: Asset) {
+  async remove(a: Pick<Asset, "key">) {
     if (this.bucket)
       await this.s3.send(
         new DeleteObjectCommand({ Bucket: this.bucket, Key: a.key }),
       );
     else await fs.rm(this.local(a.key), { force: true });
+  }
+  async *inventory(): AsyncGenerator<{ key: string; modifiedAt: number }> {
+    if (this.bucket) {
+      let cursor: string | undefined;
+      do {
+        const page = await this.s3.send(
+          new ListObjectsV2Command({
+            Bucket: this.bucket,
+            ContinuationToken: cursor,
+          }),
+        );
+        for (const object of page.Contents ?? [])
+          if (object.Key && object.LastModified)
+            yield {
+              key: object.Key,
+              modifiedAt: object.LastModified.getTime(),
+            };
+        cursor = page.IsTruncated ? page.NextContinuationToken : undefined;
+        if (page.IsTruncated && !cursor)
+          throw new Error(
+            "Incomplete storage inventory; no cleanup was performed.",
+          );
+      } while (cursor);
+    } else {
+      const directory = path.join(this.root, "media");
+      for (const entry of await fs
+        .readdir(directory, { withFileTypes: true })
+        .catch((error: any) => {
+          if (error.code === "ENOENT") return [];
+          throw error;
+        }))
+        if (entry.isFile()) {
+          const info = await fs.stat(this.local(entry.name));
+          yield { key: entry.name, modifiedAt: info.mtimeMs };
+        }
+    }
   }
   async exportBundle(reportId: string, bytes: Buffer) {
     if (!this.bucket) throw new Error("Cloud storage is not configured.");

@@ -37,7 +37,7 @@ npm run infra:synth
 - Synthetic fixtures are generated locally and not packaged into the Lambda image.
 - The initial dense adapter can make multiple model calls per clip. Measure cost and latency against the worker timeout; do not extrapolate from a local fixture.
 - Retention cleanup runs at local startup and daily while the local server runs; a daily Lambda schedule is defined in the cloud stack. It removes expired terminal cases and their source/report evidence together. Do not independently expire S3 objects referenced by retained reports.
-- Abandoned objects in `incoming/` expire after one day. A crash after copying a source but before persisting its record can still leave an unreferenced object outside that prefix; include an orphan inventory/reconciliation step in operational checks before cloud release. Do not expire all evidence keys blindly.
+- Abandoned objects in `incoming/` expire after one day. Scheduled maintenance inventories generated evidence/export keys, then removes unreferenced files older than one day. It protects both current delivery assets and every frozen report's assets/export. It completes paginated inventory before deletion and uses strongly consistent record scans. Confirm the actual bucket inventory and deletion permissions live; `npm run maintenance` previews cleanup without deleting files.
 - S3 bucket and DynamoDB table are retained on stack deletion to avoid destroying evidence. Document intentional cleanup separately.
 
 ## Post-deployment verification

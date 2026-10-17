@@ -4,7 +4,7 @@ import { createApp } from "./app.js";
 import { createStore } from "./store.js";
 import { MediaStore } from "./media.js";
 import { PackageCare } from "./service.js";
-import { purgeExpired } from "./maintenance.js";
+import { purgeExpired, purgeOrphans } from "./maintenance.js";
 const root = path.resolve(process.env.DATA_DIR || "data"),
   host = process.env.HOST || "127.0.0.1";
 if (
@@ -20,9 +20,11 @@ const cleanup = () =>
     service.store,
     service.media,
     Number(process.env.RETENTION_DAYS || 30),
-  ).catch(() =>
-    console.error("Retention cleanup failed; will retry next interval."),
-  );
+  )
+    .then(() => purgeOrphans(service.store, service.media, Date.now(), false))
+    .catch(() =>
+      console.error("Retention cleanup failed; will retry next interval."),
+    );
 void cleanup();
 setInterval(cleanup, 86400000).unref();
 createApp(service).listen(Number(process.env.PORT || 3001), host, () =>
