@@ -71,6 +71,7 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Steps:** Follow the documented alternative-base-image approach and install the runtime client during the image build.
 - **Expected:** The documented native-build prerequisites would cover runtime-client compilation.
 - **Actual:** CI failed with `autoreconf: not found` in the runtime client's preinstall script. Its build needed additional autotools in this slim base image. The log also exposed our selected HTTP adapter's Node >=24 requirement.
+- **Follow-up:** The current runtime client also extracts an `.xz` archive and requires `xz-utils`, which is absent from the slim base. Added this after the next concrete CI failure and inspected the packaged build scripts before rebuilding.
 - **Severity:** Important; image could not build.
 - **Workaround:** Add autoconf/automake/libtool/pkg-config; align runtime versions; use the verified current runtime client. Rebuild and await actual smoke-test results.
 - **Suggestion:** Include autotools requirements and a current engine compatibility matrix in the alternative-base-image example.

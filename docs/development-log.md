@@ -70,3 +70,4 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - Added the native runtime build prerequisites and selected the verified current official Lambda runtime client release. Updated GitHub Actions to their verified current releases.
 - Added a check that a model cannot cite a known case frame it did not receive in its current input window, and strengthened frame-order coverage.
 - No live provider/runtime success is inferred from these source fixes; the next CI result must confirm them.
+- Follow-up CI identified missing `xz` while the newer runtime client extracted its bundled source. Inspected the published pre/postinstall scripts and added `xz-utils` plus Python for node-gyp before the next build. The client executable moved to package-root `index.mjs`; the entrypoint now uses its verified published path.

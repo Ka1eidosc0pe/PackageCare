@@ -1,6 +1,6 @@
 # Debian runtime keeps FFmpeg and its shared libraries in one compatible distribution.
 FROM node:24-bookworm-slim AS build
-RUN apt-get update && apt-get install -y --no-install-recommends g++ make cmake unzip autoconf automake libtool pkg-config libcurl4-openssl-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends g++ make cmake python3 unzip xz-utils autoconf automake libtool pkg-config libcurl4-openssl-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /build
 COPY package*.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund
