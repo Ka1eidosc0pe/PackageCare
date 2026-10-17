@@ -6,9 +6,9 @@ Latest checkpoint: Ring authentication is verified with one simulator device; ca
 
 | Requirement | Current evidence | Status |
 |---|---|---|
-| Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `724c773` pushed to `main` | Verified |
+| Private source repository | `gh repo view` confirmed `isPrivate: true`; incremental source milestones through `d2ce3e6` pushed to `main` | Verified |
 | Local app builds | TypeScript/Vite production build passed; `npm start` and bundled frontend sample loading verified on port 3002 | Locally verified |
-| Meaningful tests | 38 tests across nine files passed locally, including preview receipts, canonical/legacy report identity, restart/retry, portable archive, stale writes, model inputs, direct uploads, cleanup and execution/generation races | Current source passed locally; fresh CI pending |
+| Meaningful tests | 38 tests across nine files passed locally, including preview receipts, canonical/legacy report identity, restart/retry, portable archive, stale writes, model inputs, direct uploads, cleanup and execution/generation races | Passed locally and in CI |
 | Recipient review | Browser confirmed observation decision, no-damage status, notes/reference, save and preview | Verified locally |
 | Report finalization/export | Browser created v1 and downloaded ZIP; archive includes HTML, JSON and seven evidence files | Verified locally |
 | Preview before finalization | Server requires a signed receipt for the previewed saved revision/content; UI waits for the actual preview document; browser preview → finalization succeeds; tampering/expiry/staleness/repetition covered by API tests | Verified locally and in CI |
@@ -22,7 +22,7 @@ Latest checkpoint: Ring authentication is verified with one simulator device; ca
 | Dense/sparse/native strategy comparison | Code, 12-scene capture/labeling plan and manifest template exist; actual footage and comparative results not available | Pending |
 | UI responsive and full journey checks | Browser review → preview → finalize → downloaded ZIP verified; playback/seek, unsaved changes, desktop and mobile checked; 390 px document = viewport. Dialog initial focus, Tab wrap, Escape and focus restoration verified | Verified for these local journeys |
 | Retention | Terminal cases expire with evidence; generated orphan files older than a day are reconciled against delivery and frozen report references. Local scheduled and daily cloud paths exist; dry-run found zero expired cases/orphans | Local filesystem and paginated S3 contract tested; cloud pending |
-| CI | [Run 38996783402](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38996783402) passed both jobs for source `724c7734703a8d827b150f963ebb693f88ef80ae`: 34 tests, production build, synthesis, Linux image, FFmpeg and runtime smoke | Passed |
+| CI | [Run 38997334192](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38997334192) passed both jobs for source `d2ce3e6b4b114ed61b4373420839d1d29d30a5b2`: 38 tests, build, synthesis, Linux image, FFmpeg and runtime smoke | Passed |
 | Feedback/friction log | Maintained in `docs/friction-log.md`; provider limitations separated from our own bugs | Maintained |
 | Submission video, registration and reviewer access | Not performed; require owner participation | Pending |
 

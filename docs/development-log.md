@@ -178,3 +178,8 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 - Updated the input contract and prompt version to `packagecare-evidence-v2`. This establishes validation behavior, not measured model performance. The quota gate still prevents evaluation.
 - Added meaningful cases for at-rest/landing/arrival-only footage, supported placement, rejected accusatory headlines, and ambiguous placement. All 38 tests across nine files, the production build and Ohio synthesis passed locally. No further live inference ran.
 - Prepared a 12-scene capture/labeling plan and a clearly marked manifest template, with distinct development/held-out cases and no fabricated timestamps or results. Uploaded staged footage can support model work but cannot replace the required Ring demonstration or establish simulator custom-media support. Footage still needs to be collected with permission; evaluation needs its own approved cost scope.
+
+### Worker/abstention milestone verified
+
+- Both CI jobs passed for source `d2ce3e6b4b114ed61b4373420839d1d29d30a5b2` in [run 38997334192](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38997334192): 38 tests, production build, Ohio synthesis, Linux Lambda image, FFmpeg and production-entrypoint smoke. The prior documentation checkpoint also passed run 38996970401.
+- No live inference or AWS resource operations ran in this continuation. Ring authentication remains partial Gate A evidence; model quality, actual cloud behavior and final submission remain incomplete. The running token-bearing preview was kept on its prior process until live testing can resume with a fresh connection.
