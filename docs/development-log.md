@@ -159,3 +159,13 @@ The owner explicitly chose to connect accounts later. Live Ring media/custom-sce
 
 - Source `724c7734703a8d827b150f963ebb693f88ef80ae` passed [CI run 38996783402](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38996783402): 34 tests, production build, CDK synthesis, Linux Lambda image build, FFmpeg and actual production-entrypoint smoke. Both jobs succeeded. Repository remained private; credentials and runtime evidence were excluded from source control.
 - The following documentation-only checkpoint records these results. No additional inference was performed. Await owner/AWS quota resolution before preparing the next approved live attempt.
+
+
+## October 16, 2026 — cloud failure recovery audit
+
+- Classified the preceding goal turn as progress: authenticated provider evidence, a real quota rejection, Ohio safeguards and passing CI changed the next action. Owner/AWS quota resolution still gates successful live inference. No new inference, deployment or cloud storage operations ran in this continuation.
+- The running Ring session still authenticates. Kept the token-bearing process alive rather than restarting during the audit. The latest documentation checkpoint CI was still running when first checked.
+- Found that the Lambda worker discarded actionable errors before its catch step, and the generic failure step could overwrite an existing failure or a ready result. Extracted the actual task executor for dependency-injected local verification, persisted safe failure text before reporting a sanitized task error, and made terminal failure writes idempotent. Stale generations remain rejected.
+- The catch task now passes only its error code, never the raw provider Cause. Exhausted MediaPending retries produce an actionable media-unavailable state. Transient retrieval remains retryable; no inference is attempted before footage exists.
+- Two consequential local worker scenarios exercise observe → quota failure → repeated catcher → new generation → verification-only recovery, plus temporary Ring readiness → exhausted catcher. They verify preserved evidence/proposal, no repeated observation call, no sensitive provider text, no stale catcher writes and no replacement of a completed result.
+- All 36 local tests, production build and CDK synthesis passed. The synthesized payload carries the catcher Error code only. Live Step Functions behavior still requires an approved deployment.

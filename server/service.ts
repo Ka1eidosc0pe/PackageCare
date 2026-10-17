@@ -285,26 +285,37 @@ export class PackageCare {
     }
   }
   async fail(id: string, error: any) {
-    console.error(
-      JSON.stringify({
-        event: "processing_failed",
-        deliveryId: id,
-        errorType: error?.name || "Error",
-        ...(error instanceof RingError ? { ringStatus: error.status } : {}),
-      }),
-    );
-    await this.store.change(id, (c) => ({
-      ...required(c),
-      state:
-        error instanceof RingError &&
-        [404, 403, 416, 425].includes(error.status)
-          ? "media_unavailable"
-          : "failed",
-      error:
-        error instanceof RingError
-          ? error.message
-          : processingErrorMessage(error),
-    }));
+    let saved = false;
+    await this.store.change(id, (c) => {
+      saved = false;
+      const d = required(c);
+      // A delayed catcher must preserve a completed result or a more useful
+      // failure already saved by the worker for this attempt.
+      if (["ready", "failed", "media_unavailable"].includes(d.state)) return d;
+      saved = true;
+      return {
+        ...d,
+        state:
+          error instanceof RingError &&
+          [404, 403, 416, 425].includes(error.status)
+            ? "media_unavailable"
+            : "failed",
+        error:
+          error instanceof RingError
+            ? error.message
+            : processingErrorMessage(error),
+      };
+    });
+    if (saved) {
+      console.error(
+        JSON.stringify({
+          event: "processing_failed",
+          deliveryId: id,
+          errorType: error?.name || "Error",
+          ...(error instanceof RingError ? { ringStatus: error.status } : {}),
+        }),
+      );
+    }
   }
   async retrieve(id: string) {
     const d = await this.get(id);

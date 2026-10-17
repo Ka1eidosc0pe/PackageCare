@@ -116,6 +116,9 @@ function task(name: string, phase: string) {
       id: sfn.JsonPath.stringAt("$.id"),
       generation: sfn.JsonPath.stringAt("$.generation"),
       phase,
+      ...(phase === "fail"
+        ? { failureCode: sfn.JsonPath.stringAt("$.failure.Error") }
+        : {}),
     }),
     payloadResponseOnly: true,
   });
