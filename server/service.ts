@@ -19,7 +19,12 @@ import {
 import type { Store } from "./store.js";
 import { MediaStore, prepareVideo, imageMime, videoMime } from "./media.js";
 import { RingClient, RingError } from "./ring.js";
-import { BedrockAnalyzer, fixtureAnalysis, type Analyzer } from "./analysis.js";
+import {
+  BedrockAnalyzer,
+  fixtureAnalysis,
+  failedAnalysisRun,
+  type Analyzer,
+} from "./analysis.js";
 import { snapshot } from "./reports.js";
 
 const required = (d: Delivery | undefined): Delivery => {
@@ -381,8 +386,10 @@ export class PackageCare {
       // failure already saved by the worker for this attempt.
       if (["ready", "failed", "media_unavailable"].includes(d.state)) return d;
       saved = true;
+      const failedRun = failedAnalysisRun(error);
       return {
         ...d,
+        runs: failedRun ? [...d.runs, failedRun] : d.runs,
         state:
           error instanceof RingError &&
           [404, 403, 416, 425].includes(error.status)
@@ -400,6 +407,9 @@ export class PackageCare {
           event: "processing_failed",
           deliveryId: id,
           errorType: error?.name || "Error",
+          ...(failedAnalysisRun(error)
+            ? { analysisDiagnostic: failedAnalysisRun(error)!.failure }
+            : {}),
           ...(error instanceof RingError ? { ringStatus: error.status } : {}),
         }),
       );

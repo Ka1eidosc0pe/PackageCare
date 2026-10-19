@@ -2,7 +2,7 @@
 
 This prepares the PRD's 12-clip feasibility set. **No evaluation clips have been collected or labeled yet.** AWS quota access, owner spending approval and actual model results remain separate requirements.
 
-Ring Playground device discovery works, but its current event history is empty. Custom-scene/recording support is still unproven. First try to obtain the scenes through the accepted Ring source. If the simulator cannot supply delivery scenes, short staged phone-camera clips can support model development with `uploaded` provenance; they do not establish Ring integration or replace the required Ring demonstration. Consult the owner before changing the submission path.
+Ring Playground discovery, actual WHEP playback, browser capture and saved playback now work. The Package capture inspected so far shows a parcel already at rest; it is a diagnostic, not evidence of visible normal placement or rough handling. The organizer confirms Package/Vehicle/Motion live scenarios, no custom uploads into Playground, and permits clearly labeled separately collected footage alongside actual Ring integration. Short staged phone-camera clips can support model development with `uploaded` provenance. Keep their source separate from Ring.
 
 ## Capture
 
@@ -29,18 +29,20 @@ These are capture intentions, not finished ground truth. Inspect each actual rec
 
 ## Label before inference
 
-Copy [the manifest template](../evaluation/manifest.template.json) beside the local `clips/` directory. Replace paths with the actual files and verify every expected assessment. For each visible drop/toss, manually add `actionWindow: [startMs, endMs]` covering the release and landing in the original clip. Do not copy guessed offsets. Keep a short local annotation describing the visible evidence and any disagreement.
+Copy [the manifest template](../evaluation/manifest.template.json) beside the local `clips/` directory. Replace paths with the actual files, set each source accurately (`uploaded` for staged phone recordings), and verify every expected assessment. For each visible drop/toss, manually add `actionWindow: [startMs, endMs]` covering the release and landing in the original clip. Do not copy guessed offsets. Keep a short local annotation describing the visible evidence and any disagreement.
 
 Leave the held-out recordings unused while adjusting prompts on development examples. Choose the input strategy using the development set, then run the selected configuration on the held-out cases. If held-out failures lead to further tuning, report that reuse and obtain new independent clips before presenting a fresh held-out result.
 
 The existing harness records expected/actual assessment, action-window overlap, elapsed time and provider usage. Review the actual descriptions and cited frames as well: matching the three-way class alone does not establish a useful or accurate explanation. Report counts and concrete misses/false flags/abstentions, with the small-set limitation.
 
-## Run only after quota and spending approval
+## Prepare locally, then approve invocation
 
 The manifest template references files that do not exist. It is not a completed dataset or a command to run immediately.
 
 ```sh
-ANALYSIS_STRATEGY=dense_frames npm run evaluate -- /absolute/path/to/local-manifest.json
+npm run evaluate -- /absolute/path/to/local-manifest.json --strategy dense_frames --split development
+# Review the emitted plan and request count, then obtain explicit spending approval.
+npm run evaluate -- /absolute/path/to/plan.json --invoke --max-requests N
 ```
 
-Repeat the same approved cases with sparse/native strategies only within a separately prepared cost scope. The evaluation harness makes real billable calls. The prior $0.05 smoke approval does not authorize this dataset run. It must use `pkgcare` and in-Region `amazon.nova-lite-v1:0` in `us-east-2`.
+Preparation is local even when the app has cloud storage configured. It checks distinct source hashes across splits, prepares immutable assets and states the exact maximum request count. Invocation rechecks hashes, journals requests/replies/usage before validation, checkpoints completed passes, stops on the first failure and refuses reuse of an invoked plan. `--max-requests` is an execution boundary, not spending authorization. Repeat cases with sparse/native strategies only within separately prepared and approved scopes. Only `--invoke` makes billable calls; prior smoke approvals do not authorize a dataset run. It must use `pkgcare` and in-Region `amazon.nova-lite-v1:0` in `us-east-2`.

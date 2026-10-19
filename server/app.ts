@@ -168,8 +168,16 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
       analysis: {
         provider: "bedrock",
         model: bedrockModel(),
-        verified: records.some((d) =>
-          d.runs.some((r) => r.provider === "bedrock" && r.finishedAt),
+        verified: records.some(
+          (d) =>
+            d.state === "ready" &&
+            d.runs.some(
+              (r) =>
+                r.provider === "bedrock" &&
+                r.finishedAt &&
+                r.verification &&
+                !r.failure,
+            ),
         ),
       },
       storage: process.env.PACKAGECARE_BUCKET ? "AWS" : "local",

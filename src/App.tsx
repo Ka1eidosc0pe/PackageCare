@@ -472,7 +472,10 @@ export default function App() {
                   e.target.value = "";
                 }}
               />
-              {deliveries.some((d) => d.source === "fixture") && (
+              {(d?.source === "fixture" ||
+                (!d &&
+                  deliveries.length > 0 &&
+                  deliveries.every((item) => item.source === "fixture"))) && (
                 <div className="sample-banner">
                   <span className="sample-icon">
                     <Play size={13} />
@@ -1674,6 +1677,7 @@ function Connections({
     [events, setEvents] = useState<any[]>([]),
     [caps, setCaps] = useState<any>(),
     [timestamp, setTimestamp] = useState(""),
+    [selectedEvent, setSelectedEvent] = useState(""),
     [component, setComponent] = useState("");
   return (
     <>
@@ -1788,6 +1792,8 @@ function Connections({
                     setCaps(undefined);
                     setComponent("");
                     setEvents([]);
+                    setTimestamp("");
+                    setSelectedEvent("");
                     if (id)
                       act("events", async () => {
                         const [events, caps] = await Promise.all([
@@ -1849,21 +1855,22 @@ function Connections({
                 <label className="field">
                   Recent recording
                   <select
-                    defaultValue=""
+                    value={selectedEvent}
                     onChange={(e) => {
                       const event = events.find((x) => x.id === e.target.value);
+                      setSelectedEvent(e.target.value);
                       if (event) {
-                        const ts = event.attributes?.timestamp;
-                        if (ts)
-                          setTimestamp(new Date(ts).toISOString().slice(0, 19));
+                        const ts = event.attributes?.start;
+                        if (Number.isFinite(ts) && ts > 0)
+                          setTimestamp(new Date(ts).toISOString().slice(0, -1));
                       }
                     }}
                   >
                     <option value="">Select an event to fill timestamp</option>
                     {events.map((event: any) => (
                       <option key={event.id} value={event.id}>
-                        {event.attributes?.timestamp
-                          ? new Date(event.attributes.timestamp).toISOString()
+                        {event.attributes?.start
+                          ? `${event.attributes.event_type || "Recording"} · ${new Date(event.attributes.start).toISOString()}`
                           : event.id}
                       </option>
                     ))}
@@ -1874,9 +1881,12 @@ function Connections({
                 Recording start (UTC)
                 <input
                   type="datetime-local"
-                  step="1"
+                  step="0.001"
                   value={timestamp}
-                  onChange={(e) => setTimestamp(e.target.value)}
+                  onChange={(e) => {
+                    setTimestamp(e.target.value);
+                    setSelectedEvent("");
+                  }}
                 />
               </label>
               <p className="subtle-copy">
@@ -1894,7 +1904,7 @@ function Connections({
                       body: JSON.stringify({
                         deviceId: device,
                         timestamp: ts,
-                        eventId: `manual-${device}-${ts}`,
+                        eventId: selectedEvent || `manual-${device}-${ts}`,
                         componentId: component || undefined,
                       }),
                     });

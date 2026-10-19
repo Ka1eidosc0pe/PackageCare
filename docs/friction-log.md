@@ -132,7 +132,7 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Tool:** Ring Playground / WHEP integration
 - **Finding:** Organizer clarification confirms three live streams and no custom uploads. Separate authorized footage may accompany actual Playground integration. Link: https://amazonappdev2026.devpost.com/forum_topics/45462-simulator-on-amazon-ring
 - **Actual:** Discovery authenticated with empty event history. After implementing WHEP, the real start request received a successful creation response but our session-Location check rejected it. Exact rejected URL form was not retained; do not attribute the mismatch to a specific provider behavior.
-- **Workaround under validation:** Accept opaque resource IDs/queries within Ring's exact trusted device/session origin/path, keep management URLs inside encrypted session tickets, and log only safe diagnostic booleans if the contract still differs. Real playback remains unverified.
+- **Verified workaround:** Accept opaque resource IDs/queries within Ring's exact trusted device/session origin/path, keep management URLs inside encrypted session tickets, and log only safe diagnostic booleans on rejection. Actual WHEP playback, browser capture and saved playback now work.
 - **Owner friction:** Token generation has a 30-minute cooldown. A server restart clears a token entered in Connections, but an unexpired token can be re-entered. Finish reload-requiring changes before reconnection; preserve an active session.
 - **Submission note:** Separate the verified organizer clarification from our own initial URL-validation assumption.
 
@@ -140,3 +140,14 @@ Record real observations as work proceeds. Severity describes impact on this pro
 
 - **PC-F001:** Customization is now clarified by the organizer: live Package/Vehicle/Motion only, no custom uploads; separate authorized scenario footage is allowed with actual Playground integration. The earlier unauthenticated-reader error no longer blocks this feasibility decision.
 - **PC-F009:** AWS Support work by the owner changed the applied daily quota to 564,480,001. A real two-pass Nova Lite smoke now succeeds. Do not repeat the obsolete zero-quota workaround or infer that a paid-plan upgrade was required; project remains FREE/ACTIVE.
+
+## PC-F012 — normal-app partial model usage was lost on failure
+
+- **Date:** October 19, 2026
+- **Tool:** Our analysis adapter and evaluation harness
+- **Actual:** An approved dense Ring analysis stopped on invalid output before completing observation. Empty runs hid partial responses/usage, preventing reconstruction of actual cost or validation stage.
+- **Correction:** Safe failed-run records retain usage/counts/window/stage. Explicit diagnostic harnesses journal replies before validation, stop on the first failure and reject replay of an invoked plan. Short exact frame aliases map back to immutable evidence IDs; invalid IDs still fail closed.
+- **Evidence:** Meaningful mid-pass failure, budget-boundary, changed-input, checkpoint/replay and supported-action coverage tests pass. A separately approved sparse Ring diagnostic completed both passes and abstained on a package already at rest.
+- **Submission note:** Our observability/contract issue, not a provider defect. The original dense failure cause/cost are unknown; successful sparse output does not establish detection quality.
+
+- **PC-F012 follow-up:** Dense v5 journaling captured seven responses and the exact failure: missing top-level limitations. Prompt v6 treats absent annotations as optional with explicit warnings, while rejecting malformed values and missing critical evidence/action fields. Seven saved replies replay locally without provider calls; live v6 dense processing remains unverified.

@@ -66,6 +66,13 @@ export interface Run {
   usage?: Record<string, number>;
   proposal?: Analysis;
   verification?: Analysis;
+  failure?: {
+    stage: "tool" | "schema" | "evidence" | "truncated" | "processing";
+    window?: number;
+    attemptedRequests: number;
+    receivedResponses: number;
+    issues?: { path: (string | number)[]; code: string }[];
+  };
 }
 export interface Review {
   decisions: Record<

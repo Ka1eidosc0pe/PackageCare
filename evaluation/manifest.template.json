@@ -3,72 +3,84 @@
     "id": "normal-01",
     "file": "clips/normal-01.mp4",
     "expected": "no_concern_observed",
-    "split": "development"
+    "split": "development",
+    "source": "uploaded"
   },
   {
     "id": "normal-02",
     "file": "clips/normal-02.mp4",
     "expected": "no_concern_observed",
-    "split": "development"
+    "split": "development",
+    "source": "uploaded"
   },
   {
     "id": "normal-03",
     "file": "clips/normal-03.mp4",
     "expected": "no_concern_observed",
-    "split": "held_out"
+    "split": "held_out",
+    "source": "uploaded"
   },
   {
     "id": "normal-04",
     "file": "clips/normal-04.mp4",
     "expected": "no_concern_observed",
-    "split": "held_out"
+    "split": "held_out",
+    "source": "uploaded"
   },
   {
     "id": "rough-01",
     "file": "clips/rough-01.mp4",
     "expected": "possible_rough_handling",
-    "split": "development"
+    "split": "development",
+    "source": "uploaded"
   },
   {
     "id": "rough-02",
     "file": "clips/rough-02.mp4",
     "expected": "possible_rough_handling",
-    "split": "development"
+    "split": "development",
+    "source": "uploaded"
   },
   {
     "id": "rough-03",
     "file": "clips/rough-03.mp4",
     "expected": "possible_rough_handling",
-    "split": "held_out"
+    "split": "held_out",
+    "source": "uploaded"
   },
   {
     "id": "rough-04",
     "file": "clips/rough-04.mp4",
     "expected": "possible_rough_handling",
-    "split": "held_out"
+    "split": "held_out",
+    "source": "uploaded"
   },
   {
     "id": "unclear-01",
     "file": "clips/unclear-01.mp4",
     "expected": "unable_to_assess",
-    "split": "development"
+    "split": "development",
+    "source": "uploaded"
   },
   {
     "id": "unclear-02",
     "file": "clips/unclear-02.mp4",
     "expected": "unable_to_assess",
-    "split": "development"
+    "split": "development",
+    "source": "uploaded"
   },
   {
     "id": "unclear-03",
     "file": "clips/unclear-03.mp4",
     "expected": "unable_to_assess",
-    "split": "held_out"
+    "split": "held_out",
+    "source": "uploaded"
   },
   {
     "id": "unclear-04",
     "file": "clips/unclear-04.mp4",
     "expected": "unable_to_assess",
-    "split": "held_out"
+    "split": "held_out",
+    "source": "uploaded"
   }
 ]

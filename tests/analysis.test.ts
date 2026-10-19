@@ -4,6 +4,8 @@ import { MediaStore } from "../server/media.js";
 import { PackageCare } from "../server/service.js";
 import { LocalStore } from "../server/store.js";
 import { delivery, analysis } from "./fixtures.js";
+import { createApp } from "../server/app.js";
+import request from "supertest";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -61,7 +63,8 @@ describe("analysis input contracts", () => {
         if (c.text?.startsWith("Evidence ID "))
           cited.add(c.text.split(";")[0].slice(12));
     }
-    expect(cited.size).toBe(13);
+    expect([...cited].sort()).toEqual(["f1", "f2", "f3", "f4", "f5"]);
+    expect(new Set(result.run.inputAssetIds).size).toBe(13);
     expect(result.run.usage?.inputTokens).toBe(300);
     expect(result.analysis.assessment).toBe("unable_to_assess");
     expect(result.analysis.summary).toContain("does not support");
@@ -197,7 +200,7 @@ describe("analysis input contracts", () => {
                   concern: true,
                   startMs: 0,
                   endMs: 1000,
-                  evidenceIds: [d.assets[1].id],
+                  evidenceIds: ["f1"],
                 },
               ],
               limitations: [],
@@ -211,8 +214,51 @@ describe("analysis input contracts", () => {
       startMs: 2400,
       endMs: 2400,
       concern: false,
+      evidenceIds: [d.assets[1].id],
     });
     expect(result.analysis.assessment).toBe("unable_to_assess");
+  });
+  it("retains valid evidence when optional limitation annotations are omitted, visibly marks the omission, and still rejects missing action fields", async () => {
+    const media = new MediaStore("/tmp/not-used");
+    vi.spyOn(media, "read").mockResolvedValue(Buffer.from("test-image"));
+    const adapter = new BedrockAnalyzer(
+      media,
+      "amazon.nova-lite-v1:0",
+      "sparse_frames",
+    );
+    const observation = {
+      label: "package_at_rest",
+      description: "A package rests on the step.",
+      evidenceIds: ["f1"],
+      verification: "supported",
+    };
+    const send = vi.spyOn(adapter.client, "send").mockResolvedValue({
+      output: { message: { content: [tool({ observations: [observation] })] } },
+    } as never);
+    const result = await adapter.analyze(delivery(), "observe");
+    expect(result.analysis.assessment).toBe("unable_to_assess");
+    expect(result.analysis.limitations).toContain(
+      "The model omitted clip-level limitations; review visibility and sampling.",
+    );
+    expect(result.analysis.observations[0].limitations).toContain(
+      "The model omitted observation-level limitations; review visibility and sampling.",
+    );
+    expect(result.analysis.observations[0].evidenceIds).toEqual([
+      delivery().assets[1].id,
+    ]);
+    send.mockResolvedValue({
+      output: {
+        message: {
+          content: [
+            tool({ observations: [{ ...observation, label: undefined }] }),
+          ],
+        },
+      },
+    } as never);
+    await expect(adapter.analyze(delivery(), "observe")).rejects.toMatchObject({
+      diagnostic: { stage: "schema" },
+    });
+    expect(send).toHaveBeenCalledTimes(2);
   });
   it("rejects a text reply when the structured evidence response is missing", async () => {
     const media = new MediaStore("/tmp/not-used");
@@ -231,6 +277,121 @@ describe("analysis input contracts", () => {
   });
 });
 describe("job outcomes", () => {
+  it("persists all returned usage and safe diagnostics for a mid-pass failure without claiming verification or retrying", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "pc-failed-pass-"));
+    try {
+      const media = new MediaStore(root),
+        d = delivery();
+      d.state = "received";
+      d.analysis = undefined;
+      d.assets = [
+        d.assets[0],
+        ...Array.from({ length: 13 }, (_, i) => ({
+          ...d.assets[1],
+          id: `source-${i}`,
+          offsetMs: 200 + i * 500,
+        })),
+      ];
+      vi.spyOn(media, "read").mockResolvedValue(Buffer.from("frame"));
+      const analyzer = new BedrockAnalyzer(
+        media,
+        "amazon.nova-lite-v1:0",
+        "dense_frames",
+      );
+      const send = vi
+        .spyOn(analyzer.client, "send")
+        .mockResolvedValueOnce({
+          output: {
+            message: { content: [tool({ observations: [], limitations: [] })] },
+          },
+          usage: { inputTokens: 100, outputTokens: 20 },
+        } as never)
+        .mockResolvedValueOnce({
+          output: {
+            message: {
+              content: [
+                tool({
+                  observations: [
+                    {
+                      ...analysis.observations[0],
+                      evidenceIds: ["f99"],
+                      description:
+                        "raw reply must stay out of the failure record",
+                    },
+                  ],
+                  limitations: [],
+                }),
+              ],
+            },
+          },
+          usage: { inputTokens: 200, outputTokens: 30 },
+        } as never);
+      const service = new PackageCare(
+        new LocalStore(root),
+        media,
+        undefined,
+        analyzer,
+      );
+      await service.store.change(d.id, () => d);
+      await service.process(d.id);
+      const saved = await new LocalStore(root).get(d.id);
+      expect(saved?.state).toBe("failed");
+      expect(saved?.analysis).toBeUndefined();
+      expect(saved?.runs).toHaveLength(1);
+      expect(saved?.runs[0]).toMatchObject({
+        usage: { inputTokens: 300, outputTokens: 50 },
+        failure: {
+          stage: "evidence",
+          window: 1,
+          attemptedRequests: 2,
+          receivedResponses: 2,
+        },
+      });
+      expect(JSON.stringify(saved)).not.toContain("raw reply must");
+      expect(send).toHaveBeenCalledTimes(2);
+      const status = await request(createApp(service))
+        .get("/api/status")
+        .expect(200);
+      expect(status.body.analysis.verified).toBe(false);
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
+  it("enforces a request boundary before dispatch and retains usage from earlier windows", async () => {
+    const media = new MediaStore("/tmp/not-used"),
+      d = delivery();
+    d.assets = [
+      d.assets[0],
+      ...Array.from({ length: 8 }, (_, i) => ({
+        ...d.assets[1],
+        id: `source-${i}`,
+        offsetMs: 200 + i * 500,
+      })),
+    ];
+    vi.spyOn(media, "read").mockResolvedValue(Buffer.from("frame"));
+    let authorized = 0;
+    const adapter = new BedrockAnalyzer(
+      media,
+      "amazon.nova-lite-v1:0",
+      "dense_frames",
+      undefined,
+      async () => {
+        if (authorized >= 1)
+          throw new Error("Approved request boundary reached");
+        authorized++;
+      },
+    );
+    const send = vi.spyOn(adapter.client, "send").mockResolvedValue({
+      output: {
+        message: { content: [tool({ observations: [], limitations: [] })] },
+      },
+      usage: { inputTokens: 100, outputTokens: 20 },
+    } as never);
+    await expect(adapter.analyze(d, "observe")).rejects.toThrow(
+      "request boundary",
+    );
+    expect(send).toHaveBeenCalledTimes(1);
+  });
   it.each([
     {
       name: "Error",

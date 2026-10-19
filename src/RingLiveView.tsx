@@ -22,14 +22,19 @@ export function RingLiveView({
     session = useRef<Session | null>(null),
     generation = useRef(0),
     recorder = useRef<MediaRecorder | null>(null),
-    discard = useRef(false);
+    discard = useRef(false),
+    autoCapture = useRef(false);
   const [phase, setPhase] = useState("idle"),
     [error, setError] = useState(""),
     [remaining, setRemaining] = useState(0),
-    [recorded, setRecorded] = useState(0);
+    [recorded, setRecorded] = useState(0),
+    [mediaReady, setMediaReady] = useState(false);
   const close = async () => {
+    setRemaining(0);
+    setMediaReady(false);
     generation.current++;
     discard.current = true;
+    autoCapture.current = false;
     if (recorder.current?.state === "recording") recorder.current.stop();
     recorder.current = null;
     peer.current?.getReceivers().forEach((r) => r.track?.stop());
@@ -57,6 +62,10 @@ export function RingLiveView({
   }, [remaining]);
   useEffect(() => {
     if (remaining === 0 && session.current && phase !== "saving") {
+      if (recorder.current) {
+        if (recorder.current.state === "recording") recorder.current.stop();
+        return;
+      }
       void close().catch(() =>
         setError(
           "The stream will close automatically at Ring's session limit.",
@@ -65,10 +74,12 @@ export function RingLiveView({
       setPhase("idle");
     }
   }, [remaining, phase]);
-  const start = async () => {
+  const start = async (capture = false) => {
     setError("");
+    setMediaReady(false);
     setPhase("connecting");
     await close().catch(() => {});
+    autoCapture.current = capture;
     const run = ++generation.current;
     try {
       if (!window.RTCPeerConnection)
@@ -86,8 +97,16 @@ export function RingLiveView({
       pc.onconnectionstatechange = () => {
         if (run !== generation.current) return;
         if (pc.connectionState === "failed") {
+          // Let MediaRecorder flush already received footage before closing the
+          // session. A network interruption is not a recipient cancellation.
+          if (recorder.current) {
+            setError("The stream ended early. Saving the footage received.");
+            if (recorder.current.state === "recording") recorder.current.stop();
+            pc.close();
+            return;
+          }
           setError(
-            "Ring's live stream could not connect. Check your network and start a new live view.",
+            "Ring's live stream ended. Check your network and start a new live view.",
           );
           void close().catch(() => {});
           setPhase("idle");
@@ -127,10 +146,10 @@ export function RingLiveView({
         return;
       }
       session.current = result;
+      setRemaining(result.viewSeconds);
       await pc.setRemoteDescription({ type: "answer", sdp: result.answer });
       if (run !== generation.current) return;
-      setRemaining(result.viewSeconds);
-      setPhase("live");
+      setPhase(recorder.current ? "recording" : "live");
     } catch (error) {
       if (run === generation.current) {
         setError(
@@ -161,6 +180,7 @@ export function RingLiveView({
     const run = generation.current,
       chunks: Blob[] = [];
     discard.current = false;
+    let captureTimer: number | undefined;
     try {
       const rec = new MediaRecorder(stream, {
         mimeType: mime,
@@ -169,11 +189,11 @@ export function RingLiveView({
       recorder.current = rec;
       let bytes = 0,
         elapsed = 0;
-      const timer = window.setInterval(() => {
+      const timer = (captureTimer = window.setInterval(() => {
         elapsed++;
         setRecorded(elapsed);
         if (elapsed >= 12 && rec.state === "recording") rec.stop();
-      }, 1000);
+      }, 1000));
       rec.ondataavailable = (event) => {
         if (event.data.size) {
           chunks.push(event.data);
@@ -191,12 +211,12 @@ export function RingLiveView({
       rec.onerror = () => {
         discard.current = true;
         window.clearInterval(timer);
+        recorder.current = null;
         setPhase("live");
         setError("The browser could not record this stream.");
       };
       rec.onstop = async () => {
         window.clearInterval(timer);
-        recorder.current = null;
         if (discard.current || run !== generation.current) return;
         setPhase("saving");
         try {
@@ -229,6 +249,9 @@ export function RingLiveView({
       setRecorded(0);
       setPhase("recording");
     } catch {
+      window.clearInterval(captureTimer);
+      recorder.current = null;
+      setPhase("live");
       setError("The browser could not start recording this stream.");
     }
   };
@@ -253,7 +276,12 @@ export function RingLiveView({
           playsInline
           muted
           onPlaying={() => {
+            setMediaReady(true);
             if (phase === "live") setError("");
+            if (autoCapture.current) {
+              autoCapture.current = false;
+              record();
+            }
           }}
         />
         {phase === "idle" && (
@@ -276,13 +304,22 @@ export function RingLiveView({
       )}
       <div className="inline-actions">
         {phase === "idle" ? (
-          <button
-            className="button primary"
-            disabled={disabled || !deviceId}
-            onClick={() => void start()}
-          >
-            <Play size={15} /> Start live view
-          </button>
+          <>
+            <button
+              className="button primary"
+              disabled={disabled || !deviceId}
+              onClick={() => void start()}
+            >
+              <Play size={15} /> Start live view
+            </button>
+            <button
+              className="button primary"
+              disabled={disabled || !deviceId}
+              onClick={() => void start(true)}
+            >
+              <Camera size={15} /> Capture 12-second clip
+            </button>
+          </>
         ) : (
           <button
             className="button"
@@ -300,7 +337,7 @@ export function RingLiveView({
         {phase === "live" && (
           <button
             className="button primary"
-            disabled={remaining < 13}
+            disabled={remaining < 13 || !mediaReady}
             onClick={record}
           >
             <Camera size={15} /> Save 12-second clip

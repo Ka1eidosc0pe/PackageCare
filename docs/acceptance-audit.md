@@ -1,12 +1,12 @@
 # PackageCare acceptance audit
 
-Updated October 19, 2026. Read this alongside `prd.md` and `progress.md`. This is a requirement-to-evidence map, not a claim that the hackathon entry is complete. The owner has connected Ring and AWS credentials. Authentication and real two-pass synthetic model invocation now work. Actual Ring stream playback/capture, labeled model quality and deployment remain pending. See `live-validation-2026-10-19.md`. Explicit approval is required before any potentially billable operation.
+Updated October 19, 2026. Read this alongside `prd.md` and `progress.md`. This is a requirement-to-evidence map, not a claim that the hackathon entry is complete. The owner has connected Ring and AWS credentials. Authentication and real two-pass synthetic model invocation now work. Actual Ring WHEP playback/capture and a two-pass sparse real-source diagnostic now work. Dense processing, labeled model quality and deployment remain pending. See `live-validation-2026-10-19.md`. Explicit approval is required before any potentially billable operation.
 
 ## Agreed MVP (PRD §3.1)
 
 | Requirement | Evidence now | What remains |
 |---|---|---|
-| 1. Working accepted Ring source | Real authenticated discovery of one simulator, capabilities/history HTTP 200; no events available | Gate A: actual WHEP playback/capture. Organizer clarified live scenarios, no custom uploads, separate authorized footage allowed |
+| 1. Working accepted Ring source | Real authenticated discovery, WHEP playback, saved browser capture and playback; live sessions create history events | Native download/event delivery and handling-quality footage remain unverified. Organizer permits separate authorized footage alongside Ring integration |
 | 2. Ordered visual handling analysis | Real media extraction tests; dense/sparse/native adapters; input-window and chronological-reference tests | Gate B: connectivity/schema smoke succeeded; labeled real clips, measured quality and strategy selection pending |
 | 3. Linked handling timeline | Browser playback and timeline seek verified; source offsets validated | Verify with actual Ring/model output |
 | 4. Supported rough-handling flags | Structured schema, evidence verification and recipient-review path implemented; synthetic concern journey verified | Useful real-world drop/throw detection is unproven |
@@ -48,11 +48,11 @@ Updated October 19, 2026. Read this alongside `prd.md` and `progress.md`. This i
 ## Reproduction, design and deliverables
 
 - `npm ci --ignore-scripts`, build, tests and infrastructure synthesis run in CI. Local production start and generated samples were browser-verified. `npm run maintenance` is dry-run-first and reported zero expired cases/orphans in the current workspace.
-- `npm run fixtures` creates original labeled synthetic footage. `ring:probe` and `evaluate` are ready for authorized accounts; neither has produced live provider validation or performance metrics.
+- `npm run fixtures` creates original labeled synthetic footage. `ring:probe` and the prepare-first `evaluate` harness support bounded validation. Two-request sparse v5 diagnostic succeeded on a Ring capture already at rest; it does not establish model quality.
 - Desktop/mobile journeys, source playback, timeline seeking, unsaved-change protection, keyboard dialog focus and report download were checked. New failure-state layouts also had document width equal to the 1440/390-pixel viewports. Screenshots live outside source control.
 - Private GitHub repository, incremental commits, README, PRD, deployment/validation notes and development/friction logs exist. Required reviewer invitations are not sent.
 - A 12-scene capture/labeling plan and empty-data manifest template are prepared. The initial 12-clip labeled evaluation set, held-out comparison, observed latency/usage/cost, actual AWS demo, final per-tool feedback, public demo video, eligibility/registration and final submission are outstanding. See `submission.md`.
 
 ## Completion decision
 
-The full objective is **not achieved**. Gate A has authenticated discovery/capabilities/history evidence but no usable recording yet. Gate B connectivity/schema is verified on synthetic input; real-footage quality and live AWS/submission requirements remain unverified. Synthetic scenarios and simulated transports establish product/contract behavior only. Continue from these external gates after the necessary footage and spending approval are available; do not replace them with scripted demonstrations or infer accuracy from the passing test count.
+The full objective is **not achieved**. Gate A has real WHEP playback and saved browser-source evidence; the captured Package clip does not show the handling action. Gate B connectivity/schema is verified on synthetic input; real-footage quality and live AWS/submission requirements remain unverified. Synthetic scenarios and simulated transports establish product/contract behavior only. Continue from these external gates after the necessary footage and spending approval are available; do not replace them with scripted demonstrations or infer accuracy from the passing test count.
