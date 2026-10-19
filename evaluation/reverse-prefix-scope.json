@@ -1,0 +1,86 @@
+{
+  "purpose": "Offline prefix completion from EVERY automatically accepted later detector seed, before its seed frame only. Future-conditioned predictions explicitly labeled. Original forward predictions retained. No manual selection, live-detection claim, handling classification, training or cloud calls.",
+  "planSha256": "4f0964f71c4a49faae16940d2801736ed67edab59a132637591fa5ee80aa4caa",
+  "parentPlanSha256": "005d4b183f9c85cb0c4f4d4dc17ba459f3c228cc6ecf496517e8aab04bf4f712",
+  "parentResultsSha256": "b717a2bf322a66a586d3fffc7231d18f4066d2535e832354e8bda0d8004f1500",
+  "validationAnnotationSha256": "9fc761fb304d74084d725a415a7bb8e811ce1944de9ea16471dc3197bd1d1c9e",
+  "model": "facebook/sam2.1-hiera-tiny",
+  "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
+  "device": "mps",
+  "direction": "reverse_prefix",
+  "mergePolicy": "preserve_forward_add_unique_v1",
+  "seedPolicy": {
+    "kind": "mask_agreement_v1",
+    "minimumIou": 0.6,
+    "ambiguityMargin": 0.1,
+    "minimumPresenceLogit": 0
+  },
+  "jobs": [
+    {
+      "case": 0,
+      "objectId": 2,
+      "frameIndex": 5,
+      "frameId": "c31e6857-41ed-43fd-8340-4ed1879ef644",
+      "offsetMs": 1375,
+      "box": [
+        367.82318115234375,
+        315.7760925292969,
+        393.88311767578125,
+        337.86138916015625
+      ],
+      "score": 0.38683298230171204,
+      "label": "cardboard box"
+    },
+    {
+      "case": 1,
+      "objectId": 3,
+      "frameIndex": 2,
+      "frameId": "00c62375-47d7-4fdb-857f-d32f67c85288",
+      "offsetMs": 620,
+      "box": [
+        59.533424377441406,
+        353.19610595703125,
+        309.6593017578125,
+        477.0585632324219
+      ],
+      "score": 0.34161612391471863,
+      "label": "parcel"
+    },
+    {
+      "case": 1,
+      "objectId": 7,
+      "frameIndex": 12,
+      "frameId": "dc7c4ef1-3467-4759-8717-e822fd93b0aa",
+      "offsetMs": 3102,
+      "box": [
+        53.62987518310547,
+        1.0966157913208008,
+        1089.2298583984375,
+        590.6039428710938
+      ],
+      "score": 0.3556833267211914,
+      "label": "parcel"
+    },
+    {
+      "case": 1,
+      "objectId": 8,
+      "frameIndex": 14,
+      "frameId": "8186fc3b-ee8f-4a18-b8c9-6cd57b50dba0",
+      "offsetMs": 3599,
+      "box": [
+        3.9078903198242188,
+        2.6411819458007812,
+        1275.317138671875,
+        716.6190185546875
+      ],
+      "score": 0.48654472827911377,
+      "label": "cardboard box"
+    }
+  ],
+  "maximumReverseCalls": 37,
+  "training": false,
+  "cloudCalls": false,
+  "mpsFallback": false,
+  "automaticRetries": 0,
+  "developmentReuse": "Same two additional sources, reused after the forward findings; not held out. No label/box content enters inference, annotations unchanged."
+}

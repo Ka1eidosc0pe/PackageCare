@@ -91,3 +91,22 @@ python3 experiments/local_cv/score_tracking.py \
 ```
 
 Use `--mode detection` with the detector plan/run directory for box-only coverage. The annotation digest must have been sealed in the inference plan before invocation and must match the receipt; the scorer refuses missing/reordered/changed evidence and existing score outputs. Single-agent approximate visual annotations are provisional, not independently adjudicated truth. Unscorable frames remain explicit. No handling verdict is produced.
+
+## Offline prefix completion
+
+[Frozen reverse-tracking experiment](../../docs/reverse-tracking.md) reuses an already completed forward run, considering every accepted later seed and completing earlier frames only. It makes no new detector calls and explicitly labels predictions conditioned on later footage. It is not a live detection claim.
+
+```sh
+python3 experiments/local_cv/reverse_prefix.py prepare \
+  --forward-plan /absolute/path/to/forward/plan.json \
+  --forward-run /absolute/path/to/forward/attempt-1 \
+  --output /absolute/path/to/new-completion-scope
+
+# Exact digest and call count come from preparation; local MPS only.
+data/cv-env/bin/python experiments/local_cv/reverse_prefix.py run \
+  --plan /absolute/path/to/new-completion-scope/plan.json \
+  --plan-sha256 PREPARATION_DIGEST --model-dir data/local-sam2-model \
+  --output /absolute/path/to/new-completion-scope/attempt-1
+```
+
+At most 128 local single-object calls per prepared completion batch; the actual frozen two-source scope has 37. Original forward masks/objects are preserved, reverse raw masks saved separately, and possible duplicates withheld from the derived view using the existing policy. Unavailable MPS/unsupported operations stop without fallback/retry. Use the same `score_tracking.py --mode tracking` and `review_masks.py` on the new derived run; added masks identify their later seed offset. No ML inference is added to CI.

@@ -64,6 +64,20 @@ def main():
                         overlay[mask] = [80, 240, 145, 115]
                         im = Image.alpha_composite(im, Image.fromarray(overlay))
                         note = "predicted mask" if mask.any() else "no mask"
+                        saved_frame = next(
+                            x
+                            for x in results["frames"]
+                            if x["case"] == args.case and x["frameIndex"] == fi
+                        )
+                        metadata = next(
+                            o
+                            for o in saved_frame["objects"]
+                            if o["objectId"] == identity
+                        )
+                        if metadata.get("temporalDirection") == "backward":
+                            note = (
+                                f"backward; seed {metadata['conditionedOnOffsetMs']}ms"
+                            )
             im.thumbnail((344, 196))
             tile = Image.new("RGB", (344, 226), "#111820")
             tile.paste(im, (0, 28))

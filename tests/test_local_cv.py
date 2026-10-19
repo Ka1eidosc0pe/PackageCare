@@ -1,6 +1,7 @@
 """Input-integrity checks only; no CV packages, model downloads or inference."""
 
 import hashlib
+import copy
 import json
 from pathlib import Path
 import tempfile
@@ -11,6 +12,7 @@ from experiments.local_cv.associate import associate
 from experiments.local_cv.prepare_tracking import prepare_tracking
 from experiments.local_cv.seed_policy import select_new_seeds
 from experiments.local_cv.score_tracking import score, POLICY
+from experiments.local_cv.reverse_prefix import derive_jobs, merge_prefix_object
 
 
 class LocalCvPreparation(unittest.TestCase):
@@ -166,6 +168,96 @@ class LocalCvTrackingPreparation(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Frame/case/time mismatch"):
                 prepare_tracking(source, root / "rejected")
             self.assertFalse((root / "rejected").exists())
+
+
+class ReversePrefixIntegrity(unittest.TestCase):
+    def fixture(self):
+        cases, result = [], []
+        for ci in range(2):
+            frames = [{"id": f"c{ci}-f{i}", "offsetMs": i * 250} for i in range(4)]
+            seeds = [
+                {
+                    "objectId": j + 1,
+                    "frameIndex": j,
+                    "frameId": frames[j]["id"],
+                    "offsetMs": frames[j]["offsetMs"],
+                    "box": [j * 10, 0, j * 10 + 5, 5],
+                }
+                for j in range(4)
+            ]
+            cases.append({"frames": frames, "seeds": seeds})
+            for fi, frame in enumerate(frames):
+                # Keep all accepted candidates, including a generic background candidate;
+                # seed 4 was spatially suppressed by the completed forward policy.
+                result.append(
+                    {
+                        **frame,
+                        "case": ci,
+                        "frameIndex": fi,
+                        "seededObjectIds": [fi + 1] if fi < 3 else [],
+                        "objects": [
+                            {"objectId": identity}
+                            for identity in range(1, min(fi + 2, 4))
+                        ],
+                    }
+                )
+        return {"cases": cases}, {"state": "complete", "frames": result}
+
+    def test_every_accepted_later_seed_is_used_without_a_manual_target(self):
+        plan, result = self.fixture()
+        jobs = derive_jobs(plan, result)
+        self.assertEqual(
+            [(j["case"], j["objectId"], j["frameIndex"]) for j in jobs],
+            [(0, 2, 1), (0, 3, 2), (1, 2, 1), (1, 3, 2)],
+        )
+        self.assertEqual(sum(j["frameIndex"] + 1 for j in jobs), 10)
+
+    def test_retiming_or_preseed_prediction_cannot_create_reverse_jobs(self):
+        plan, result = self.fixture()
+        changed = copy.deepcopy(result)
+        changed["frames"][1]["seededObjectIds"] = [3]
+        with self.assertRaisesRegex(ValueError, "retimed"):
+            derive_jobs(plan, changed)
+        changed = copy.deepcopy(result)
+        changed["frames"][0]["objects"].append({"objectId": 3})
+        with self.assertRaisesRegex(ValueError, "before its seed"):
+            derive_jobs(plan, changed)
+
+    def test_addition_discloses_future_seed_and_cannot_overwrite_forward(self):
+        frame = {"offsetMs": 125, "objects": []}
+        candidate = {
+            "objectId": 2,
+            "box": [10, 10, 20, 20],
+            "areaPixels": 100,
+            "objectScoreLogit": 4,
+        }
+        added, _ = merge_prefix_object(frame, candidate, 1375)
+        self.assertTrue(added)
+        self.assertEqual(frame["objects"][0]["conditionedOnOffsetMs"], 1375)
+        self.assertEqual(frame["objects"][0]["temporalDirection"], "backward")
+        with self.assertRaisesRegex(ValueError, "overwrite"):
+            merge_prefix_object(frame, candidate, 1375)
+        with self.assertRaisesRegex(ValueError, "overwrite"):
+            merge_prefix_object({"offsetMs": 1375, "objects": []}, candidate, 1375)
+
+    def test_duplicate_or_invisible_prefix_never_removes_forward_evidence(self):
+        original = {
+            "objectId": 1,
+            "box": [10, 10, 20, 20],
+            "areaPixels": 100,
+            "objectScoreLogit": 4,
+        }
+        frame = {"offsetMs": 125, "objects": [copy.deepcopy(original)]}
+        added, decision = merge_prefix_object(frame, {**original, "objectId": 2}, 1375)
+        self.assertFalse(added)
+        self.assertEqual(decision["possibleDuplicateOf"], 1)
+        self.assertEqual(frame["objects"], [original])
+        added, decision = merge_prefix_object(
+            frame, {**original, "objectId": 2, "objectScoreLogit": -1}, 1375
+        )
+        self.assertFalse(added)
+        self.assertEqual(decision["decision"], "not_visible")
+        self.assertEqual(frame["objects"], [original])
 
 
 class TrackingScores(unittest.TestCase):
