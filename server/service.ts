@@ -162,6 +162,94 @@ export class PackageCare {
     if (created) await this.dispatch(id);
     return d;
   }
+  async saveLiveCapture(
+    bytes: Buffer,
+    session: {
+      id: string;
+      deviceId: string;
+      componentId?: string;
+      startedAt: number;
+    },
+  ) {
+    const current = await this.store.get(session.id);
+    if (current) {
+      if (
+        current.assets[0]?.sha256 !==
+        createHash("sha256").update(bytes).digest("hex")
+      )
+        throw Object.assign(
+          new Error("A different clip was already saved for this session."),
+          { status: 409 },
+        );
+      return current;
+    }
+    const mime = videoMime(bytes);
+    const asset = await this.media.put(
+      bytes,
+      `original-ring-live-capture.${mime === "video/webm" ? "webm" : "mp4"}`,
+      mime,
+      "video",
+    );
+    try {
+      const saved = await this.store.change(session.id, (existing) => {
+        if (existing) {
+          if (existing.assets[0]?.sha256 !== asset.sha256)
+            throw Object.assign(
+              new Error("A different clip was already saved for this session."),
+              { status: 409 },
+            );
+          return existing;
+        }
+        return {
+          id: session.id,
+          revision: 0,
+          source:
+            process.env.RING_SOURCE_TYPE === "ring_device"
+              ? "ring_device"
+              : "ring_simulator",
+          deviceId: session.deviceId,
+          componentId: session.componentId,
+          title: "Ring live capture",
+          camera: "Ring live view",
+          observedAt: new Date(session.startedAt).toISOString(),
+          createdAt: new Date().toISOString(),
+          durationMs: 0,
+          state: "awaiting_analysis",
+          assets: [asset],
+          runs: [],
+          reports: [],
+          review: emptyReview(),
+          capture: {
+            method: "browser_recording",
+            sessionId: session.id,
+            startedAt: new Date(session.startedAt).toISOString(),
+          },
+        };
+      });
+      if (!saved.assets.some((a) => a.id === asset.id))
+        await this.media.remove(asset);
+      return saved;
+    } catch (error) {
+      if (
+        !(await this.store.get(session.id))?.assets.some(
+          (a) => a.id === asset.id,
+        )
+      )
+        await this.media.remove(asset);
+      throw error;
+    }
+  }
+  async startAnalysis(id: string) {
+    await this.store.change(id, (current) => {
+      const d = required(current);
+      if (d.state !== "awaiting_analysis")
+        throw Object.assign(new Error("This clip is not awaiting analysis."), {
+          status: 409,
+        });
+      return { ...d, state: "received" };
+    });
+    await this.dispatch(id);
+  }
   async addPhoto(id: string, bytes: Buffer, assetId?: string) {
     const current = await this.get(id);
     if (assetId && current.assets.some((a) => a.id === assetId)) return current;
@@ -320,7 +408,7 @@ export class PackageCare {
   async retrieve(id: string) {
     const d = await this.get(id);
     if (d.durationMs > 0 && d.assets.some((a) => a.kind === "video")) return;
-    if (d.source === "uploaded") {
+    if (d.source === "uploaded" || d.capture?.method === "browser_recording") {
       const original = d.assets.find((a) => a.kind === "video");
       if (!original)
         throw new Error(

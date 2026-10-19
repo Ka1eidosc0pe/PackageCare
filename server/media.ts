@@ -185,8 +185,38 @@ export async function inspectVideo(file: string) {
     ],
     { timeout: 15000, maxBuffer: 100000 },
   );
-  const info = JSON.parse(stdout),
-    durationMs = Math.round(Number(info.format?.duration) * 1000);
+  const info = JSON.parse(stdout);
+  let durationMs = Math.round(Number(info.format?.duration) * 1000);
+  // MediaRecorder's streaming WebM often has no Duration header. Read bounded
+  // packet timestamps instead of rejecting an otherwise playable live capture.
+  if (
+    !Number.isFinite(durationMs) &&
+    info.streams?.some((s: any) => s.codec_type === "video")
+  ) {
+    const packets = await run(
+      process.env.FFPROBE_PATH || "ffprobe",
+      [
+        "-v",
+        "error",
+        "-protocol_whitelist",
+        "file,pipe",
+        "-select_streams",
+        "v:0",
+        "-read_intervals",
+        "%+61",
+        "-show_entries",
+        "packet=pts_time,duration_time",
+        "-of",
+        "json",
+        file,
+      ],
+      { timeout: 15000, maxBuffer: 4 * 1024 * 1024 },
+    );
+    const ends = (JSON.parse(packets.stdout).packets || [])
+      .map((p: any) => Number(p.pts_time) + (Number(p.duration_time) || 0))
+      .filter(Number.isFinite);
+    durationMs = Math.round(Math.max(...ends) * 1000);
+  }
   if (
     !Number.isFinite(durationMs) ||
     durationMs < 500 ||

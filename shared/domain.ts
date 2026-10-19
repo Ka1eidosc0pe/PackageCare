@@ -8,6 +8,7 @@ export const assessmentSchema = z.enum([
 export type Assessment = z.infer<typeof assessmentSchema>;
 export type Source = "fixture" | "uploaded" | "ring_simulator" | "ring_device";
 export type State =
+  | "awaiting_analysis"
   | "received"
   | "waiting_for_media"
   | "analyzing"
@@ -93,6 +94,7 @@ export interface Report {
     observedAt: string;
     durationMs: number;
     eventId?: string;
+    capture?: Delivery["capture"];
   };
   analysis: Analysis;
   review: Review;
@@ -105,6 +107,11 @@ export interface Delivery {
   eventId?: string;
   deviceId?: string;
   componentId?: string;
+  capture?: {
+    method: "browser_recording";
+    sessionId: string;
+    startedAt: string;
+  };
   workflowExecutionArn?: string;
   workflowGeneration?: string;
   source: Source;

@@ -35,5 +35,7 @@ export function processingErrorMessage(error: {
     return /tokens per day|daily/i.test(error.message || "")
       ? "Bedrock's daily token quota is unavailable or exhausted. Check Amazon Bedrock quotas in us-east-2 before retrying."
       : "Bedrock is rate limited. Check the model's quotas before retrying.";
+  if (error?.name === "ModelOutputError")
+    return "Bedrock returned an invalid evidence response. No assessment was saved. Review model diagnostics before retrying.";
   return "Processing failed. Check account access, media format, and server logs; then retry.";
 }

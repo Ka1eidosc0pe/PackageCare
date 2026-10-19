@@ -7,6 +7,9 @@ import { delivery, analysis } from "./fixtures.js";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+const tool = (input: unknown) => ({
+  toolUse: { name: "record_evidence", toolUseId: "test-tool", input },
+});
 describe("analysis input contracts", () => {
   it("covers every dense frame in chronological windows without exceeding model image limits", async () => {
     const media = new MediaStore("/tmp/not-used");
@@ -32,15 +35,7 @@ describe("analysis input contracts", () => {
         return {
           output: {
             message: {
-              content: [
-                {
-                  text: JSON.stringify({
-                    ...analysis,
-                    observations: [],
-                    assessment: "unable_to_assess",
-                  }),
-                },
-              ],
+              content: [tool({ observations: [], limitations: [] })],
             },
           },
           usage: { inputTokens: 100, outputTokens: 20 },
@@ -51,6 +46,9 @@ describe("analysis input contracts", () => {
     expect(calls).toHaveLength(3);
     const cited = new Set<string>();
     for (const call of calls) {
+      expect(call.toolConfig.toolChoice).toEqual({
+        tool: { name: "record_evidence" },
+      });
       const content = call.messages[0].content;
       expect(content.filter((c: any) => c.image).length).toBeLessThanOrEqual(5);
       const offsets = content
@@ -79,11 +77,12 @@ describe("analysis input contracts", () => {
       bad = structuredClone(analysis);
     bad.observations[0].evidenceIds = ["invented"];
     vi.spyOn(adapter.client, "send").mockResolvedValue({
-      output: { message: { content: [{ text: JSON.stringify(bad) }] } },
+      output: { message: { content: [tool(bad)] } },
     } as never);
-    await expect(adapter.analyze(delivery(), "observe")).rejects.toThrow(
-      "missing",
-    );
+    await expect(adapter.analyze(delivery(), "observe")).rejects.toMatchObject({
+      name: "ModelOutputError",
+      diagnostic: { stage: "evidence" },
+    });
   });
   it("uses a real video input contract in native-video mode rather than relabeling frame input", async () => {
     const media = new MediaStore("/tmp/not-used");
@@ -96,9 +95,7 @@ describe("analysis input contracts", () => {
     const send = vi.spyOn(adapter.client, "send").mockResolvedValue({
       output: {
         message: {
-          content: [
-            { text: JSON.stringify({ ...analysis, observations: [] }) },
-          ],
+          content: [tool({ observations: [], limitations: [] })],
         },
       },
     } as never);
@@ -132,9 +129,105 @@ describe("analysis input contracts", () => {
       "dense_frames",
     );
     vi.spyOn(adapter.client, "send").mockResolvedValue({
-      output: { message: { content: [{ text: JSON.stringify(proposed) }] } },
+      output: { message: { content: [tool(proposed)] } },
     } as never);
-    await expect(adapter.analyze(d, "observe")).rejects.toThrow("missing");
+    await expect(adapter.analyze(d, "observe")).rejects.toMatchObject({
+      name: "ModelOutputError",
+      diagnostic: { stage: "evidence" },
+    });
+  });
+  it("retains a received response and usage before rejecting invalid model structure, without retrying", async () => {
+    const media = new MediaStore("/tmp/not-used");
+    vi.spyOn(media, "read").mockResolvedValue(Buffer.from("test-image"));
+    const received = vi.fn().mockResolvedValue(undefined);
+    const adapter = new BedrockAnalyzer(
+      media,
+      "amazon.nova-lite-v1:0",
+      "sparse_frames",
+      received,
+    );
+    const raw = JSON.stringify({
+      ...analysis,
+      observations: [{ ...analysis.observations[0], limitations: null }],
+    });
+    const send = vi.spyOn(adapter.client, "send").mockResolvedValue({
+      output: { message: { content: [tool(JSON.parse(raw))] } },
+      usage: { inputTokens: 123, outputTokens: 45 },
+      stopReason: "end_turn",
+      $metadata: { requestId: "test-request" },
+    } as never);
+    await expect(adapter.analyze(delivery(), "observe")).rejects.toMatchObject({
+      name: "ModelOutputError",
+      diagnostic: {
+        stage: "schema",
+        usage: { inputTokens: 123, outputTokens: 45 },
+        issues: [
+          { path: ["observations", 0, "limitations"], code: "invalid_type" },
+        ],
+      },
+    });
+    expect(received).toHaveBeenCalledWith(
+      expect.objectContaining({
+        raw,
+        requestId: "test-request",
+        usage: { inputTokens: 123, outputTokens: 45 },
+      }),
+    );
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+  it("anchors image observation timing to cited offsets and derives concern only from a handling action", async () => {
+    const media = new MediaStore("/tmp/not-used");
+    vi.spyOn(media, "read").mockResolvedValue(Buffer.from("test-image"));
+    const adapter = new BedrockAnalyzer(
+        media,
+        "amazon.nova-lite-v1:0",
+        "sparse_frames",
+      ),
+      d = delivery();
+    d.assets[1].offsetMs = 2400;
+    vi.spyOn(adapter.client, "send").mockResolvedValue({
+      output: {
+        message: {
+          content: [
+            tool({
+              observations: [
+                {
+                  ...analysis.observations[0],
+                  label: "package_visible",
+                  concern: true,
+                  startMs: 0,
+                  endMs: 1000,
+                  evidenceIds: [d.assets[1].id],
+                },
+              ],
+              limitations: [],
+            }),
+          ],
+        },
+      },
+    } as never);
+    const result = await adapter.analyze(d, "observe");
+    expect(result.analysis.observations[0]).toMatchObject({
+      startMs: 2400,
+      endMs: 2400,
+      concern: false,
+    });
+    expect(result.analysis.assessment).toBe("unable_to_assess");
+  });
+  it("rejects a text reply when the structured evidence response is missing", async () => {
+    const media = new MediaStore("/tmp/not-used");
+    vi.spyOn(media, "read").mockResolvedValue(Buffer.from("test-image"));
+    const adapter = new BedrockAnalyzer(
+      media,
+      "amazon.nova-lite-v1:0",
+      "sparse_frames",
+    );
+    vi.spyOn(adapter.client, "send").mockResolvedValue({
+      output: { message: { content: [{ text: JSON.stringify(analysis) }] } },
+    } as never);
+    await expect(adapter.analyze(delivery(), "observe")).rejects.toMatchObject({
+      diagnostic: { stage: "tool" },
+    });
   });
 });
 describe("job outcomes", () => {

@@ -3,7 +3,11 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { MediaStore, prepareVideo } from "../server/media.js";
-import { BedrockAnalyzer } from "../server/analysis.js";
+import {
+  BedrockAnalyzer,
+  ModelOutputError,
+  type ModelResponseReceipt,
+} from "../server/analysis.js";
 import {
   APPLICATION_REGION,
   BEDROCK_MODEL,
@@ -56,8 +60,23 @@ console.log(
   }),
 );
 if (mode === "--invoke") {
+  const responses: ModelResponseReceipt[] = [];
   try {
-    const analyzer = new BedrockAnalyzer(media, BEDROCK_MODEL, "sparse_frames"),
+    const analyzer = new BedrockAnalyzer(
+        media,
+        BEDROCK_MODEL,
+        "sparse_frames",
+        async (receipt) => {
+          responses.push(receipt);
+          // Save usage/output before schema validation so a rejected reply still has an audit trail.
+          // Ignored local evidence only; never print raw model output or source frames.
+          await fs.writeFile(
+            path.join(root, "responses.json"),
+            JSON.stringify(responses, null, 2),
+            { mode: 0o600 },
+          );
+        },
+      ),
       first = await analyzer.analyze(delivery, "observe");
     delivery.runs.push(first.run);
     await fs.writeFile(
@@ -92,7 +111,11 @@ if (mode === "--invoke") {
       httpStatus: error?.$metadata?.httpStatusCode,
       attempts: error?.$metadata?.attempts,
       automaticRetryDelayMs: error?.$metadata?.totalRetryDelay,
-      completedCalls: delivery.runs.length,
+      receivedResponses: responses.length,
+      completedPasses: delivery.runs.length,
+      ...(error instanceof ModelOutputError
+        ? { validation: error.diagnostic }
+        : {}),
     };
     await fs.writeFile(
       path.join(root, "failure.json"),

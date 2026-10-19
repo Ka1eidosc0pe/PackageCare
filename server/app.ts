@@ -15,6 +15,7 @@ import { verifySignature, ringEventSchema, RingError } from "./ring.js";
 import { CloudUploads } from "./uploads.js";
 import { renderReport, snapshot } from "./reports.js";
 import { ReportPreviews } from "./report-preview.js";
+import { RingLive } from "./ring-live.js";
 
 export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
   const app = express();
@@ -22,6 +23,7 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
   const secret = process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
     password = process.env.PACKAGECARE_PASSWORD;
   const previews = new ReportPreviews(secret);
+  const live = new RingLive(service.ring, secret);
   if (service.media.bucket && !process.env.SESSION_SECRET)
     throw new Error("Configure SESSION_SECRET before using cloud uploads.");
   const directUploads =
@@ -276,6 +278,10 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
     await service.retry(String(req.params.id));
     res.status(202).json({ ok: true });
   });
+  app.post("/api/deliveries/:id/analyze", async (req, res) => {
+    await service.startAnalysis(String(req.params.id));
+    res.status(202).json(await service.get(String(req.params.id)));
+  });
   app.post(
     "/api/deliveries/:id/photos",
     uploads.single("file"),
@@ -365,7 +371,9 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
     const d = await service.get(String(req.params.id));
     if (
       service.running.has(d.id) ||
-      !["ready", "failed", "media_unavailable"].includes(d.state)
+      !["awaiting_analysis", "ready", "failed", "media_unavailable"].includes(
+        d.state,
+      )
     )
       return res
         .status(409)
@@ -445,6 +453,40 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
         ),
       );
   });
+  app.post("/api/ring/live", async (req, res) => {
+    const body = z
+      .object({
+        deviceId: z.string().min(1).max(300),
+        componentId: z.string().max(100).optional(),
+        offer: z.string().min(10).max(90000).startsWith("v=0"),
+      })
+      .parse(req.body);
+    res
+      .status(201)
+      .json(await live.start(body.deviceId, body.offer, body.componentId));
+  });
+  app.post("/api/ring/live/close", async (req, res) => {
+    const { ticket } = z
+      .object({ ticket: z.string().max(5000) })
+      .parse(req.body);
+    await live.close(ticket);
+    res.status(204).end();
+  });
+  app.post(
+    "/api/ring/live/capture",
+    multer({
+      storage: multer.memoryStorage(),
+      limits: { fileSize: 4 * 1024 * 1024, files: 1, fields: 1 },
+    }).single("file"),
+    async (req, res) => {
+      const session = live.read(z.string().max(5000).parse(req.body.ticket));
+      if (!req.file?.buffer.length)
+        throw new Error("No recorded clip was received.");
+      res
+        .status(201)
+        .json(await service.saveLiveCapture(req.file.buffer, session));
+    },
+  );
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "Endpoint not found." }),
   );

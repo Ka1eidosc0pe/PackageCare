@@ -15,6 +15,38 @@ import {
 } from "../server/media.js";
 const exec = promisify(execFile);
 describe("actual media preparation", () => {
+  it("prepares streaming WebM without a duration header, as produced by browser live recording", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "pc-webm-"));
+    try {
+      const { stdout } = await exec(
+        "ffmpeg",
+        [
+          "-v",
+          "error",
+          "-f",
+          "lavfi",
+          "-i",
+          "color=c=gray:s=160x90:r=10",
+          "-t",
+          "1",
+          "-c:v",
+          "libvpx",
+          "-f",
+          "webm",
+          "pipe:1",
+        ],
+        { encoding: "buffer" },
+      );
+      const media = new MediaStore(root),
+        prepared = await prepareVideo(stdout, media, "live.webm", 5);
+      expect(prepared.durationMs).toBeGreaterThanOrEqual(900);
+      expect(prepared.durationMs).toBeLessThanOrEqual(1100);
+      expect(await media.read(prepared.assets[0])).toEqual(stdout);
+      expect(prepared.assets.filter((a) => a.kind === "frame")).toHaveLength(5);
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  }, 20000);
   it("preserves input bytes, makes playable output and ordered frame evidence, then clears temporary files", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "pc-media-")),
       input = path.join(root, "fixture.mp4");

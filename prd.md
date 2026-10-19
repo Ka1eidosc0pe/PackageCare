@@ -102,6 +102,8 @@ Determine what the official Ring Developer Playground/simulator actually support
 
 Development fixtures can exercise the analysis pipeline. They must be labeled as fixtures and cannot be represented as Ring simulator footage. If the proposed submission combines real Ring integration with separate scenario clips, obtain clarification on acceptance rather than assuming this meets the track requirement.
 
+**October 19 finding:** The [organizer clarification](https://amazonappdev2026.devpost.com/forum_topics/45462-simulator-on-amazon-ring) resolves customization: Playground provides Package, Vehicle and Motion live-view sessions; it cannot accept custom videos. Actual Playground streams may be combined with separately collected footage with clear provenance. Use the documented WHEP live-view path rather than treating empty recorded-event history as failure. Browser-captured Ring streams must be labeled as browser recordings, retain their original captured bytes, and never imply native-provider byte attestation. Saving a live capture does not itself start inference. Actual playback/capture still needs validation.
+
 ### 4.3 Gate B — useful handling analysis
 
 Use labeled examples of ordinary placement, clear drops/throws, and ambiguous handling. Check whether the model can distinguish them, point to relevant moments, and abstain appropriately.
@@ -503,9 +505,9 @@ Aim to have the complete demonstrated workflow before the final submission day. 
 
 Resolve in this order after the human authorizes implementation:
 
-1. What imagery and customization does the official Ring simulator support?
+1. Resolved: three live-view scenarios, no custom uploads; see Gate A and the October 19 validation checkpoint.
 2. Which supported event-to-media path can we demonstrate reliably?
-3. What AWS account, region, model access, and spending budget will be available?
+3. Access/Region resolved: `pkgcare`, Ohio, in-Region Nova Lite. Each potentially billable scope still needs explicit approval.
 4. Which model/input configuration best distinguishes normal, rough, and unclear handling?
 5. Can the human supply or record consented scenario footage if needed for evaluation?
 6. Should the final export be printable HTML plus files, or is a bundled/PDF export worth the additional work?
@@ -544,4 +546,4 @@ Before continuing after context loss:
 - Update this document when the user changes product scope or feasibility findings invalidate an assumption.
 - Record verification and remaining limitations before handing work back.
 
-**Current handoff state:** Implementation authorized and started. Consult `docs/progress.md` and actual files/tests for verified state. Ring credentials and AWS access have not yet been provided; Gate A and live Gate B remain unverified.
+**Current handoff state (October 19):** Implementation is authorized and ongoing. AWS access and a real two-pass Nova Lite synthetic connectivity/schema smoke are verified in Ohio. Ring discovery authenticates; WHEP playback/capture and real-footage model quality are not yet verified. The organizer confirms Playground has live Package/Vehicle/Motion streams, no custom uploads, and allows combining actual Playground integration with separately labeled authorized footage. Read `docs/live-validation-2026-10-19.md` and `docs/progress.md`; do not repeat the obsolete zero-quota diagnosis or infer accuracy from the synthetic smoke.

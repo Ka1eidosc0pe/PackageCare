@@ -114,3 +114,29 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Workaround/status:** No working runtime workaround established. Stopped inference, kept all processing in Ohio, recorded evidence, prepared an unsent support draft. No paid-plan upgrade or quota/permission changes made. Added a specific application error and tested preservation of source evidence on quota failure.
 - **Suggestion:** Include applied runtime-quota readiness alongside model authorization/availability, and expose a clear onboarding route when a new project has zero non-adjustable daily allocation.
 - **Submission note:** This is a directly observed provider onboarding constraint. Free-plan status is known, but its causal relationship to the quota is not established. Synthetic input only; no claim of model accuracy or successful production inference.
+
+
+## PC-F010 — structured response and timing diagnostics
+
+- **Date:** October 19, 2026
+- **Tool:** Our Nova Lite response contract / validation / smoke harness
+- **Task:** Verify real in-Region model access after quota resolution.
+- **Actual:** The original reply failed schema validation without retaining usage/raw response. The next diagnostic reply repeated example field text and cited a 2,400 ms frame in a 0–1,000 ms interval. Validation rejected it; no verification request or fabricated assessment followed.
+- **Workaround:** Save local response receipts before parsing; distinguish received replies from completed passes. Use documented structured response fields without dummy observation examples; derive image time ranges from cited evidence offsets and concern from handling-action labels.
+- **Verification:** Separately approved v4 smoke completed two passes; 24,095 input / 618 output tokens, estimated $0.00159402. Ambiguous airborne observation remained ambiguous. Synthetic input establishes connectivity/schema only.
+- **Submission note:** These were our prompt/diagnostic issues, not evidence of a provider defect or a measured model-quality claim.
+
+## PC-F011 — Ring simulator is live view; first Location validation too restrictive
+
+- **Date:** October 19, 2026
+- **Tool:** Ring Playground / WHEP integration
+- **Finding:** Organizer clarification confirms three live streams and no custom uploads. Separate authorized footage may accompany actual Playground integration. Link: https://amazonappdev2026.devpost.com/forum_topics/45462-simulator-on-amazon-ring
+- **Actual:** Discovery authenticated with empty event history. After implementing WHEP, the real start request received a successful creation response but our session-Location check rejected it. Exact rejected URL form was not retained; do not attribute the mismatch to a specific provider behavior.
+- **Workaround under validation:** Accept opaque resource IDs/queries within Ring's exact trusted device/session origin/path, keep management URLs inside encrypted session tickets, and log only safe diagnostic booleans if the contract still differs. Real playback remains unverified.
+- **Owner friction:** Token generation has a 30-minute cooldown. A server restart clears a token entered in Connections, but an unexpired token can be re-entered. Finish reload-requiring changes before reconnection; preserve an active session.
+- **Submission note:** Separate the verified organizer clarification from our own initial URL-validation assumption.
+
+### October 19 updates to earlier entries
+
+- **PC-F001:** Customization is now clarified by the organizer: live Package/Vehicle/Motion only, no custom uploads; separate authorized scenario footage is allowed with actual Playground integration. The earlier unauthenticated-reader error no longer blocks this feasibility decision.
+- **PC-F009:** AWS Support work by the owner changed the applied daily quota to 564,480,001. A real two-pass Nova Lite smoke now succeeds. Do not repeat the obsolete zero-quota workaround or infer that a paid-plan upgrade was required; project remains FREE/ACTIVE.

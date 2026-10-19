@@ -13,7 +13,9 @@ export async function purgeExpired(
   const expired = (await store.list()).filter(
     (d) =>
       Date.parse(d.createdAt) < cutoff &&
-      ["ready", "failed", "media_unavailable"].includes(d.state),
+      ["awaiting_analysis", "ready", "failed", "media_unavailable"].includes(
+        d.state,
+      ),
   );
   for (const d of expired)
     if (!dryRun) {

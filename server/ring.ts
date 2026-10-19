@@ -82,6 +82,84 @@ export class RingClient {
       await (await this.request("devices?include=status,capabilities")).json()
     ).data as any[];
   }
+  async startLive(device: string, offer: string, component?: string) {
+    if (!this.token)
+      throw new RingError(401, "Connect Ring with a current Playground token.");
+    const endpoint = `https://api.amazonvision.com/v1/devices/${encodeURIComponent(device)}/media/streaming/whep/sessions`;
+    const response = await this.transport(
+      endpoint +
+        (component ? `?component_id=${encodeURIComponent(component)}` : ""),
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          "Content-Type": "application/sdp",
+        },
+        body: offer,
+        redirect: "manual",
+        signal: AbortSignal.timeout(30000),
+      },
+    );
+    if (response.status !== 201) {
+      if (response.status === 401) this.token = "";
+      throw new RingError(
+        response.status,
+        response.status === 401
+          ? "Ring token expired. Reconnect with a fresh token."
+          : `Ring live view could not start (${response.status}). Check the simulator is active.`,
+      );
+    }
+    const location = response.headers.get("location");
+    const url = new URL(location || "", endpoint);
+    // Never follow an arbitrary Location or forward credentials outside this exact session path.
+    if (
+      !location ||
+      url.origin !== "https://api.amazonvision.com" ||
+      url.username ||
+      url.password ||
+      url.hash ||
+      !url.pathname.startsWith(new URL(endpoint).pathname + "/") ||
+      url.pathname.length <= new URL(endpoint).pathname.length + 1
+    ) {
+      // Location may contain an opaque resource ID or query. Never log it or
+      // guess its alphabet. These booleans diagnose contract differences safely.
+      console.error(
+        JSON.stringify({
+          event: "ring_live_location_rejected",
+          present: !!location,
+          sameOrigin: url.origin === "https://api.amazonvision.com",
+          sessionPath: url.pathname.startsWith(
+            new URL(endpoint).pathname + "/",
+          ),
+          queryPresent: !!url.search,
+          fragmentPresent: !!url.hash,
+        }),
+      );
+      throw new RingError(
+        502,
+        "Ring returned an invalid live-session location.",
+      );
+    }
+    const answer = await response.text();
+    if (answer.length > 100000 || !answer.startsWith("v=0"))
+      throw new RingError(502, "Ring returned an invalid live-view answer.");
+    return { answer, sessionUrl: url.href };
+  }
+  async closeLive(sessionUrl: string) {
+    // sessionUrl comes only from startLive or an authenticated server-issued ticket.
+    if (!this.token) return;
+    const response = await this.transport(sessionUrl, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${this.token}` },
+      redirect: "manual",
+      signal: AbortSignal.timeout(10000),
+    });
+    if (![200, 202, 204, 404, 410].includes(response.status))
+      throw new RingError(
+        response.status,
+        "Ring could not close the live view. It will expire automatically.",
+      );
+  }
   async account() {
     return (await (await this.request("users/me")).json()).data;
   }

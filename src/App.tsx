@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { RingLiveView } from "./RingLiveView";
 import {
   APPLICATION_REGION,
   AWS_PROFILE_NAME,
@@ -155,6 +156,7 @@ function Badge({ d }: { d: Delivery }) {
     d.state === "ready"
       ? labels[d.analysis!.assessment]
       : {
+          awaiting_analysis: "Clip saved",
           received: "Received",
           waiting_for_media: "Waiting for footage",
           analyzing: "Analyzing footage",
@@ -227,7 +229,13 @@ export default function App() {
   useEffect(() => {
     if (
       !deliveries.some(
-        (d) => !["ready", "failed", "media_unavailable"].includes(d.state),
+        (d) =>
+          ![
+            "awaiting_analysis",
+            "ready",
+            "failed",
+            "media_unavailable",
+          ].includes(d.state),
       )
     )
       return;
@@ -945,6 +953,7 @@ function DeliveryWorkspace({
                   src={assetUrl(d, media.id)}
                   poster={frames[2] ? assetUrl(d, frames[2].id) : undefined}
                   playsInline
+                  controls={d.state === "awaiting_analysis"}
                   onTimeUpdate={(e) =>
                     setPosition(e.currentTarget.currentTime * 1000)
                   }
@@ -964,46 +973,48 @@ function DeliveryWorkspace({
                       : sourceLabels[d.source].toUpperCase()}
                   </span>
                 </div>
-                <div className="video-controls">
-                  <button
-                    aria-label={playing ? "Pause footage" : "Play footage"}
-                    onClick={() => {
-                      if (video.current)
-                        playing
-                          ? video.current.pause()
-                          : void video.current
-                              .play()
-                              .catch(() =>
-                                onNotice(
-                                  "Playback unavailable. Download the source footage.",
-                                ),
-                              );
-                    }}
-                  >
-                    {playing ? <Pause size={17} /> : <Play size={17} />}
-                  </button>
-                  <span>
-                    {timecode(position)} / {timecode(d.durationMs)}
-                  </span>
-                  <input
-                    aria-label="Footage position"
-                    type="range"
-                    min="0"
-                    max={d.durationMs || 1}
-                    value={position}
-                    onChange={(e) => {
-                      const t = Number(e.target.value);
-                      if (video.current) video.current.currentTime = t / 1000;
-                      setPosition(t);
-                    }}
-                  />
-                  <button
-                    aria-label="Full screen footage"
-                    onClick={() => video.current?.requestFullscreen()}
-                  >
-                    <Maximize size={16} />
-                  </button>
-                </div>
+                {d.state !== "awaiting_analysis" && (
+                  <div className="video-controls">
+                    <button
+                      aria-label={playing ? "Pause footage" : "Play footage"}
+                      onClick={() => {
+                        if (video.current)
+                          playing
+                            ? video.current.pause()
+                            : void video.current
+                                .play()
+                                .catch(() =>
+                                  onNotice(
+                                    "Playback unavailable. Download the source footage.",
+                                  ),
+                                );
+                      }}
+                    >
+                      {playing ? <Pause size={17} /> : <Play size={17} />}
+                    </button>
+                    <span>
+                      {timecode(position)} / {timecode(d.durationMs)}
+                    </span>
+                    <input
+                      aria-label="Footage position"
+                      type="range"
+                      min="0"
+                      max={d.durationMs || 1}
+                      value={position}
+                      onChange={(e) => {
+                        const t = Number(e.target.value);
+                        if (video.current) video.current.currentTime = t / 1000;
+                        setPosition(t);
+                      }}
+                    />
+                    <button
+                      aria-label="Full screen footage"
+                      onClick={() => video.current?.requestFullscreen()}
+                    >
+                      <Maximize size={16} />
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <div className="media-wait">
@@ -1017,11 +1028,47 @@ function DeliveryWorkspace({
               <ShieldCheck size={13} /> Source footage preserved
             </span>
             <span>
-              {(d.durationMs / 1000).toFixed(1)} sec
+              {d.durationMs
+                ? `${(d.durationMs / 1000).toFixed(1)} sec`
+                : "Not analyzed"}
               {d.source === "fixture" ? " · Animated fixture" : ""}
             </span>
           </div>
-          {!["ready", "failed", "media_unavailable"].includes(d.state) && (
+          {d.capture && (
+            <p className="subtle-copy">
+              Browser recording from Ring live view. The preserved file is the
+              browser capture, not a native Ring recording download.
+            </p>
+          )}
+          {d.state === "awaiting_analysis" && (
+            <div className="processing">
+              <Camera size={24} />
+              <h3>Clip saved</h3>
+              <p>
+                Review the captured footage, then start a handling analysis.
+              </p>
+              <button
+                className="button primary"
+                disabled={!!busy}
+                onClick={() =>
+                  act("analyze", async () => {
+                    await api(`/deliveries/${d.id}/analyze`, {
+                      method: "POST",
+                    });
+                    update(await api(`/deliveries/${d.id}`));
+                  })
+                }
+              >
+                Analyze clip <ArrowRight size={15} />
+              </button>
+            </div>
+          )}
+          {![
+            "awaiting_analysis",
+            "ready",
+            "failed",
+            "media_unavailable",
+          ].includes(d.state) && (
             <div className="processing">
               <Loader2 className="spin" size={20} />
               <div>
@@ -1730,7 +1777,7 @@ function Connections({
           </form>
           {devices.length > 0 && (
             <div className="device-import">
-              <h3>Import a recorded event</h3>
+              <h3>Select a camera</h3>
               <label className="field">
                 Camera
                 <select
@@ -1778,6 +1825,26 @@ function Connections({
                   </select>
                 </label>
               )}
+              <RingLiveView
+                key={`${device}-${component}`}
+                deviceId={device}
+                componentId={component || undefined}
+                disabled={
+                  !!busy ||
+                  !device ||
+                  (!!caps?.attributes?.components?.items?.length && !component)
+                }
+                request={api}
+                onSaved={async (d) => {
+                  await refresh();
+                  onImport(d.id);
+                }}
+              />
+              <h3>Import an existing recording</h3>
+              <p className="subtle-copy">
+                Playground scenarios are live streams. Use Live view above when
+                history is empty.
+              </p>
               {events.length > 0 && (
                 <label className="field">
                   Recent recording

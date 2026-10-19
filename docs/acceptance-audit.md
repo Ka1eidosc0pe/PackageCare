@@ -1,13 +1,13 @@
 # PackageCare acceptance audit
 
-October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requirement-to-evidence map, not a claim that the hackathon entry is complete. The owner has connected Ring and AWS credentials. Authentication and model authorization are checked; usable Ring media, live inference and deployment remain pending. Explicit approval is required before any potentially billable operation.
+Updated October 19, 2026. Read this alongside `prd.md` and `progress.md`. This is a requirement-to-evidence map, not a claim that the hackathon entry is complete. The owner has connected Ring and AWS credentials. Authentication and real two-pass synthetic model invocation now work. Actual Ring stream playback/capture, labeled model quality and deployment remain pending. See `live-validation-2026-10-19.md`. Explicit approval is required before any potentially billable operation.
 
 ## Agreed MVP (PRD §3.1)
 
 | Requirement | Evidence now | What remains |
 |---|---|---|
-| 1. Working accepted Ring source | Real authenticated discovery of one simulator, capabilities/history HTTP 200; no events available | Gate A: suitable recording, playback, supported scenario/custom-media feasibility |
-| 2. Ordered visual handling analysis | Real media extraction tests; dense/sparse/native adapters; input-window and chronological-reference tests | Gate B: real model calls, labeled clips, measured quality and strategy selection |
+| 1. Working accepted Ring source | Real authenticated discovery of one simulator, capabilities/history HTTP 200; no events available | Gate A: actual WHEP playback/capture. Organizer clarified live scenarios, no custom uploads, separate authorized footage allowed |
+| 2. Ordered visual handling analysis | Real media extraction tests; dense/sparse/native adapters; input-window and chronological-reference tests | Gate B: connectivity/schema smoke succeeded; labeled real clips, measured quality and strategy selection pending |
 | 3. Linked handling timeline | Browser playback and timeline seek verified; source offsets validated | Verify with actual Ring/model output |
 | 4. Supported rough-handling flags | Structured schema, evidence verification and recipient-review path implemented; synthetic concern journey verified | Useful real-world drop/throw detection is unproven |
 | 5. Unclear footage | Arrival/landing/rest alone abstain; supported controlled placement is required before clearing a clip; rejected headlines are replaced. Domain checks and scripted ambiguous example; no fixture fallback | Measure abstention on real ambiguous/occluded clips |
@@ -55,4 +55,4 @@ October 16, 2026. Read this alongside `prd.md` and `progress.md`. This is a requ
 
 ## Completion decision
 
-The full objective is **not achieved**. Gate A has authenticated discovery/capabilities/history evidence but no usable recording yet. Gate B and live AWS/submission requirements remain unverified. Synthetic scenarios and simulated transports establish product/contract behavior only. Continue from these external gates after the necessary footage and spending approval are available; do not replace them with scripted demonstrations or infer accuracy from the passing test count.
+The full objective is **not achieved**. Gate A has authenticated discovery/capabilities/history evidence but no usable recording yet. Gate B connectivity/schema is verified on synthetic input; real-footage quality and live AWS/submission requirements remain unverified. Synthetic scenarios and simulated transports establish product/contract behavior only. Continue from these external gates after the necessary footage and spending approval are available; do not replace them with scripted demonstrations or infer accuracy from the passing test count.
