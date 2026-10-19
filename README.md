@@ -39,6 +39,7 @@ Imported source bytes are saved before processing starts, so a restart can resum
 | `npm run fixtures` | Generate original synthetic MP4 test scenes |
 | `npm run ring:probe` | Exercise actual Ring device discovery and optional recording retrieval |
 | `npm run evaluate -- /path/to/manifest.json --strategy dense_frames` | Prepare a local evaluation plan without inference; invocation needs spending approval |
+| `npm run benchmark:vision -- /path/to/baseline-plan.json` | Prepare a bounded alternative-model experiment; no inference without separate spending approval |
 | `npm run infra:synth` | Generate the AWS deployment template; does not deploy |
 | `npm run maintenance` | Preview expired cases and old orphan files; add `-- --apply` to delete them |
 
@@ -63,6 +64,8 @@ Local clients use the named `pkgcare` AWS profile; Lambda uses its execution rol
 The owner requires explicit approval before any potentially billable operation, even on the Free plan. Connection checks do not authorize inference or deployment. `npm run bedrock:smoke -- /path/to/clip.mp4` prepares five frames locally without inference. After specific spending approval, adding `--invoke` makes at most two model requests, with no automatic retries and at most 2,500 output tokens per request. It saves usage/results under ignored `data/bedrock-smoke/` and never uses S3 or Step Functions. A synthetic input tests connectivity/schema only, not model accuracy or Ring provenance.
 
 `ANALYSIS_STRATEGY=dense_frames` is the initial adapter default: up to four frames per second, capped at 120 across the full clip, analyzed in overlapping windows of at most five images. `sparse_frames` and `native_video` exist for comparison. Sparse input passed a two-request diagnostic on a Ring Package clip already at rest. A first CC BY development comparison then found dense abstentions and sparse/native false clears on a brief carton release; 8 fps dense also abstained. See [actual results](docs/evaluation-results-2026-10-19.md). The full labeled strategy/quality gate remains pending. Native video sampling may miss brief actions; denser inputs cost more and also need evaluation.
+
+An evaluation-only [Qwen3-VL benchmark plan](docs/model-benchmark-plan.md) reuses the same sixteen source frames in a full-sequence request. It does not expand the application model allowlist. Preparation, validation and mocked tests make no model calls; an explicit, separately approved two-request scope is required to invoke it.
 
 Recipient notes and footage text are treated as data. Model output is schema-checked, cited frames/time ranges are validated, and candidate observations receive a verification pass. The model returns structured observations; image time bounds are derived from cited frame offsets rather than guessed times. This limits unsupported output; it does not establish a measured detection accuracy.
 

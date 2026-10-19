@@ -47,3 +47,13 @@ No final strategy is selected. A stronger-model comparison is a reasonable next 
 - Obtain independent normal placements and ambiguous cases with a suitable license/use path. The catalog's candidate list is not a completed dataset.
 - Test the chosen configuration on unused cases; disclose reuse if prompts/input sampling are tuned after inspecting results.
 - Full dense processing of the saved Ring at-rest clip stopped before completing observation, most recently on a provider service error. A separate two-pass sparse Ring diagnostic succeeded. These are distinct findings.
+
+## Alternative vision development experiment
+
+After the Nova comparisons, the owner separately approved up to $0.40 for two Qwen3-VL requests on the exact sixteen 4 fps frames. Model `qwen.qwen3-vl-235b-a22b` ran directly in Ohio with pkgcare, max 2,500 output tokens, zero retries and local storage. Both passes received all sixteen ordered images rather than Nova's five-image windows; model and context changed together. The expected label/action window were not sent. See [scope and pricing evidence](model-benchmark-plan.md).
+
+Both requests completed and passed the evidence parser. **Both returned empty observations and empty limitations.** Final result: `unable_to_assess`, no supported concern/action coverage. Do not interpret a schema-valid reply as useful detection or replace the original annotation to make it match. Qwen did not improve this development result and was not enabled in the application.
+
+Reported usage: 9,878 input / 26 output tokens; estimated **$0.00530450 before tax** at the verified Ohio standard rates. Analysis time: 6.971 seconds. The two-request scope is completed and closed. Raw replies, immutable prepared evidence and results remain in ignored `data/vision-benchmarks/27ea257a-aeda-4883-b2ff-e8ef4abbe1d2/`.
+
+A subsequent local inspection confirmed that the prepared 1,875 ms image is a 690 × 392 JPEG and visibly shows the carton above the person's hands. The model received actual prepared images; there is no evidence of a failed decode in the service response. This does not establish why it returned empty observations. Investigate prompt/input behavior and other sources before proposing another paid experiment.

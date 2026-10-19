@@ -16,7 +16,8 @@
     "evaluate": "node --import tsx scripts/evaluate.ts",
     "bedrock:smoke": "node --import tsx scripts/bedrock-smoke.ts",
     "ring:probe": "node --import tsx scripts/ring-probe.ts",
-    "infra:synth": "cdk synth --app 'node --import tsx infra/app.ts'"
+    "infra:synth": "cdk synth --app 'node --import tsx infra/app.ts'",
+    "benchmark:vision": "node --import tsx scripts/vision-benchmark.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",

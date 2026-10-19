@@ -55,7 +55,7 @@ const assetSchema = z.object({
   kind: z.enum(["video", "frame"]),
   offsetMs: z.number().int().nonnegative().optional(),
 });
-const planSchema = z.object({
+export const evaluationPlanSchema = z.object({
   kind: z.literal("packagecare-evaluation-v1"),
   strategy: strategySchema,
   promptVersion: z.literal(PROMPT_VERSION),
@@ -79,7 +79,7 @@ const planSchema = z.object({
     )
     .min(1),
 });
-type Plan = z.infer<typeof planSchema>;
+type Plan = z.infer<typeof evaluationPlanSchema>;
 const hash = (bytes: Buffer) =>
   createHash("sha256").update(bytes).digest("hex");
 async function save(file: string, value: unknown) {
@@ -212,7 +212,7 @@ export async function runEvaluation(
     new BedrockAnalyzer(media, BEDROCK_MODEL, strategy, response, before),
 ) {
   const planBytes = await fs.readFile(planPath),
-    plan = planSchema.parse(JSON.parse(planBytes.toString())),
+    plan = evaluationPlanSchema.parse(JSON.parse(planBytes.toString())),
     root = path.dirname(planPath),
     media = new MediaStore(root, "");
   const required = plan.cases.reduce(
