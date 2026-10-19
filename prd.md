@@ -73,11 +73,11 @@ The presentation may illustrate this future flow, clearly labeled as a concept. 
 ### 4.1 Hardware and accounts
 
 - The user has no Ring camera, Fire TV, Bee device, or Apple Watch available for the project.
-- The user is willing to create necessary accounts.
-- Ring simulator use is accepted by the hackathon, but the simulator's media capabilities have not been tested.
-- October 16 readiness: the `pkgcare` browser-login credentials and application SDK resolve successfully. The owner confirmed `us-east-2`; the project is on the active Free plan. Bedrock metadata marks in-Region `amazon.nova-lite-v1:0` authorized and available. This is not evidence of successful inference or measured quality.
-- Explicit owner approval is required before every potentially billable scope, including inference, AWS media upload, CDK bootstrap or deployment. Follow `AGENTS.md`; credits and Free-plan eligibility do not replace approval. One smoke test was subsequently approved up to $0.05: its first inference request was rejected for zero daily token quota, with no retry or second pass. Further billable scopes remain unapproved.
-- Ring token authentication, one simulator device and capabilities/history endpoints were verified. History contained zero events; usable media and custom delivery-scene support remain unproven. Tokens are temporary and local connection-form tokens live in server memory.
+- The user created the required Ring/AWS access; application connections and live acceptance evidence remain distinct.
+- Ring simulator use is accepted. Organizer-confirmed sources are Package/Vehicle/Motion live streams, without custom uploads; actual WHEP playback remains under validation.
+- October 19 readiness: `pkgcare` authentication works; the owner confirmed Ohio and the project remains FREE/ACTIVE. In-Region `amazon.nova-lite-v1:0` has positive quota and completed a real two-pass synthetic connectivity/schema smoke. Real-footage quality remains unmeasured.
+- Explicit owner approval is required before every potentially billable scope, including inference, AWS media upload, CDK bootstrap or deployment. Follow `AGENTS.md`; credits and Free-plan eligibility do not replace approval. Three October 19 smoke attempts each received separate $0.05 approval. The final structured-response attempt succeeded in both passes, estimated $0.00159402. Those approvals do not cover further inference, ordinary dense import/retry, AWS uploads or deployment.
+- Ring token authentication, one simulator device and capabilities/history endpoints were verified. History contained zero events; the live-view path now implemented still needs actual playback/capture validation. Custom upload is unavailable per the organizer. Tokens are temporary and local connection-form tokens live in server memory.
 - Do not assume free AWS resources or promotional credits. The organizers announced on October 7 that credit codes had run out.
 - Never put credentials, personal footage, or account tokens in source control or tool output.
 
