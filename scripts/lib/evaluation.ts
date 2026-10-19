@@ -66,6 +66,7 @@ const planSchema = z.object({
   maximumOutputTokensPerRequest: z.literal(2500),
   retries: z.literal(0),
   storage: z.literal("local"),
+  requestedFrameCount: z.number().int().min(5).max(120).optional(),
   cases: z
     .array(
       z.object({
@@ -109,8 +110,11 @@ export async function prepareEvaluation(
   strategy: z.infer<typeof strategySchema>,
   split: "development" | "held_out" | "all",
   outputParent = path.resolve("data/evaluations"),
+  requestedFrameCount?: number,
 ) {
   strategySchema.parse(strategy);
+  if (requestedFrameCount !== undefined)
+    z.number().int().min(5).max(120).parse(requestedFrameCount);
   const items = z
     .array(itemSchema)
     .min(1)
@@ -148,7 +152,12 @@ export async function prepareEvaluation(
         throw new Error(
           "Source changed during preparation; prepare a fresh plan.",
         );
-      const prepared = await prepareVideo(bytes, media, `${item.id}.mp4`);
+      const prepared = await prepareVideo(
+        bytes,
+        media,
+        `${item.id}.mp4`,
+        requestedFrameCount,
+      );
       if (item.actionWindow && item.actionWindow[1] > prepared.durationMs)
         throw new Error(`Action window exceeds ${item.id}'s duration.`);
       const video = prepared.assets.find((a) => a.name.startsWith("playback"))!;
@@ -179,6 +188,7 @@ export async function prepareEvaluation(
       maximumOutputTokensPerRequest: 2500,
       retries: 0,
       storage: "local",
+      ...(requestedFrameCount === undefined ? {} : { requestedFrameCount }),
       cases,
     };
     const planPath = path.join(root, "plan.json");
@@ -268,6 +278,7 @@ export async function runEvaluation(
       promptVersion: plan.promptVersion,
       region: plan.region,
       model: plan.model,
+      requestedFrameCount: plan.requestedFrameCount,
       maximumRequests: required,
       attemptedRequests,
       receivedResponses,

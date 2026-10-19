@@ -62,23 +62,25 @@ describe("reviewable evaluation scopes", () => {
     try {
       const { planPath, plan } = await prepareEvaluation(
         manifest,
-        "sparse_frames",
+        "dense_frames",
         "development",
         path.join(root, "plans"),
+        8,
       );
       expect(plan.storage).toBe("local");
-      expect(plan.maximumRequests).toBe(4);
+      expect(plan.requestedFrameCount).toBe(8);
+      expect(plan.maximumRequests).toBe(8);
       expect(s3).not.toHaveBeenCalled();
       const factory = vi.fn() as unknown as AnalyzerFactory;
       await expect(runEvaluation(planPath, 2, factory)).rejects.toThrow(
-        "requires a request limit of 4",
+        "requires a request limit of 8",
       );
       const asset = plan.cases[0].assets[0];
       await fs.writeFile(
         path.join(path.dirname(planPath), "media", asset.key),
         "changed",
       );
-      await expect(runEvaluation(planPath, 4, factory)).rejects.toThrow(
+      await expect(runEvaluation(planPath, 8, factory)).rejects.toThrow(
         "evidence changed",
       );
       expect(factory).not.toHaveBeenCalled();

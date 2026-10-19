@@ -1,6 +1,6 @@
 # PackageCare footage capture and labeling plan
 
-This prepares the PRD's 12-clip feasibility set. **No evaluation clips have been collected or labeled yet.** AWS quota access, owner spending approval and actual model results remain separate requirements.
+This prepares the PRD's 12-clip feasibility set. **The planned twelve-clip set is not collected yet; one source-credited van-loading development excerpt is now labeled. See [online sources](footage-sources.md) and [actual results](evaluation-results-2026-10-19.md).** AWS quota access, owner spending approval and actual model results remain separate requirements.
 
 Ring Playground discovery, actual WHEP playback, browser capture and saved playback now work. The Package capture inspected so far shows a parcel already at rest; it is a diagnostic, not evidence of visible normal placement or rough handling. The organizer confirms Package/Vehicle/Motion live scenarios, no custom uploads into Playground, and permits clearly labeled separately collected footage alongside actual Ring integration. Short staged phone-camera clips can support model development with `uploaded` provenance. Keep their source separate from Ring.
 
@@ -32,6 +32,8 @@ These are capture intentions, not finished ground truth. Inspect each actual rec
 Copy [the manifest template](../evaluation/manifest.template.json) beside the local `clips/` directory. Replace paths with the actual files, set each source accurately (`uploaded` for staged phone recordings), and verify every expected assessment. For each visible drop/toss, manually add `actionWindow: [startMs, endMs]` covering the release and landing in the original clip. Do not copy guessed offsets. Keep a short local annotation describing the visible evidence and any disagreement.
 
 Leave the held-out recordings unused while adjusting prompts on development examples. Choose the input strategy using the development set, then run the selected configuration on the held-out cases. If held-out failures lead to further tuning, report that reuse and obtain new independent clips before presenting a fresh held-out result.
+
+The prepare-only CLI also accepts `--frame-count N` (5–120) to investigate denser sampling without changing the app default. The requested count is saved in the reviewed plan and its exact model request count is recomputed before invocation. Changing density needs a new plan and spending scope.
 
 The existing harness records expected/actual assessment, action-window overlap, elapsed time and provider usage. Review the actual descriptions and cited frames as well: matching the three-way class alone does not establish a useful or accurate explanation. Report counts and concrete misses/false flags/abstentions, with the small-set limitation.
 

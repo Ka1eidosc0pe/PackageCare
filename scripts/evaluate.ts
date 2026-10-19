@@ -10,6 +10,7 @@ const { values, positionals } = parseArgs({
     "max-requests": { type: "string" },
     strategy: { type: "string" },
     split: { type: "string" },
+    "frame-count": { type: "string" },
   },
 });
 if (positionals.length !== 1)
@@ -17,7 +18,7 @@ if (positionals.length !== 1)
     "Prepare: npm run evaluate -- manifest.json [--strategy dense_frames] [--split development]. After spending approval: npm run evaluate -- /path/to/plan.json --invoke --max-requests N",
   );
 if (values.invoke) {
-  if (values.strategy || values.split)
+  if (values.strategy || values.split || values["frame-count"])
     throw new Error(
       "Invocation uses the reviewed plan's strategy/split. Prepare another plan to change them.",
     );
@@ -51,6 +52,10 @@ if (values.invoke) {
     z
       .enum(["development", "held_out", "all"])
       .parse(values.split || "development"),
+    undefined,
+    values["frame-count"] === undefined
+      ? undefined
+      : Number(values["frame-count"]),
   );
   console.log(
     JSON.stringify({
@@ -62,6 +67,7 @@ if (values.invoke) {
       maximumOutputTokensPerRequest: 2500,
       retries: 0,
       storage: "local",
+      requestedFrameCount: plan.requestedFrameCount,
       note: "Prepared locally. Review the exact sources/call count and current pricing, then obtain owner spending approval before --invoke.",
     }),
   );

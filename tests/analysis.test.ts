@@ -403,6 +403,11 @@ describe("job outcomes", () => {
       message: "Too many tokens per day, please wait before trying again.",
       expected: "daily token quota",
     },
+    {
+      name: "ServiceUnavailableException",
+      message: "Temporary provider failure with private diagnostics",
+      expected: "Bedrock is temporarily unavailable",
+    },
   ])(
     "persists $name as failed without a successful assessment or automatic retry",
     async ({ name, message, expected }) => {
