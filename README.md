@@ -76,6 +76,8 @@ The owner chose tracking validation before training. A [local SAM2 extension](do
 
 [Offline reverse completion](docs/reverse-tracking.md) then raised office coverage to 7/8 using later automatic seeds, with explicit future-conditioning labels. Visual review also exposed leg spill from boundary-truncated seeds; a zero-model saved-mask replay withholds those additions using an interior-seed guard. This is reused development evidence, not independent validation, live detection or a handling classifier. Original forward evidence remains intact; false parcel semantics still need work.
 
+[The local temporal-action comparison](docs/local-action-baseline.md) completed five whole-clip and fifteen automatic-window forwards over those same five development sources. Neither configuration usefully detected the clear van toss, and the Ring at-rest control received forced action classes. The generic classifier is not adopted; this comparison is closed. No custom training or cloud inference ran. All twenty input arrays match sealed previews, and the source passed CI with twenty-three dependency-free CV/action checks plus application/build/Ohio/Linux runtime verification. Handling quality and independent data remain open.
+
 Recipient notes and footage text are treated as data. Model output is schema-checked, cited frames/time ranges are validated, and candidate observations receive a verification pass. The model returns structured observations; image time bounds are derived from cited frame offsets rather than guessed times. This limits unsupported output; it does not establish a measured detection accuracy.
 
 ### AWS deployment
