@@ -9,6 +9,7 @@ import uuid
 from experiments.local_cv.prepare import prepare
 from experiments.local_cv.associate import associate
 from experiments.local_cv.prepare_tracking import prepare_tracking
+from experiments.local_cv.seed_policy import select_new_seeds
 
 
 class LocalCvPreparation(unittest.TestCase):
@@ -148,6 +149,51 @@ class LocalCvTrackingPreparation(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Frame/case/time mismatch"):
                 prepare_tracking(source, root / "rejected")
             self.assertFalse((root / "rejected").exists())
+
+
+class MaskAgreementSeeds(unittest.TestCase):
+    def test_unique_current_mask_reuses_candidate_without_changing_input(self):
+        seed = {
+            "objectId": 5,
+            "box": [10, 10, 20, 20],
+            "frameIndex": 5,
+            "frameId": "source-id",
+        }
+        existing = [
+            {
+                "objectId": 1,
+                "box": [10, 10, 20, 20],
+                "areaPixels": 100,
+                "objectScoreLogit": 4,
+            }
+        ]
+        accepted, decisions = select_new_seeds([seed], existing)
+        self.assertEqual(accepted, [])
+        self.assertEqual(decisions[0]["possibleDuplicateOf"], 1)
+        self.assertEqual(decisions[0]["decision"], "possible_duplicate")
+        self.assertEqual(seed["frameId"], "source-id")
+        self.assertEqual(existing[0]["objectId"], 1)
+
+    def test_ambiguous_or_absent_or_different_object_does_not_suppress_new_parcel(self):
+        seed = {"objectId": 5, "box": [10, 10, 20, 20]}
+        visible = {
+            "objectId": 1,
+            "box": [10, 10, 20, 20],
+            "areaPixels": 100,
+            "objectScoreLogit": 4,
+        }
+        cases = [
+            [],
+            [{**visible, "objectScoreLogit": -1}],
+            [{**visible, "areaPixels": 0, "box": None}],
+            [{**visible, "box": [30, 30, 40, 40]}],
+            [visible, {**visible, "objectId": 2}],
+        ]
+        for objects in cases:
+            with self.subTest(objects=objects):
+                accepted, decisions = select_new_seeds([seed], objects)
+                self.assertEqual(accepted, [seed])
+                self.assertEqual(decisions[0]["decision"], "seeded")
 
 
 class LocalCvAssociation(unittest.TestCase):

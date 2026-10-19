@@ -5,6 +5,7 @@ import os
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 os.environ["DO_NOT_TRACK"] = "1"
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "0"
 from pathlib import Path
 import hashlib
 import json
@@ -12,6 +13,11 @@ import io
 import time
 import math
 import argparse
+
+if __package__:
+    from .seed_policy import MASK_AGREEMENT, select_new_seeds
+else:
+    from seed_policy import MASK_AGREEMENT, select_new_seeds
 
 
 def main():
@@ -26,6 +32,8 @@ def main():
     if hashlib.sha256(plan_bytes).hexdigest() != args.plan_sha256:
         raise ValueError("Changed scope")
     plan = json.loads(plan_bytes)
+    if plan.get("seedPolicy") not in (None, MASK_AGREEMENT):
+        raise ValueError("Unreviewed seed policy")
     model_dir = args.model_dir.resolve()
     if (
         plan["model"] != "facebook/sam2.1-hiera-tiny"
@@ -33,7 +41,7 @@ def main():
         or plan["direction"] != "forward"
         or plan["cloudCalls"]
         or plan["training"]
-        or plan["device"] != "cpu"
+        or plan["device"] not in ("cpu", "mps")
         or plan["threads"] != 4
         or plan["maskLogitThreshold"] != 0
         or plan["maximumFrames"] != 48
@@ -89,6 +97,9 @@ def main():
     from transformers import Sam2VideoModel, Sam2VideoProcessor
     from PIL import Image
 
+    if plan["device"] == "mps" and not torch.backends.mps.is_available():
+        raise ValueError("Local MPS unavailable; no fallback or cloud inference")
+    device = plan["device"]
     torch.set_num_threads(4)
     torch.manual_seed(0)
     processor = Sam2VideoProcessor.from_pretrained(
@@ -101,7 +112,7 @@ def main():
             trust_remote_code=False,
             use_safetensors=True,
         )
-        .to("cpu")
+        .to(device)
         .eval()
     )
     (out / "invocation.json").write_text(
@@ -109,13 +120,31 @@ def main():
             {
                 "planSha256": hashlib.sha256(plan_bytes).hexdigest(),
                 "scriptSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                "policyModuleSha256": hashlib.sha256(
+                    Path(__file__).with_name("seed_policy.py").read_bytes()
+                ).hexdigest(),
+                "associationModuleSha256": hashlib.sha256(
+                    Path(__file__).with_name("associate.py").read_bytes()
+                ).hexdigest(),
                 "training": False,
                 "cloudCalls": False,
+                "device": device,
+                "dtype": "float32",
+                "mpsFallback": False,
+                "torchVersion": torch.__version__,
             },
             indent=2,
         )
     )
-    result = {"state": "running", "warning": plan["purpose"], "frames": []}
+    result = {
+        "state": "running",
+        "warning": plan["purpose"],
+        "device": device,
+        "seedPolicy": plan.get("seedPolicy"),
+        "modelForwardCalls": 0,
+        "modelObjectEvaluations": 0,
+        "frames": [],
+    }
     started = time.monotonic()
 
     def save():
@@ -124,15 +153,65 @@ def main():
         p.with_suffix(".tmp").replace(p)
 
     save()
+
+    def infer(session, fi, image):
+        if result["modelForwardCalls"] >= 96:
+            raise ValueError("Local comparison call bound reached")
+        result["modelForwardCalls"] += 1
+        result["modelObjectEvaluations"] += len(session.obj_ids)
+        save()
+        with torch.inference_mode():
+            prediction = model(inference_session=session, frame_idx=fi)
+        masks = processor.post_process_masks(
+            [prediction.pred_masks],
+            original_sizes=[[image.height, image.width]],
+            binarize=False,
+        )[0]
+        masks = (masks[:, 0] > 0).cpu().numpy()
+        scores = prediction.object_score_logits.cpu().reshape(-1).tolist()
+        if not len(masks) == len(prediction.object_ids) == len(scores):
+            raise ValueError("Mask/object count mismatch")
+        objects = []
+        for identity, mask, score in zip(prediction.object_ids, masks, scores):
+            yy, xx = np.nonzero(mask)
+            box = (
+                [int(xx.min()), int(yy.min()), int(xx.max() + 1), int(yy.max() + 1)]
+                if len(xx)
+                else None
+            )
+            if not math.isfinite(score):
+                raise ValueError("Non-finite tracking score")
+            objects.append(
+                {
+                    "objectId": identity,
+                    "box": box,
+                    "areaPixels": int(mask.sum()),
+                    "objectScoreLogit": score,
+                }
+            )
+        return prediction, masks, objects
+
     try:
         for ci, c in enumerate(plan["cases"]):
             video = [Image.open(io.BytesIO(b)).convert("RGB") for b in frozen[ci]]
             session = processor.init_video_session(
-                video=video, inference_device="cpu", dtype=torch.float32
+                video=video,
+                inference_device=device,
+                processing_device="cpu",
+                video_storage_device="cpu",
+                dtype=torch.float32,
             )
             for fi, f in enumerate(c["frames"]):
                 t = time.monotonic()
                 new = [s for s in c["seeds"] if s["frameIndex"] == fi]
+                cached = None
+                if plan.get("seedPolicy") and session.obj_ids:
+                    cached = infer(session, fi, video[fi])
+                    new, decisions = select_new_seeds(new, cached[2])
+                else:
+                    decisions = [
+                        {"objectId": s["objectId"], "decision": "seeded"} for s in new
+                    ]
                 if new:
                     processor.add_inputs_to_inference_session(
                         inference_session=session,
@@ -153,42 +232,9 @@ def main():
                     )
                     save()
                     continue
-                with torch.inference_mode():
-                    prediction = model(inference_session=session, frame_idx=fi)
-                masks = processor.post_process_masks(
-                    [prediction.pred_masks],
-                    original_sizes=[[video[fi].height, video[fi].width]],
-                    binarize=False,
-                )[0]
-                masks = (masks[:, 0] > 0).cpu().numpy()
-                scores = prediction.object_score_logits.cpu().reshape(-1).tolist()
-                objects = []
-                if not len(masks) == len(prediction.object_ids) == len(scores):
-                    raise ValueError("Mask/object count mismatch")
-                for oi, (identity, mask, score) in enumerate(
-                    zip(prediction.object_ids, masks, scores)
-                ):
-                    yy, xx = np.nonzero(mask)
-                    box = (
-                        [
-                            int(xx.min()),
-                            int(yy.min()),
-                            int(xx.max() + 1),
-                            int(yy.max() + 1),
-                        ]
-                        if len(xx)
-                        else None
-                    )
-                    if not math.isfinite(score):
-                        raise ValueError("Non-finite tracking score")
-                    objects.append(
-                        {
-                            "objectId": identity,
-                            "box": box,
-                            "areaPixels": int(mask.sum()),
-                            "objectScoreLogit": score,
-                        }
-                    )
+                prediction, masks, objects = (
+                    infer(session, fi, video[fi]) if new or cached is None else cached
+                )
                 np.savez_compressed(
                     out / f"case-{ci}-frame-{fi}.npz",
                     **{
@@ -203,6 +249,7 @@ def main():
                         "id": f["id"],
                         "offsetMs": f["offsetMs"],
                         "seededObjectIds": [s["objectId"] for s in new],
+                        "seedDecisions": decisions,
                         "objects": objects,
                         "elapsedMs": round((time.monotonic() - t) * 1000),
                     }

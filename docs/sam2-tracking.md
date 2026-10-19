@@ -28,10 +28,28 @@ Source credits/edits/hashes remain in [the frozen provenance record](../evaluati
 
 Tracking took **299.824 s** after model load, including processing and local checkpoints/mask files. Median frame update **2.8525 s**; per-case frame processing approximately **59.964 / 205.377 / 34.095 s**. These are workstation results, not an AWS benchmark. The cluttered postal scene accumulates duplicate/background seeds; following 35 candidates is costly. Do not adopt this latency as the product experience or hide it behind an unmeasured cloud claim.
 
-Next: reduce duplicate seeds using agreement with existing masks, retain uncertainty through occlusion, and validate correct-object continuity on independent recordings. False semantic seeds need separate treatment. A movement threshold or contact proxy tuned on these three clips would not establish handling quality. No training commitment follows; task-data coverage and the PRD's twelve-clip gate remain open.
+Next: retain uncertainty through occlusion and validate correct-object continuity on independent recordings. False semantic seeds need separate treatment. A movement threshold or contact proxy tuned on these three clips would not establish handling quality. No training commitment follows; task-data coverage and the PRD's twelve-clip gate remain open.
+
+## Duplicate-seed and local GPU comparison
+
+Two subsequent **free local** runs kept the original weights, all 48 images, the automatic candidate pool (10 / 35 / 3) and forward direction. No labels, manual box selection, later corrections or training entered either plan. The new `mask_agreement_v1` policy considers every scheduled seed: suppress a new seed only when its box agrees with one positive-presence, nonempty current mask at IoU ≥ 0.6, with a ≥ 0.1 margin over the next match. Otherwise retain it. A suppressed seed is recorded as `possible_duplicate`; spatial agreement is not proof of physical identity. Original detector inputs remain intact.
+
+| Run | Device | Accepted seeds by case | Forward calls | Object evaluations | Saved object-frame predictions | Time after model load |
+|---|---|---|---:|---:|---:|---:|
+| Original, every seed | CPU | 10 / 35 / 3 | 48 | 501 | 501 | 299.824 s |
+| Mask agreement | CPU | 7 / 16 / 3 | 61 | 432 | 330 | 258.716 s |
+| Same mask agreement | Local Apple GPU / MPS | 7 / 16 / 3 | 61 | 432 | 330 | 207.105 s |
+
+The original run's call/object-evaluation counts follow from its one-forward-per-frame loop and saved objects. Later runs explicitly count both the probe of existing masks and any same-frame recomputation after accepting new seeds. Thus 22 fewer seeds do **not** imply a proportional compute reduction. CPU gating was approximately 13.7% faster than the original; MPS was approximately 19.9% faster than gated CPU and 30.9% faster than the original. These are single sequential workstation measurements, including preprocessing/checkpoint/mask saving, excluding model initialization. No repeated timing distribution, end-to-end app latency or cloud estimate is established.
+
+Review confirms object 1 still follows the loading carton through the detector miss and visibly airborne frame; duplicate seeds 5 and 7 are suppressed. Postal objects 1, 3 and the newly arriving 24 remain; all three Ring seeds remain, including false mat/background candidates. Later loading occlusion/mask spill remains. CPU/MPS accepted seed IDs agree. Across all 330 corresponding saved masks, mean IoU is 0.9999919 and minimum 0.9990421. **This measures backend consistency against CPU predictions, not accuracy against ground truth.** Selected MPS masks were also visually reviewed. There is no new semantic classification result.
+
+CPU scope SHA256 `954471454e9278e1bbe24713b493b6805a4afcb729b61eb05ff02eebef1dd594`; MPS scope `33e696c46a3607cfc05991104b049befb2c8551fbaf74301a77945bf5caa9cff`. Complete receipts/results/masks and invocation-time source snapshots remain under ignored `data/local-sam2-gated/` and `data/local-sam2-mps/`; each has one `attempt-1/`, no retries. [Portable measured summary](../evaluation/local-tracking-comparison.json).
+
+MPS was available in the normal local process but hidden by the restricted process. The GPU run used float32, four CPU threads, CPU preprocessing/video storage and explicit MPS inference. CPU fallback was disabled before importing PyTorch, and the runner refuses unavailable MPS. All 48 frames completed without fallback. This does not make the current runtime suitable for the product: roughly 3.5 minutes for twelve sampled seconds, in addition to detector initialization/inference, remains an engineering issue.
 
 ## Reproduction and software verification
 
 Helpers are under [experiments/local_cv](../experiments/local_cv/README.md). Portable preparation was checked against the original for all **48 frame IDs/times/hashes and all 48 automatic seeds**. It has not received another full model run. Existing-run refusal was exercised before model imports and preserved original receipt/results byte-for-byte. The prototype used for the actual inference remains with its script digest under ignored `data/local-sam2/`; original masks/results are under `attempt-1/`.
 
-Six standard-library tests now cover the earlier evidence/association invariants plus refusal of hand-selected seed tracks and wrong case/time mappings. They do not measure model accuracy. The generalized helper follows the same inference loop; only the original prototype has the full-run receipt. Production application behavior, model allowlist, preview and saved reports remain unchanged.
+Eight standard-library tests now cover evidence/association invariants, refusal of hand-selected seed tracks and wrong case/time mappings, and conservative seed gating for unique versus ambiguous/absent/different masks. They do not measure model accuracy. The original baseline used the preserved prototype; the generalized helper received the complete gated CPU and MPS runs above. Production application behavior, model allowlist, preview and saved reports remain unchanged.

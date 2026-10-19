@@ -8,11 +8,15 @@ import shutil
 
 if __package__:
     from .associate import associate
+    from .seed_policy import MASK_AGREEMENT
 else:
     from associate import associate
+    from seed_policy import MASK_AGREEMENT
 
 
-def prepare_tracking(source: Path, output: Path):
+def prepare_tracking(source: Path, output: Path, mask_agreement=False, device="cpu"):
+    if device not in ("cpu", "mps"):
+        raise ValueError("Local CPU or MPS only")
     if output.exists():
         raise FileExistsError("Existing tracking scope preserved")
     raw = {
@@ -99,7 +103,7 @@ def prepare_tracking(source: Path, output: Path):
             "purpose": "Local forward mask propagation prerequisite. Automatic first detection of EVERY candidate track, no manual action/region seed or future correction. No handling classification, training, model adoption or cloud calls. Same three development excerpts, not held out.",
             "model": "facebook/sam2.1-hiera-tiny",
             "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
-            "device": "cpu",
+            "device": device,
             "threads": 4,
             "maskLogitThreshold": 0,
             "direction": "forward",
@@ -111,6 +115,11 @@ def prepare_tracking(source: Path, output: Path):
             "sourceHashes": {n: hashlib.sha256(b).hexdigest() for n, b in raw.items()},
             "cases": cases,
         }
+        if mask_agreement:
+            plan["seedPolicy"] = MASK_AGREEMENT
+            plan["purpose"] = (
+                "Local forward tracking comparison: all automatic candidates considered at first detection; suppress a new seed only on unique current-mask agreement, retain ambiguous/new/absent cases. No physical identity guarantee, handling classification, training, cloud calls or held-out accuracy claim."
+            )
         p = output / "plan.json"
         p.write_text(json.dumps(plan, indent=2))
         return {
@@ -127,5 +136,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--mask-agreement", action="store_true")
+    parser.add_argument("--device", choices=["cpu", "mps"], default="cpu")
     args = parser.parse_args()
-    print(json.dumps(prepare_tracking(args.source, args.output)))
+    print(
+        json.dumps(
+            prepare_tracking(args.source, args.output, args.mask_agreement, args.device)
+        )
+    )

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "purpose": "Development tracking compute/backend comparison; no ground-truth accuracy, handling classification or production adoption.",
+  "framesPerCase": [
+    16,
+    16,
+    16
+  ],
+  "automaticSeedPool": [
+    10,
+    35,
+    3
+  ],
+  "sourceProvenance": "handling-pilot-sources.json",
+  "runs": [
+    {
+      "name": "local-sam2",
+      "device": "cpu",
+      "planSha256": "882eae4a727bf136449d419aca7a031fef5ba5a32bd29101d483a51aa6d52283",
+      "resultsSha256": "c693f59422e1538bd9b8e6c3a4a0e39758585ce8d0b6035337b7bf47790a2a7d",
+      "seedPolicy": null,
+      "acceptedSeedsPerCase": [
+        10,
+        35,
+        3
+      ],
+      "suppressedSeedCount": 0,
+      "modelForwardCalls": 48,
+      "modelObjectEvaluations": 501,
+      "countProvenance": "Derived from one forward per saved frame in original prototype.",
+      "savedObjectFramePredictions": 501,
+      "elapsedAfterModelLoadMs": 299824,
+      "medianFrameProcessingMs": 2852.5,
+      "frameProcessingMsPerCase": [
+        59964,
+        205377,
+        34095
+      ]
+    },
+    {
+      "name": "local-sam2-gated",
+      "device": "cpu",
+      "planSha256": "954471454e9278e1bbe24713b493b6805a4afcb729b61eb05ff02eebef1dd594",
+      "resultsSha256": "54ba81ba5c9b850350d5509098ce438286c3ad9bfef477440ee161e43ce63dee",
+      "seedPolicy": {
+        "kind": "mask_agreement_v1",
+        "minimumIou": 0.6,
+        "ambiguityMargin": 0.1,
+        "minimumPresenceLogit": 0
+      },
+      "acceptedSeedsPerCase": [
+        7,
+        16,
+        3
+      ],
+      "suppressedSeedCount": 22,
+      "modelForwardCalls": 61,
+      "modelObjectEvaluations": 432,
+      "countProvenance": "Explicit runner counters including probe/recompute.",
+      "savedObjectFramePredictions": 330,
+      "elapsedAfterModelLoadMs": 258716,
+      "medianFrameProcessingMs": 2836.5,
+      "frameProcessingMsPerCase": [
+        54667,
+        169461,
+        34297
+      ]
+    },
+    {
+      "name": "local-sam2-mps",
+      "device": "mps",
+      "planSha256": "33e696c46a3607cfc05991104b049befb2c8551fbaf74301a77945bf5caa9cff",
+      "resultsSha256": "29836c57b9f7c5c533841bef872c186f421174adb6d4ae317dd143aa766452d4",
+      "seedPolicy": {
+        "kind": "mask_agreement_v1",
+        "minimumIou": 0.6,
+        "ambiguityMargin": 0.1,
+        "minimumPresenceLogit": 0
+      },
+      "acceptedSeedsPerCase": [
+        7,
+        16,
+        3
+      ],
+      "suppressedSeedCount": 22,
+      "modelForwardCalls": 61,
+      "modelObjectEvaluations": 432,
+      "countProvenance": "Explicit runner counters including probe/recompute.",
+      "savedObjectFramePredictions": 330,
+      "elapsedAfterModelLoadMs": 207105,
+      "medianFrameProcessingMs": 2182.0,
+      "frameProcessingMsPerCase": [
+        47573,
+        135012,
+        24199
+      ]
+    }
+  ],
+  "backendConsistency": {
+    "comparisons": 330,
+    "meanMaskIou": 0.9999919067178139,
+    "minimumMaskIou": 0.9990421455938697,
+    "below0_95": [],
+    "note": "Backend consistency only; CPU masks are not ground truth."
+  },
+  "limitations": [
+    "Single sequential timing per configuration; not an application or AWS latency benchmark.",
+    "All three original development sources reused, not held out.",
+    "Mask agreement is a spatial duplicate heuristic, not physical identity.",
+    "Doormat/background false seeds and late occlusion persist.",
+    "No training, cloud calls, media upload, deployment or paid scope."
+  ]
+}

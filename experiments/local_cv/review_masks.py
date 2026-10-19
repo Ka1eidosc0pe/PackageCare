@@ -28,6 +28,13 @@ def main():
         raise ValueError("Object was not an automatic seed")
     output = args.run / "review"
     output.mkdir(exist_ok=True)
+    skipped = {
+        d["objectId"]: d["possibleDuplicateOf"]
+        for f in results["frames"]
+        if f["case"] == args.case
+        for d in f.get("seedDecisions", [])
+        if d["decision"] == "possible_duplicate"
+    }
     for identity in selected:
         seed = next(s for s in case["seeds"] if s["objectId"] == identity)
         sheet = Image.new("RGB", (344 * 4, 226 * 4), "#111820")
@@ -38,6 +45,8 @@ def main():
             im = Image.open(io.BytesIO(data)).convert("RGBA")
             file = args.run / f"case-{args.case}-frame-{fi}.npz"
             note = "not seeded"
+            if identity in skipped and fi >= seed["frameIndex"]:
+                note = f"skipped: agrees with {skipped[identity]}"
             if file.exists():
                 with np.load(file, allow_pickle=False) as masks:
                     if str(identity) in masks:
