@@ -47,3 +47,11 @@ A miss or unsupported output is a product feasibility finding. Return to the own
 ## Current authorization and application state
 
 No inference or deployment approval is open. No paid job is running. The application still permits only Nova Lite; the Qwen harness is evaluation-only. Existing source clips, failure diagnostics and frozen reports remain intact. Do not claim Gate B passes, submit misleading model results, or mark the full implementation goal complete.
+
+### Frozen pilot outcome
+
+The free prerequisites subsequently produced a source-credited ordinary postal placement, alongside the existing van-loading and Ring at-rest controls. [The frozen pilot](handling-pilot.md) used sixteen uniform frames/excerpt in automatic three-image windows, with preflighted hashes, fixed labels and a maximum of 48 Qwen requests. The owner approved up to $10 for that exact scope.
+
+It stopped after **one** returned request: valid JSON but no observations, contrary to the required cited-fact/visibility fallback. Only offsets 125/375/625 ms entered inference; the annotated toss and both control cases were not reached. Returned usage estimates to **$0.00111707 before tax**. No complete pass or assessment exists. The scope is closed, with all remaining calls unused and no follow-up variants. This is a response-contract failure, not a completed three-class quality evaluation.
+
+Do not continue the structured-Qwen prompt-diagnostic branch automatically. Return these results and a recommendation to the owner before changing approach. A pretrained temporal-CV baseline is a candidate next direction; the CAP/MEVA source research does not yet establish parcel-action training coverage, and this pilot authorizes no training, additional inference or deployment.

@@ -40,6 +40,7 @@ Imported source bytes are saved before processing starts, so a restart can resum
 | `npm run ring:probe` | Exercise actual Ring device discovery and optional recording retrieval |
 | `npm run evaluate -- /path/to/manifest.json --strategy dense_frames` | Prepare a local evaluation plan without inference; invocation needs spending approval |
 | `npm run benchmark:vision -- /path/to/baseline-plan.json` | Prepare a bounded alternative-model experiment; no inference without separate spending approval |
+| `npm run pilot:vision -- /path/to/prepared-evaluation-plan.json` | Prepare the fixed rough/ordinary/unclear whole-clip pilot locally; invocation needs separate spending approval |
 | `npm run infra:synth` | Generate the AWS deployment template; does not deploy |
 | `npm run maintenance` | Preview expired cases and old orphan files; add `-- --apply` to delete them |
 
@@ -65,7 +66,7 @@ The owner requires explicit approval before any potentially billable operation, 
 
 `ANALYSIS_STRATEGY=dense_frames` is the initial adapter default: up to four frames per second, capped at 120 across the full clip, analyzed in overlapping windows of at most five images. `sparse_frames` and `native_video` exist for comparison. Sparse input passed a two-request diagnostic on a Ring Package clip already at rest. A first CC BY development comparison then found dense abstentions and sparse/native false clears on a brief carton release; 8 fps dense also abstained. See [actual results](docs/evaluation-results-2026-10-19.md). The full labeled strategy/quality gate remains pending. Native video sampling may miss brief actions; denser inputs cost more and also need evaluation.
 
-An evaluation-only [Qwen3-VL benchmark plan](docs/model-benchmark-plan.md) reuses the same sixteen source frames in a full-sequence request. It does not expand the application model allowlist. Preparation, validation and mocked tests make no model calls; an explicit, separately approved two-request scope is required to invoke it.
+An evaluation-only [Qwen3-VL benchmark](docs/model-benchmark-plan.md) recorded empty structured replies and a useful three-frame caption, without establishing handling quality. The owner-approved [fixed three-case pilot](docs/handling-pilot.md) then stopped on its first empty-observation reply; it did not reach the annotated toss or either control case. Estimated returned-usage cost was $0.00111707 before tax. Its scope is closed; no follow-up variants ran. Preparation, validation and mocked tests make no model calls. The application model allowlist remains unchanged.
 
 Recipient notes and footage text are treated as data. Model output is schema-checked, cited frames/time ranges are validated, and candidate observations receive a verification pass. The model returns structured observations; image time bounds are derived from cited frame offsets rather than guessed times. This limits unsupported output; it does not establish a measured detection accuracy.
 

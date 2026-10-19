@@ -69,3 +69,21 @@ One request returned, no retries; 920 input / 237 output tokens, 5.209 seconds; 
 Under the separately approved conditional $0.75 batch, the first request returned empty observations and five limitation statements describing the sequence as untrackable/static. The new nonempty-observation check rejected it; no completed assessment or verification was saved. This is still a miss against the existing visible-action annotation, not evidence that the carton was static. The conditional Ring control **did not run**. One attempted/returned request, 5,026 input / 163 output tokens, 5.442 seconds, estimated **$0.00309736 before tax**. The entire batch stopped and is closed; unused calls are not available for reuse.
 
 The three-frame caption versus sixteen-frame structured result motivates a narrower-context development diagnostic. It does not isolate context length from schema/prompt effects or justify production adoption. Source labels, prior failures and action annotation remain unchanged.
+
+## Fixed three-case pilot after evaluation reset
+
+The selected-action diagnostic above was deferred, not invoked. Instead, the owner approved up to **$10** for one frozen rough/ordinary/unclear pilot: maximum 48 direct in-Region Qwen requests, three uniformly sampled frames/window, max 2,500 output tokens, no retries, local storage, no training/deployment. All sources, labels and hashes were frozen before inference. [Exact scope, credits, decision and local receipts](handling-pilot.md).
+
+The pilot **stopped on request one**, at observation window zero of case 01. It received normal `end_turn` JSON with empty observations and five limitation statements; the required cited observation/visibility fallback was absent. The evidence validator rejected it. Raw response and usage survived; no completed window, pass, verification or assessment exists.
+
+| Planned case | Actual outcome | Requests | Time excluding preparation | Usage-based estimated USD |
+|---|---|---:|---:|---:|
+| Van-loading release, annotated rough | Failed evidence validation; annotated action not reached | 1 returned | 3.285 s | $0.00111707 |
+| New postal conveyor placement, annotated ordinary | Not run | 0 | — | — |
+| Saved Ring at-rest excerpt, annotated unable | Not run | 0 | — | — |
+
+Sent offsets were **125/375/625 ms**, preceding the prewritten 1,300–2,300 ms action window. Visual inspection shows cartons and changing arm/carton positions with occlusion, so generic rest/contact limitations do not constitute cited evidence. This is neither a demonstrated toss miss nor successful abstention: the candidate failed its response contract before the planned evaluation could complete. No whole-clip or three-class accuracy claim is possible.
+
+Reported usage was **1,395 input / 142 output tokens**. At $0.00053/1K input and $0.00266/1K output, the estimate is **$0.00111707 before tax**. Every attempted request returned usage. This is an estimate, not a reconciled bill. The approval scope is **closed**; the remaining 47 requests cannot be reused. No automatic prompt variants or retries followed.
+
+The structured-Qwen candidate is not adopted. Recommend ending this prompt-diagnostic branch and discussing a pretrained temporal-CV feasibility baseline/data plan before the next spending scope. CAP and MEVA are licensed research leads, not a validated PackageCare training corpus. No training has started; the twelve-clip quality gate and production model decision remain open.

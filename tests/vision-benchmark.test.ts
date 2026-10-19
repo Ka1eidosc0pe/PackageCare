@@ -10,11 +10,15 @@ import {
   runVisionBenchmark,
   VISION_BENCHMARK_MODEL,
 } from "../scripts/lib/vision-benchmark.js";
-async function source() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pc-vision-"));
+import {
+  prepareVisionPilot,
+  runVisionPilot,
+} from "../scripts/lib/vision-pilot.js";
+async function source(seed = "source test bytes", parent = os.tmpdir()) {
+  const root = await fs.mkdtemp(path.join(parent, "pc-vision-"));
   const media = new MediaStore(root, "");
   const original = await media.put(
-    Buffer.from("source test bytes"),
+    Buffer.from(seed),
     "original-test.mp4",
     "video/mp4",
     "video",
@@ -144,7 +148,7 @@ describe("bounded alternative vision benchmark", () => {
       expect(prepared.frameCount).toBe(8);
       await expect(
         runVisionBenchmark(prepared.planPath, 1, client),
-      ).rejects.toThrow("exactly two");
+      ).rejects.toThrow("exactly 2");
       await fs.writeFile(
         prepared.planPath,
         JSON.stringify({ ...scope, model: "us.amazon.nova-pro-v1:0" }),
@@ -300,6 +304,194 @@ describe("bounded alternative vision benchmark", () => {
       });
       expect(result.actual).toBeUndefined();
       expect(send).toHaveBeenCalledTimes(1);
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
+async function pilotDataset() {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pc-pilot-"));
+  await fs.mkdir(path.join(root, "media"));
+  let baseline: any;
+  const cases = [];
+  for (const [i, expected] of [
+    "possible_rough_handling",
+    "no_concern_observed",
+    "unable_to_assess",
+  ].entries()) {
+    const child = await source(`distinct source ${i}`, root);
+    const plan = JSON.parse(await fs.readFile(child.planPath, "utf8"));
+    baseline = plan;
+    const entry = plan.cases[0];
+    entry.item = { ...entry.item, id: `case-${i}`, expected };
+    if (expected !== "possible_rough_handling") delete entry.item.actionWindow;
+    cases.push(entry);
+    for (const asset of entry.assets)
+      await fs.copyFile(
+        path.join(child.root, "media", asset.key),
+        path.join(root, "media", asset.key),
+      );
+  }
+  const baselinePath = path.join(root, "plan.json");
+  await fs.writeFile(
+    baselinePath,
+    JSON.stringify({ ...baseline, maximumRequests: 12, cases }),
+  );
+  return { root, baselinePath };
+}
+
+describe("whole-clip mixed-case pilot", () => {
+  it("covers every prepared frame in both passes with bounded windows and exact global offsets, without accepting selected action frames", async () => {
+    const { root, planPath: baseline, assets } = await source();
+    try {
+      await expect(
+        prepareVisionBenchmark(
+          baseline,
+          path.join(root, "scopes"),
+          [63, 188, 313],
+          3,
+        ),
+      ).rejects.toThrow("cannot use selected");
+      const prepared = await prepareVisionBenchmark(
+        baseline,
+        path.join(root, "scopes"),
+        undefined,
+        3,
+      );
+      expect(prepared.maximumRequests).toBe(8);
+      const send = vi.fn().mockResolvedValue(reply(evidence("f2")));
+      await expect(
+        runVisionBenchmark(prepared.planPath, 2, { send } as any),
+      ).rejects.toThrow("exactly 8");
+      expect(send).not.toHaveBeenCalled();
+      const result = await runVisionBenchmark(prepared.planPath, 8, {
+        send,
+      } as any);
+      expect(result.state).toBe("complete");
+      expect(result.passes).toHaveLength(2);
+      expect(result.windowResults).toHaveLength(8);
+      const frames = assets.filter((a) => a.kind === "frame");
+      expect(new Set(result.windows.flatMap((w) => w.frameIds))).toEqual(
+        new Set(frames.map((a) => a.id)),
+      );
+      for (const pass of result.passes) {
+        expect(pass.usage).toEqual({ inputTokens: 400, outputTokens: 80 });
+        expect(pass.analysis.observations.map((o) => o.evidenceIds[0])).toEqual(
+          [frames[1].id, frames[3].id, frames[5].id, frames[7].id],
+        );
+        expect(pass.analysis.observations.map((o) => o.startMs)).toEqual([
+          188, 438, 688, 938,
+        ]);
+      }
+      expect(send).toHaveBeenCalledTimes(8);
+      for (const [i, call] of send.mock.calls.entries()) {
+        const content = call[0].input.messages[0].content;
+        expect(content.filter((c: any) => c.image)).toHaveLength(
+          i % 4 === 3 ? 2 : 3,
+        );
+        expect(JSON.stringify(content)).not.toContain(
+          "private-annotation-not-a-prompt",
+        );
+        expect(JSON.stringify(content)).not.toContain('"expected"');
+      }
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
+  it("checks every source before spending, retains valid mismatches across all classes, and cannot replay a completed pilot", async () => {
+    const { root, baselinePath } = await pilotDataset();
+    try {
+      const prepared = await prepareVisionPilot(
+        baselinePath,
+        path.join(root, "pilots"),
+      );
+      expect(prepared.maximumRequests).toBe(24);
+      const scope = JSON.parse(await fs.readFile(prepared.planPath, "utf8"));
+      const lastPath = path.join(
+        path.dirname(prepared.planPath),
+        scope.cases[2].plan,
+      );
+      const last = JSON.parse(await fs.readFile(lastPath, "utf8"));
+      const frame = last.baseline.cases[0].assets.find(
+        (a: any) => a.kind === "frame",
+      );
+      const file = path.join(path.dirname(lastPath), "media", frame.key);
+      const original = await fs.readFile(file);
+      const send = vi.fn().mockResolvedValue(
+        reply({
+          ...evidence("f1"),
+          observations: [
+            { ...evidence("f1").observations[0], label: "package_at_rest" },
+          ],
+        }),
+      );
+      await expect(
+        runVisionPilot(prepared.planPath, 23, { send } as any),
+      ).rejects.toThrow("exactly 24");
+      await fs.writeFile(file, "changed last case");
+      await expect(
+        runVisionPilot(prepared.planPath, 24, { send } as any),
+      ).rejects.toThrow("evidence changed");
+      expect(send).not.toHaveBeenCalled();
+      await fs.writeFile(file, original);
+      const result = await runVisionPilot(prepared.planPath, 24, {
+        send,
+      } as any);
+      expect(result.state).toBe("complete");
+      expect(result.results.map((r) => r.match)).toEqual([false, false, true]);
+      expect(result.results.every((r) => r.attemptedRequests === 8)).toBe(true);
+      expect(send).toHaveBeenCalledTimes(24);
+      await expect(
+        runVisionPilot(prepared.planPath, 24, { send } as any),
+      ).rejects.toMatchObject({ code: "EEXIST" });
+      expect(send).toHaveBeenCalledTimes(24);
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
+  it("stops the entire pilot on invalid verification, retaining the completed observation, partial usage and all raw receipts", async () => {
+    const { root, baselinePath } = await pilotDataset();
+    try {
+      const prepared = await prepareVisionPilot(
+        baselinePath,
+        path.join(root, "pilots"),
+      );
+      let calls = 0;
+      const send = vi
+        .fn()
+        .mockImplementation(async () =>
+          reply(evidence(++calls === 5 ? "f99" : "f2")),
+        );
+      const result = await runVisionPilot(prepared.planPath, 24, {
+        send,
+      } as any);
+      expect(result.state).toBe("failed");
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0]).toMatchObject({
+        state: "failed",
+        attemptedRequests: 5,
+        receivedResponses: 5,
+        usage: { inputTokens: 500, outputTokens: 100 },
+        diagnostic: { stage: "evidence", window: 0 },
+      });
+      expect(result.results[0].passes).toHaveLength(1);
+      expect(result.results[0].actual).toBeUndefined();
+      const receipts = (
+        await fs.readFile(
+          path.join(path.dirname(result.results[0].output), "responses.jsonl"),
+          "utf8",
+        )
+      )
+        .trim()
+        .split("\n")
+        .map((s) => JSON.parse(s));
+      expect(receipts.filter((r) => r.type === "response")).toHaveLength(5);
+      expect(JSON.stringify(receipts.at(-1))).toContain("f99");
+      expect(send).toHaveBeenCalledTimes(5);
+      await expect(
+        runVisionPilot(prepared.planPath, 24, { send } as any),
+      ).rejects.toMatchObject({ code: "EEXIST" });
     } finally {
       await fs.rm(root, { recursive: true, force: true });
     }

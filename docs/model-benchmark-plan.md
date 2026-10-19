@@ -1,5 +1,7 @@
 # Alternative vision benchmark — October 19, 2026
 
+All selected-frame proposals below remain historical/unapproved. Subsequent work uses the [fixed mixed-case whole-clip pilot](handling-pilot.md); do not invoke an old scope or reuse a closed approval.
+
 Status: **completed under a separate owner-approved $0.40 scope; that scope is now closed.** Two requests returned valid JSON but empty observations; the final result abstained. No further invocation is authorized by this document. See [actual results](evaluation-results-2026-10-19.md#alternative-vision-development-experiment).
 
 ## Reason for the experiment

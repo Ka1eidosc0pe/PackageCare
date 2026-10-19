@@ -57,3 +57,29 @@ The owner approved a new $0.75 maximum batch: v6 Ring dense processing first (at
 ### Subsequent development comparisons
 
 Two later separately approved scopes did run the source-credited excerpt: twelve requests comparing dense/sparse/native inputs, then sixteen requests for 8 fps dense input. All returned/validated, but neither dense run supported the annotated concern, and sparse/native returned no concern. No model-quality gate passed. Both scopes are closed; estimated combined inference cost $0.00877866 before tax. See [complete development results](evaluation-results-2026-10-19.md). This supersedes only the earlier statement that its *conditional Ring batch* did not invoke the excerpt; that historical batch did stop as agreed.
+
+## October 19 — action-dataset investigation and normal-control source
+
+The owner's custom-CV suggestion prompted a search for annotated, reusable action footage rather than more viral throw compilations. No model training, inference, paid stock purchase or rights-holder contact occurred.
+
+### CAP: real annotated data, limited immediate package fit
+
+The [official Consented Activities of People dataset](https://github.com/visym/cap) / [dataset site](https://visym.github.io/cap/) explicitly lists CC BY4.0 and consented subjects. It contains fine-grained object-handling activities and is a credible future transfer-learning source. The small public detection-validation archive was acquired through the official README's Dropbox link, not the 288/386GB classification archives. Download: **901,869,561 bytes**; published MD5 **72f58e69582c17dd366d3c7e85cf0da8** matched; local SHA256 **1a3da568bb217e99256a33b322c1bd644b5845deccaea0992ae4a941c761ff4e**. It contains 47 annotation files and 47 raw videos plus their visualizations. Only four raw recordings were extracted for initial inspection.
+
+Inspection found box packing/carrying, backpack placement and other household-object handling; the box example did not show the required ordinary box-lowering event. These are not automatically PackageCare normal-delivery labels. No CAP case enters the current pilot or a claimed training set. Preserve publisher attribution if used later: Jeffrey Byrne, Greg Castanon, Zhongheng Li and Gil Ettinger, “Fine-grained Activities of People Worldwide,” WACV2023, Visym Labs/STR, CC BY4.0. Avoid exposing irrelevant metadata fields in project artifacts. No face/identity analysis is part of PackageCare.
+
+The public training-directory index exposes the two large archives; public root listing returned403. No authenticated access, requester-pays request, prefix guessing or access workaround was attempted. The explorer's large embedded image exceeded an initial30MB metadata bound; a later read stopped after the7.36MB data-script block and did not execute its JavaScript. No archive-wide training download occurred.
+
+### MEVA: reusable reference, rendered labels excluded from inference
+
+[MEVA](https://mevadata.org/) and its [dataset license](https://mevadata.org/resources/MEVA-data-license.txt) explicitly provide CC BY4.0. Acquired the official Kitware exemplar ZIP: **286,906,812 bytes**; published SHA512 **7afa764e3fa659ce5e70fcf86cc74ad65b31e650e55f1ebe8c12a5437cccf8c39d1182fed19410ec5c8a3d2a7273331411e1a3edc2e37ca7725e9c187cafc09f** matched. Four short put-down/abandon-package renderings were inspected. They show bags/distant objects and contain burned-in activity labels/bounding boxes, so they are **reference-only, excluded from the pilot**. Obtain corresponding unannotated raw footage before any later inference to prevent label leakage. No MEVID identity dataset or face recognition was used. Credit Kitware Inc. and IARPA with the MEVA paper/license for any later reuse.
+
+### Selected ordinary handling control
+
+[DVIDS: Okinawa postal service broll package](https://www.dvidshub.net/video/776728/okinawa-postal-service-broll-package), U.S. Marine Corps video by MCSN Kelly Meyer / AFN Okinawa, November23,2020, lists PUBLIC DOMAIN. The [Public Use Notice](https://www.dvidshub.net/about/copyright) was read. Acquired the openly served1024×576 public playback rendition, **233,710,319 bytes**, SHA256 **4e61d332d00d53ea6c0d605ffb2752c658abc1e83b54caba8f2857681d94e41a**; it is not a native camera-file claim. No login, account creation or download-access bypass.
+
+Selected source94.5–98.5 seconds after visual inspection: a worker lowers a flat carton onto a conveyor with visible hand support, followed by a white parcel. No scene cut within the final4.004s excerpt. Audio removed/H.264 transcoded, no crop or speed change. Excerpt SHA256 **f43600e46fd05ff19e828f5cce5814b400e959c2cae3d532510a35e7e620f48a**. Pre-inference development label: no_concern_observed. This is postal sorting outside the doorstep domain and counts as one source group, regardless of additional excerpts.
+
+For any shared excerpt/report/demo, preserve source credit and this notice: “The appearance of U.S. Department of War (DoW) visual information does not imply or constitute DoW endorsement.” Public-domain listing is not an endorsement or a warranty of every third-party right. No public publication occurred.
+
+The [fixed pilot](handling-pilot.md) now has a rough, ordinary and handling-absent excerpt with [frozen annotations/hashes](../evaluation/handling-pilot-sources.json). It remains a three-case development pilot, not the twelve independent real delivery cases required for the feasibility gate. All source acquisition and preparation were anonymous public downloads/local processing, with no AWS project storage, provisioning, training or model requests.

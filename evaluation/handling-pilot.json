@@ -1,0 +1,24 @@
+[
+  {
+    "id": "handling-development-01",
+    "file": "../data/online-footage/clips/loading-development.mp4",
+    "source": "uploaded",
+    "expected": "possible_rough_handling",
+    "split": "development",
+    "actionWindow": [1300, 2300]
+  },
+  {
+    "id": "handling-development-02",
+    "file": "../data/online-footage/clips/postal-placement-development.mp4",
+    "source": "uploaded",
+    "expected": "no_concern_observed",
+    "split": "development"
+  },
+  {
+    "id": "handling-development-03",
+    "file": "../data/online-footage/clips/ring-at-rest-development.mp4",
+    "source": "ring_simulator",
+    "expected": "unable_to_assess",
+    "split": "development"
+  }
+]
