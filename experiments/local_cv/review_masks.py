@@ -19,7 +19,11 @@ def main():
 
     plan = json.loads(args.plan.read_text())
     results = json.loads((args.run / "results.json").read_text())
-    if results["state"] != "complete" or len(results["frames"]) != 48:
+    if (
+        results["state"] != "complete"
+        or len(results["frames"]) != plan["maximumFrames"]
+        or args.case >= len(plan["cases"])
+    ):
         raise ValueError("Requires completed run")
     case = plan["cases"][args.case]
     ids = [s["objectId"] for s in case["seeds"]]

@@ -34,10 +34,10 @@ def main():
         or scope["cloudCalls"]
         or scope["boxThreshold"] != 0.3
         or scope["textThreshold"] != 0.25
-        or len(scope["cases"]) != 3
+        or not 1 <= len(scope["cases"]) <= 3
         or any(len(c["frames"]) != 16 for c in scope["cases"])
     ):
-        raise ValueError("Not the fixed three-case localization scope")
+        raise ValueError("Not the bounded local localization scope")
     images = []
     for case in scope["cases"]:
         for frame in case["frames"]:
@@ -68,8 +68,8 @@ def main():
             or hashlib.sha256(data).hexdigest() != entry["sha256"]
         ):
             raise ValueError("Model file changed")
-    if len(images) != scope["maximumFrames"] or len(images) != 48:
-        raise ValueError("Expected exactly 48 prepared frames")
+    if len(images) != scope["maximumFrames"] or not 16 <= len(images) <= 48:
+        raise ValueError("Expected every prepared frame, at most 48")
     if (root / "invocation.json").exists():
         raise FileExistsError(
             "Existing run preserved; use a separately prepared output directory"

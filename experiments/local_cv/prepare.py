@@ -1,4 +1,4 @@
-"""Copy all frames from a prepared three-case evaluation; no models or networking."""
+"""Copy all frames from a bounded local evaluation; no models or networking."""
 
 import argparse
 import hashlib
@@ -12,8 +12,10 @@ def prepare(baseline: Path, output: Path):
         raise FileExistsError("Existing experiment directory preserved")
     plan = json.loads(baseline.read_text())
     cases = plan["cases"]
-    if len(cases) != 3 or len({c["sourceSha256"] for c in cases}) != 3:
-        raise ValueError("Expected three distinct development recordings")
+    if not 1 <= len(cases) <= 3 or len({c["sourceSha256"] for c in cases}) != len(
+        cases
+    ):
+        raise ValueError("Expected one to three distinct development recordings")
     pending = []
     seen = set()
     for case in cases:
@@ -74,14 +76,14 @@ def prepare(baseline: Path, output: Path):
                 }
             )
         scope = {
-            "purpose": "Evaluation-only parcel/hand localization prerequisite, not action classification, product adoption or training. Same three development excerpts; all sixteen frames each.",
+            "purpose": "Evaluation-only parcel/hand localization prerequisite, not action classification, product adoption or training. Every prepared development case and all sixteen frames each.",
             "model": "IDEA-Research/grounding-dino-tiny",
             "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
             "query": "cardboard box. parcel. hand.",
             "boxThreshold": 0.3,
             "textThreshold": 0.25,
             "device": "cpu",
-            "maximumFrames": 48,
+            "maximumFrames": 16 * len(cases),
             "training": False,
             "cloudCalls": False,
             "cases": prepared,
@@ -91,7 +93,7 @@ def prepare(baseline: Path, output: Path):
         return {
             "plan": str(file),
             "sha256": hashlib.sha256(file.read_bytes()).hexdigest(),
-            "frames": 48,
+            "frames": 16 * len(cases),
         }
     except Exception:
         shutil.rmtree(output)

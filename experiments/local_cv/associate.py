@@ -81,8 +81,14 @@ if __name__ == "__main__":
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
     source = json.loads(args.results.read_text())
-    if source["state"] != "complete" or len(source["frames"]) != 48:
-        raise ValueError("Requires the completed 48-frame development localization run")
+    cases = sorted({f["case"] for f in source["frames"]})
+    if (
+        source["state"] != "complete"
+        or not 1 <= len(cases) <= 3
+        or cases != list(range(len(cases)))
+        or any(sum(f["case"] == ci for f in source["frames"]) != 16 for ci in cases)
+    ):
+        raise ValueError("Requires a complete run of one to three sixteen-frame cases")
     result = {
         "warning": "Heuristic candidate association, not object identity ground truth, support/release inference, concern classification or accuracy. False boxes remain candidates. No interpolation or gap bridging.",
         "thresholds": {
@@ -93,7 +99,7 @@ if __name__ == "__main__":
         },
         "cases": [],
     }
-    for ci in range(3):
+    for ci in cases:
         frames = sorted(
             (f for f in source["frames"] if f["case"] == ci),
             key=lambda f: f["offsetMs"],

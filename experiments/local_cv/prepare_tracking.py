@@ -28,14 +28,12 @@ def prepare_tracking(source: Path, output: Path, mask_agreement=False, device="c
     tracks = json.loads(raw["tracks.json"])
     if (
         results["state"] != "complete"
-        or len(results["frames"]) != 48
-        or len(baseline["cases"]) != 3
+        or not 1 <= len(baseline["cases"]) <= 3
+        or len(results["frames"]) != 16 * len(baseline["cases"])
     ):
-        raise ValueError(
-            "Requires the complete three-case local detection prerequisite"
-        )
+        raise ValueError("Requires the complete bounded local detection prerequisite")
     indexed = {f["id"]: f for f in results["frames"]}
-    if len(indexed) != 48:
+    if len(indexed) != len(results["frames"]):
         raise ValueError("Duplicate result frame ID")
     cases = []
     images = []
@@ -100,7 +98,7 @@ def prepare_tracking(source: Path, output: Path, mask_agreement=False, device="c
         for key, data in images:
             (output / key).write_bytes(data)
         plan = {
-            "purpose": "Local forward mask propagation prerequisite. Automatic first detection of EVERY candidate track, no manual action/region seed or future correction. No handling classification, training, model adoption or cloud calls. Same three development excerpts, not held out.",
+            "purpose": "Local forward mask propagation prerequisite. Automatic first detection of EVERY candidate track, no manual action/region seed or future correction. No handling classification, training, model adoption or cloud calls. Every prepared case and frame retained.",
             "model": "facebook/sam2.1-hiera-tiny",
             "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
             "device": device,
@@ -109,7 +107,7 @@ def prepare_tracking(source: Path, output: Path, mask_agreement=False, device="c
             "direction": "forward",
             "training": False,
             "cloudCalls": False,
-            "maximumFrames": 48,
+            "maximumFrames": 16 * len(cases),
             "maximumObjectsPerCase": 35,
             "sourceDirectory": str(source.resolve()),
             "sourceHashes": {n: hashlib.sha256(b).hexdigest() for n, b in raw.items()},
@@ -120,6 +118,8 @@ def prepare_tracking(source: Path, output: Path, mask_agreement=False, device="c
             plan["purpose"] = (
                 "Local forward tracking comparison: all automatic candidates considered at first detection; suppress a new seed only on unique current-mask agreement, retain ambiguous/new/absent cases. No physical identity guarantee, handling classification, training, cloud calls or held-out accuracy claim."
             )
+        if "validationAnnotationSha256" in baseline:
+            plan["validationAnnotationSha256"] = baseline["validationAnnotationSha256"]
         p = output / "plan.json"
         p.write_text(json.dumps(plan, indent=2))
         return {

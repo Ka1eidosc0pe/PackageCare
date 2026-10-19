@@ -44,9 +44,9 @@ def main():
         or plan["device"] not in ("cpu", "mps")
         or plan["threads"] != 4
         or plan["maskLogitThreshold"] != 0
-        or plan["maximumFrames"] != 48
+        or plan["maximumFrames"] != 16 * len(plan["cases"])
         or plan["maximumObjectsPerCase"] != 35
-        or len(plan["cases"]) != 3
+        or not 1 <= len(plan["cases"]) <= 3
         or any(len(c["frames"]) != 16 or len(c["seeds"]) > 35 for c in plan["cases"])
     ):
         raise ValueError("Not the frozen local tracking scope")
@@ -155,7 +155,7 @@ def main():
     save()
 
     def infer(session, fi, image):
-        if result["modelForwardCalls"] >= 96:
+        if result["modelForwardCalls"] >= 2 * plan["maximumFrames"]:
             raise ValueError("Local comparison call bound reached")
         result["modelForwardCalls"] += 1
         result["modelObjectEvaluations"] += len(session.obj_ids)

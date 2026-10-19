@@ -10,13 +10,14 @@ from experiments.local_cv.prepare import prepare
 from experiments.local_cv.associate import associate
 from experiments.local_cv.prepare_tracking import prepare_tracking
 from experiments.local_cv.seed_policy import select_new_seeds
+from experiments.local_cv.score_tracking import score, POLICY
 
 
 class LocalCvPreparation(unittest.TestCase):
-    def fixture(self, root):
+    def fixture(self, root, case_count=3):
         (root / "media").mkdir()
         cases = []
-        for ci in range(3):
+        for ci in range(case_count):
             assets = []
             for i in range(16):
                 identity = str(uuid.uuid4())
@@ -91,8 +92,8 @@ class LocalCvPreparation(unittest.TestCase):
 
 
 class LocalCvTrackingPreparation(unittest.TestCase):
-    def fixture(self, root):
-        baseline, _ = LocalCvPreparation().fixture(root)
+    def fixture(self, root, case_count=3):
+        baseline, _ = LocalCvPreparation().fixture(root, case_count)
         source = root / "detections"
         prepare(baseline, source)
         plan = json.loads((source / "plan.json").read_text())
@@ -122,6 +123,22 @@ class LocalCvTrackingPreparation(unittest.TestCase):
         (source / "tracks.json").write_text(json.dumps({"cases": cases}))
         return source
 
+    def test_two_sources_are_not_padded_and_larger_scope_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = self.fixture(root, 2)
+            prepared = prepare_tracking(source, root / "tracking")
+            plan = json.loads(Path(prepared["plan"]).read_text())
+            self.assertEqual(plan["maximumFrames"], 32)
+            self.assertEqual(len(plan["cases"]), 2)
+            self.assertEqual(prepared["objectsPerCase"], [1, 1])
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            baseline, _ = LocalCvPreparation().fixture(root, 4)
+            with self.assertRaisesRegex(ValueError, "one to three"):
+                prepare(baseline, root / "rejected")
+            self.assertFalse((root / "rejected").exists())
+
     def test_uses_every_automatic_first_seed_and_rejects_manual_action_selection(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -149,6 +166,82 @@ class LocalCvTrackingPreparation(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Frame/case/time mismatch"):
                 prepare_tracking(source, root / "rejected")
             self.assertFalse((root / "rejected").exists())
+
+
+class TrackingScores(unittest.TestCase):
+    def fixture(self):
+        frames = [
+            {"id": f"frame-{i}", "sha256": str(i) * 64, "offsetMs": i * 250}
+            for i in range(3)
+        ]
+        plan = {"cases": [{"sourceSha256": "a" * 64, "frames": frames}]}
+        labels = {
+            "policy": POLICY,
+            "cases": [
+                {
+                    "sourceSha256": "a" * 64,
+                    "dimensions": [100, 100],
+                    "frames": [
+                        {**f, "visibility": "visible", "box": [10, 10, 20, 20]}
+                        for f in frames
+                    ],
+                }
+            ],
+        }
+        results = {
+            "state": "complete",
+            "frames": [
+                {
+                    "case": 0,
+                    "id": f["id"],
+                    "offsetMs": f["offsetMs"],
+                    "objects": [
+                        {
+                            "objectId": 1 if i == 0 else 2,
+                            "box": [10, 10, 20, 20],
+                            "areaPixels": 100,
+                            "objectScoreLogit": 4,
+                        }
+                    ],
+                }
+                for i, f in enumerate(frames)
+            ],
+        }
+        return plan, results, labels
+
+    def test_oracle_box_matches_do_not_hide_identity_switch(self):
+        plan, results, labels = self.fixture()
+        case = score(plan, results, labels, "tracking")["cases"][0]
+        self.assertEqual(case["anyCandidateHits"], 3)
+        self.assertEqual(case["lockedIdHits"], 1)
+        self.assertEqual(case["acquisitions"], [{"frameIndex": 0, "objectId": 1}])
+
+    def test_unscorable_and_discontinuity_do_not_invent_a_continuous_track(self):
+        plan, results, labels = self.fixture()
+        labels["cases"][0]["frames"][1].update(
+            {"visibility": "unscorable", "box": None, "reason": "Parcel hidden"}
+        )
+        labels["cases"][0]["frames"][2]["continuityBreakBefore"] = True
+        case = score(plan, results, labels, "tracking")["cases"][0]
+        self.assertEqual(
+            (case["totalFrames"], case["scoreableFrames"], case["unscorableFrames"]),
+            (3, 2, 1),
+        )
+        self.assertIsNone(case["frames"][1]["anyCandidateHit"])
+        self.assertEqual(
+            case["acquisitions"],
+            [{"frameIndex": 0, "objectId": 1}, {"frameIndex": 2, "objectId": 2}],
+        )
+
+    def test_changed_annotations_or_duplicate_results_cannot_be_scored(self):
+        plan, results, labels = self.fixture()
+        labels["cases"][0]["frames"][0]["sha256"] = "changed"
+        with self.assertRaisesRegex(ValueError, "Annotation frame changed"):
+            score(plan, results, labels, "tracking")
+        plan, results, labels = self.fixture()
+        results["frames"][1] = results["frames"][0]
+        with self.assertRaisesRegex(ValueError, "exactly once"):
+            score(plan, results, labels, "tracking")
 
 
 class MaskAgreementSeeds(unittest.TestCase):

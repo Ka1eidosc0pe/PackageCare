@@ -75,3 +75,19 @@ Actual original run: `data/local-sam2/attempt-1/`, one complete 48-frame/501-obj
 For the measured policy, prepare a **new** scope with `--mask-agreement`; optionally add `--device mps` for a local Apple GPU. CPU remains the default. Copy the already verified tracker `model-receipt.json` into the new scope, or fetch artifacts using the command above. Use the printed new plan digest when running. Do not edit an old plan or reuse its output directory. MPS availability is checked explicitly and CPU fallback is disabled; an unavailable/unsupported backend stops the attempt. CPU preprocessing/video storage and float32 were used in the actual GPU run.
 
 The policy records `possible_duplicate` only when a current positive, nonempty mask uniquely agrees with the new seed (box IoU ≥ 0.6, margin ≥ 0.1). It keeps new/absent/ambiguous candidates. It cannot reject a semantically false parcel, establish identity through occlusion or infer handling. Probe and recomputation calls are counted separately; at most 96 forwards are allowed for the 48-frame comparison. Saved review sheets distinguish suppressed seeds from objects not yet seeded.
+
+## Additional-source validation
+
+Helpers now accept **one to three distinct development sources**, with **all sixteen prepared frames per source**, at most 48 images and 35 automatic seeds per case. Smaller batches are not padded with reused clips. Tracking has at most twice the prepared frame count in forward calls. Existing three-case runs/receipts remain historical evidence with their original source snapshots.
+
+[Additional-source protocol and frozen annotations](../../docs/tracking-validation.md) distinguish parcel-box coverage from locked-ID continuity. The standard-library scorer makes no model calls:
+
+```sh
+python3 experiments/local_cv/score_tracking.py \
+  --plan /absolute/path/to/tracking/plan.json \
+  --run /absolute/path/to/tracking/attempt-1 \
+  --annotations evaluation/tracking-validation-annotations.json \
+  --mode tracking --output /absolute/path/to/new-score.json
+```
+
+Use `--mode detection` with the detector plan/run directory for box-only coverage. The annotation digest must have been sealed in the inference plan before invocation and must match the receipt; the scorer refuses missing/reordered/changed evidence and existing score outputs. Single-agent approximate visual annotations are provisional, not independently adjudicated truth. Unscorable frames remain explicit. No handling verdict is produced.

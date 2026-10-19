@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "annotationMethod": "Single Codex visual review of full frames and enlarged review-only crops before either model saw these sources. Approximate visible-envelope boxes; not independently adjudicated. No model suggestions used.",
+  "policy": {
+    "minimumIou": 0.5,
+    "acquisitionMargin": 0.1
+  },
+  "handlingAssessment": "Not scored. Support/release/landing is obscured; annotations do not label careful or rough handling.",
+  "cases": [
+    {
+      "name": "office",
+      "sourceSha256": "d0689815ba4bcf9eb84dcbb3845e08b106d0af43d2a6cf0741fd92382adb3c47",
+      "dimensions": [
+        640,
+        480
+      ],
+      "frames": [
+        {
+          "id": "ac0f6837-33d2-4520-9072-fc18d1768658",
+          "offsetMs": 125,
+          "sha256": "4828d4cb485de9a3d88139893acfbe8605d713dda01c2417a9556392f4db11d8",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Overexposed distant parcel boundary cannot be located reliably."
+        },
+        {
+          "id": "f844a49f-961f-4687-a749-c33fa7b4d5bd",
+          "offsetMs": 375,
+          "sha256": "88c37ee46b440310d8a58517c337e35a1802ba7c49c2943deda766db47f72711",
+          "visibility": "visible",
+          "box": [
+            382,
+            307,
+            404,
+            331
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "6e4e869f-ca6e-4b11-9984-d28767e7caf7",
+          "offsetMs": 625,
+          "sha256": "a9130ca22bcc16502ebe405b61471bd739b52f57d8b4355bc4b88a7767451e5e",
+          "visibility": "visible",
+          "box": [
+            380,
+            309,
+            404,
+            334
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "367406af-663d-4558-9d27-4ceafd5a82ab",
+          "offsetMs": 875,
+          "sha256": "2bac5797f7a12c4eae76e7e1e544d7d7ab506b5f9cad273df9ccee68f5d69d01",
+          "visibility": "visible",
+          "box": [
+            374,
+            309,
+            400,
+            337
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "7bab67d4-7e7a-4394-a248-95c6c31d0f3d",
+          "offsetMs": 1125,
+          "sha256": "d00865fd312cfe89a1b57f662a88b178110a58464b1e45e6e8b08d2ca2902333",
+          "visibility": "visible",
+          "box": [
+            367,
+            313,
+            393,
+            339
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "c31e6857-41ed-43fd-8340-4ed1879ef644",
+          "offsetMs": 1375,
+          "sha256": "acf0c8b935825b28273e9bced47c72abacc8b641d2dc405af57dd9ee71973209",
+          "visibility": "visible",
+          "box": [
+            369,
+            315,
+            393,
+            338
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "a245a76f-20bf-4126-9495-6fb9ea29a753",
+          "offsetMs": 1625,
+          "sha256": "149458ea762d2c938df86b6c61b9d9b1f126a6ec1592a575f3d57fb64944b038",
+          "visibility": "visible",
+          "box": [
+            358,
+            314,
+            380,
+            337
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "eee192e8-a17d-47bc-960f-43f9c6d6a644",
+          "offsetMs": 1875,
+          "sha256": "496881d099272e4b7fd5f4893c3dd653bba55b91d6f5b0bb10b45eba02d517dd",
+          "visibility": "visible",
+          "box": [
+            349,
+            319,
+            375,
+            341
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "a43e5aee-955f-4c25-af35-70232577a103",
+          "offsetMs": 2125,
+          "sha256": "b09ab919039225ca1b7359f6ef2b6714d14b75231b5d33bd0dc18e90baa8212e",
+          "visibility": "visible",
+          "box": [
+            338,
+            320,
+            360,
+            341
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "28e762e1-0a41-4301-b682-cb9e8ad2adcf",
+          "offsetMs": 2375,
+          "sha256": "b8d9e52b2283313a0d1491de561889e8fc91ced42fe51d0d6dca61ea80c335ca",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Railing and subsequent occlusion prevent a reliable visible parcel envelope."
+        },
+        {
+          "id": "0366c982-019f-438d-8e6b-8c460c202259",
+          "offsetMs": 2625,
+          "sha256": "bbf408e56bdd1885fd82227d684fb01052d06249f226842fbfa4c8220d5285a4",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Railing and subsequent occlusion prevent a reliable visible parcel envelope."
+        },
+        {
+          "id": "5312bf9f-2a43-4d7a-9797-8609fc01e03a",
+          "offsetMs": 2875,
+          "sha256": "a59c3d639bf45248fc0c7e863c9d89d8b2778e4fbf8765c0c80ca7cc463dd007",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Railing and subsequent occlusion prevent a reliable visible parcel envelope."
+        },
+        {
+          "id": "48b5dd6c-5f44-48a2-a952-b93832a1152d",
+          "offsetMs": 3125,
+          "sha256": "0b9c39ae4728395acf296942c0c692efdf24cc7aaedb25e6012702a5ab9e019d",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Railing and subsequent occlusion prevent a reliable visible parcel envelope."
+        },
+        {
+          "id": "eafc3dc9-a5ff-4f4b-b424-a9d9c14f13e8",
+          "offsetMs": 3375,
+          "sha256": "299c3089929695df1d52d07e8d450224f730779fae2c2733f016fa5381534f7e",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Railing and subsequent occlusion prevent a reliable visible parcel envelope."
+        },
+        {
+          "id": "9879f312-9656-4145-b1df-fd42b7fce211",
+          "offsetMs": 3625,
+          "sha256": "47dd6125ff1f11b8dfddabfc2f2e4242e2ce5952ba8b7ba5dff249c23f7eaa2a",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Railing and subsequent occlusion prevent a reliable visible parcel envelope."
+        },
+        {
+          "id": "f9471eed-81e0-44ee-8129-fcd6730ab295",
+          "offsetMs": 3875,
+          "sha256": "259b9ad4d316a6a118b41317657342c8440180ca4a1b8ad41fbfcfea5a6b1b47",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Railing and subsequent occlusion prevent a reliable visible parcel envelope."
+        }
+      ]
+    },
+    {
+      "name": "porch",
+      "sourceSha256": "624b851fe89a05f0e7a2ad326aef4f7914fd22b331db914a8efb866e5ab5f205",
+      "dimensions": [
+        1280,
+        720
+      ],
+      "frames": [
+        {
+          "id": "b5263ae7-7393-4643-832c-c5c8672998df",
+          "offsetMs": 124,
+          "sha256": "b5f2ff4aba3ddecd72edb00bd338c6fd9c265e81d9769c47180c3e8e09ae89f0",
+          "visibility": "visible",
+          "box": [
+            165,
+            377,
+            250,
+            416
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "b5ebb044-a856-432d-b331-7b20ad27be51",
+          "offsetMs": 372,
+          "sha256": "1e5212a670306c379c5e72f358ad7da59edba4b267e57cf233d1d9c1112c8918",
+          "visibility": "visible",
+          "box": [
+            168,
+            375,
+            255,
+            417
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "00c62375-47d7-4fdb-857f-d32f67c85288",
+          "offsetMs": 620,
+          "sha256": "1be2748352d6a9f1c1f30dd261346decc408d7b0ae9bbbcaddae9f53ff1ecde2",
+          "visibility": "visible",
+          "box": [
+            170,
+            369,
+            263,
+            414
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "00fcee24-1ea5-43b2-9c76-49e902734b93",
+          "offsetMs": 869,
+          "sha256": "0b508ff7e65173357f1e5a7206a2d46cb1871a9b2b74a0d03acb7ded8ff9f1ab",
+          "visibility": "visible",
+          "box": [
+            166,
+            366,
+            267,
+            414
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "d0a7a867-813a-4890-bb5c-1b754879a354",
+          "offsetMs": 1117,
+          "sha256": "f8aeb90d142a885327cd27cd3d00b9580f0ba5f1813c74f58ef1d2ce1d528de3",
+          "visibility": "visible",
+          "box": [
+            164,
+            361,
+            279,
+            415
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "4bab7f3a-3436-4058-878e-f1196dde44bb",
+          "offsetMs": 1365,
+          "sha256": "52fbe4e1fcf396a299f967b3fbe056f449b8aaa41667ccd824ab4a747c6e6735",
+          "visibility": "visible",
+          "box": [
+            164,
+            358,
+            283,
+            415
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "50512fcc-23cf-4a64-9b19-1f79588eb7e4",
+          "offsetMs": 1613,
+          "sha256": "fa715900697d4c0d2d2fcf6b82bd19f897275b2b469995505b625e6e3d0c99c3",
+          "visibility": "visible",
+          "box": [
+            165,
+            348,
+            287,
+            407
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "17e4e4f0-b319-45f9-a3b2-e9780bc4e8c0",
+          "offsetMs": 1861,
+          "sha256": "a3f0f8fae962e6e2fbd58b4b74729c2ce5ae73d6fca2aabd2608265b81921161",
+          "visibility": "visible_cropped",
+          "box": [
+            215,
+            0,
+            600,
+            166
+          ],
+          "reason": "Visible-envelope estimate from source pixels.",
+          "continuityBreakBefore": true,
+          "continuityReason": "Large approach-position discontinuity between sampled frames 6 and 7; do not assume physical identity continuity across it."
+        },
+        {
+          "id": "2c0cdeb0-1efd-4615-8c4e-7f6d055613ed",
+          "offsetMs": 2110,
+          "sha256": "76699f57b7c3e476bac0de7136c230d712124fdd5a624f6fadb34ee9f54db1bd",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Parcel mostly outside top edge; visible envelope cannot be located reliably."
+        },
+        {
+          "id": "b855d15f-d269-4ce7-a69f-1582b431d7c6",
+          "offsetMs": 2358,
+          "sha256": "d125c22b4ef9e0dacf12bbcaee3f1a6aebba7793ba9ed2cb5c331e2e5fb747a0",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Parcel mostly outside top edge; visible envelope cannot be located reliably."
+        },
+        {
+          "id": "772efeb7-29ab-48d3-bf77-96de91ee4a59",
+          "offsetMs": 2606,
+          "sha256": "a771df4bd30f53b61df48ddd7beb8b95df34b552f1b7f011574777898f8c893c",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Parcel mostly outside top edge; visible envelope cannot be located reliably."
+        },
+        {
+          "id": "10b6e851-5c16-411c-8334-67eb3cc7cf82",
+          "offsetMs": 2854,
+          "sha256": "b390dc474ca3e38199e085761a7ae2cff51197efee095bbe1f5b546d623f2d05",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Parcel mostly outside top edge; visible envelope cannot be located reliably."
+        },
+        {
+          "id": "dc7c4ef1-3467-4759-8717-e822fd93b0aa",
+          "offsetMs": 3102,
+          "sha256": "d90128d68171ec3f461b600bdebc92b446f161e403dab3f83e6a38065deb0135",
+          "visibility": "visible_cropped",
+          "box": [
+            80,
+            0,
+            1120,
+            300
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "a85b2017-fce8-4603-813f-6623c69b7617",
+          "offsetMs": 3351,
+          "sha256": "b525ada9a769b7127f116477887b555e455c9a699153b62cd0359ae88434159d",
+          "visibility": "visible_cropped",
+          "box": [
+            50,
+            0,
+            1280,
+            614
+          ],
+          "reason": "Visible-envelope estimate from source pixels."
+        },
+        {
+          "id": "8186fc3b-ee8f-4a18-b8c9-6cd57b50dba0",
+          "offsetMs": 3599,
+          "sha256": "f330347ca9ac04a2ff375cf61e8bb367327a0479d2a8375ef4598cccd395194a",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Carton blocks nearly the entire camera; reliable object boundary unavailable."
+        },
+        {
+          "id": "798e6155-2dff-4879-b225-9c79d611447e",
+          "offsetMs": 3847,
+          "sha256": "5e5d5726586632517d7c5eada09b447ade8fa81eb5b448d64bb83551ddfe8155",
+          "visibility": "unscorable",
+          "box": null,
+          "reason": "Carton blocks nearly the entire camera; reliable object boundary unavailable."
+        }
+      ]
+    }
+  ]
+}
