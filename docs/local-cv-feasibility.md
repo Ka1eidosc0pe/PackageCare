@@ -15,7 +15,7 @@ Counts below mean at least one raw candidate detection in a frame. They are **no
 
 | Development excerpt | Frames with box/parcel candidate | Frames with hand candidate | Visual findings |
 |---|---:|---:|---|
-| Van loading / annotated release | 14/16 | 11/16 | Some cartons/hands localized, including an airborne carton at 1,875 ms. The relevant airborne carton is missed at 1,625 ms despite other detections. Support → release → landing cannot be established from a continuous correct-object track. |
+| Van loading / annotated release | 14/16 | 11/16 | Some cartons/hands localized, including an airborne carton at 1,875 ms. The relevant moving carton is missed at 1,625 ms despite other detections. Detector/IoU association alone cannot establish a continuous correct-object release/landing track. |
 | Controlled postal placement | 16/16 | 16/16 | Foreground cartons and hands often found, along with many background/duplicate candidates. A hand box alone does not establish hand contact or parcel support. |
 | Ring package already at rest | 16/16 | 0/16 | Real parcel repeatedly localized, but doormat and shrub/background regions also receive box/parcel labels. Stable false positives show why persistent boxes are not delivery observations. Placement remains absent. |
 
@@ -39,4 +39,4 @@ A local CV route is technically practical: pretrained weights run on this workst
 
 Recommended next stage is to validate parcel identity tracking and support/release visibility on independently labeled footage before a training commitment. If tracking cannot maintain the relevant object through blur/occlusion, a temporal head on those tracks will inherit that gap. Custom temporal training becomes a considered proposal only after suitable task data, grouped splits and a comparison protocol exist. A generic Kinetics classifier's published classes/benchmark numbers are not PackageCare performance.
 
-The owner's choice between further tracking validation and prioritizing training-footage collection is pending. No paid scope is open. No training, deployment, final model selection or product-scope change follows from this free prerequisite. [Reproduction helpers and meaningful software checks](../experiments/local_cv/README.md) are separate from production code.
+The owner subsequently chose **tracking validation before training**. [The SAM2 extension](sam2-tracking.md) recovers the moving carton through the detector miss using automatic seeds, with duplicate/background and occlusion limits still present. No paid scope is open. No training, deployment, final model selection or product-scope change follows from this free prerequisite. [Reproduction helpers and meaningful software checks](../experiments/local_cv/README.md) are separate from production code.

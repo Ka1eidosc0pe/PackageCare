@@ -8,6 +8,7 @@ import unittest
 import uuid
 from experiments.local_cv.prepare import prepare
 from experiments.local_cv.associate import associate
+from experiments.local_cv.prepare_tracking import prepare_tracking
 
 
 class LocalCvPreparation(unittest.TestCase):
@@ -85,6 +86,67 @@ class LocalCvPreparation(unittest.TestCase):
             source.write_text(json.dumps({"cases": cases}))
             with self.assertRaisesRegex(ValueError, "Duplicate evidence ID"):
                 prepare(source, root / "rejected")
+            self.assertFalse((root / "rejected").exists())
+
+
+class LocalCvTrackingPreparation(unittest.TestCase):
+    def fixture(self, root):
+        baseline, _ = LocalCvPreparation().fixture(root)
+        source = root / "detections"
+        prepare(baseline, source)
+        plan = json.loads((source / "plan.json").read_text())
+        frames = []
+        cases = []
+        for ci, case in enumerate(plan["cases"]):
+            observed = [
+                {
+                    "id": f["id"],
+                    "case": ci,
+                    "offsetMs": f["offsetMs"],
+                    "detections": [
+                        {
+                            "box": [10, 10, 20, 20],
+                            "score": 0.7,
+                            "label": "cardboard box",
+                        }
+                    ],
+                }
+                for f in case["frames"]
+            ]
+            frames.extend(observed)
+            cases.append({"case": ci, "tracks": associate(observed)})
+        (source / "results.json").write_text(
+            json.dumps({"state": "complete", "frames": frames})
+        )
+        (source / "tracks.json").write_text(json.dumps({"cases": cases}))
+        return source
+
+    def test_uses_every_automatic_first_seed_and_rejects_manual_action_selection(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = self.fixture(root)
+            prepared = prepare_tracking(source, root / "tracking")
+            plan = json.loads(Path(prepared["plan"]).read_text())
+            self.assertEqual(prepared["objectsPerCase"], [1, 1, 1])
+            self.assertTrue(
+                all(c["seeds"][0]["frameIndex"] == 0 for c in plan["cases"])
+            )
+            tracks = json.loads((source / "tracks.json").read_text())
+            tracks["cases"][0]["tracks"][0]["points"].pop(0)
+            (source / "tracks.json").write_text(json.dumps(tracks))
+            with self.assertRaisesRegex(ValueError, "manually selected"):
+                prepare_tracking(source, root / "rejected")
+            self.assertFalse((root / "rejected").exists())
+
+    def test_retimed_or_wrong_case_frame_is_not_used_as_tracking_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = self.fixture(root)
+            result = json.loads((source / "results.json").read_text())
+            result["frames"][-1]["case"] = 0
+            (source / "results.json").write_text(json.dumps(result))
+            with self.assertRaisesRegex(ValueError, "Frame/case/time mismatch"):
+                prepare_tracking(source, root / "rejected")
             self.assertFalse((root / "rejected").exists())
 
 

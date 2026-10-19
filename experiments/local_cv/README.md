@@ -44,3 +44,30 @@ The fixed public model is [IDEA-Research/grounding-dino-tiny](https://huggingfac
 Association is an explicitly heuristic diagnostic added after inspecting detections: NMS IoU 0.6; link IoU at least 0.3; mutual best match with a 0.1 ambiguity margin; maximum 300 ms gap. Missing or ambiguous matches start separate tracks rather than inventing an identity or interpolated trajectory. Persistent false detections can still form persistent false tracks. Association parameters were not independently calibrated. No action classification follows from these tracks.
 
 Actual original run: `data/local-cv-baseline/`, prepared before the checked-in portable helpers. Original plan digest `c8232052f17a4877815cdb48856bded3a96a75f8207bbc2ccd5384a0c4d425ac`. A free portable preparation at `data/local-cv-reproduction/` was checked to preserve all 48 original IDs, offsets and image hashes; it has **not** been inferred again. Existing-run refusal was exercised before model import and left original receipts/results byte-identical. The original prototype is preserved alongside its receipts. This distinction prevents claiming the generalized helper itself received a second full model run.
+
+## Forward video masks
+
+Owner chose tracking validation before training. [SAM2 results and limits](../../docs/sam2-tracking.md): automatic initial seeds recover the moving carton through the detector miss, but duplicate/background seeds, occlusion uncertainty and processing time remain. This is still an experiment, not an action classifier.
+
+```sh
+# Uses every candidate's first automatic detection; rejects edited/selected tracks.
+data/cv-env/bin/python experiments/local_cv/prepare_tracking.py \
+  data/local-cv-new data/local-tracking-new
+
+# Public SAM2.1 Tiny artifact download (~156 MB), no inference or media upload.
+HF_HOME=./data/local-cv-cache data/cv-env/bin/python experiments/local_cv/fetch_model.py \
+  --tracker --model-dir data/local-sam2-model --receipt-dir data/local-tracking-new
+
+# Offline CPU inference, only forward propagation; no future corrections.
+data/cv-env/bin/python experiments/local_cv/track_masks.py \
+  --plan data/local-tracking-new/plan.json --plan-sha256 PREPARATION_DIGEST \
+  --model-dir data/local-sam2-model --output data/local-tracking-new/attempt-1
+
+# Display selected saved masks only; this does not change model inputs/results.
+# Omitting --objects renders every seeded object for that case.
+data/cv-env/bin/python experiments/local_cv/review_masks.py \
+  --plan data/local-tracking-new/plan.json --run data/local-tracking-new/attempt-1 \
+  --case 0 --objects 1 5
+```
+
+Actual original run: `data/local-sam2/attempt-1/`, one complete 48-frame/501-object-frame run. Original prototype and scope remain alongside it. The portable preparation at `data/local-sam2-reproduction/` preserves every original frame and automatic seed and has not been inferred again. Six dependency-free tests now include tracking-seed provenance/case/time integrity. No ML package or model call is added to CI.
