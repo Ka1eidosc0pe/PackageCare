@@ -57,3 +57,15 @@ Both requests completed and passed the evidence parser. **Both returned empty ob
 Reported usage: 9,878 input / 26 output tokens; estimated **$0.00530450 before tax** at the verified Ohio standard rates. Analysis time: 6.971 seconds. The two-request scope is completed and closed. Raw replies, immutable prepared evidence and results remain in ignored `data/vision-benchmarks/27ea257a-aeda-4883-b2ff-e8ef4abbe1d2/`.
 
 A subsequent local inspection confirmed that the prepared 1,875 ms image is a 690 × 392 JPEG and visibly shows the carton above the person's hands. The model received actual prepared images; there is no evidence of a failed decode in the service response. This does not establish why it returned empty observations. Investigate prompt/input behavior and other sources before proposing another paid experiment.
+
+### Neutral caption diagnostic
+
+A separately owner-approved one-request probe used the existing 1,625 / 1,875 / 2,125 ms JPEGs with a plain-language, post-image prompt and max 750 output tokens. Qwen returned visible scene content: a parcel changing from support to being away from the hand and then becoming obscured inside the vehicle, with an uncertain landing/path. Not all fine details are established (including first-frame support and direction). This is not a schema-validated action result or an accuracy measure; prompt format, image count and instruction position all changed together. It does show that useful scene content can be elicited from these source images.
+
+One request returned, no retries; 920 input / 237 output tokens, 5.209 seconds; estimated **$0.00111802 before tax**. Raw reply/source hashes remain in ignored `data/vision-probes/loading-caption-v1/`. The $0.20 scope is closed. [Prepared v2 proposal](model-benchmark-plan.md#proposed-structured-v2-development-batch) is a new scope and has not been invoked.
+
+### Structured v2, sixteen-frame outcome
+
+Under the separately approved conditional $0.75 batch, the first request returned empty observations and five limitation statements describing the sequence as untrackable/static. The new nonempty-observation check rejected it; no completed assessment or verification was saved. This is still a miss against the existing visible-action annotation, not evidence that the carton was static. The conditional Ring control **did not run**. One attempted/returned request, 5,026 input / 163 output tokens, 5.442 seconds, estimated **$0.00309736 before tax**. The entire batch stopped and is closed; unused calls are not available for reuse.
+
+The three-frame caption versus sixteen-frame structured result motivates a narrower-context development diagnostic. It does not isolate context length from schema/prompt effects or justify production adoption. Source labels, prior failures and action annotation remain unchanged.

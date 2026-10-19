@@ -61,3 +61,9 @@ Preview was restarted on the tested v6 backend with all six records terminal. AP
 - Added an evaluation-only runner with frozen source bytes, exact citations, preserved raw replies/usage, stop-on-failure and paid-replay protection. The shared evidence parser was extracted without intentionally changing Nova's prompt or validation behavior.
 - All **56 tests across twelve files** and the production build pass locally. Tests use mocks/local media, not live model accuracy. Prior source c2d9b69 CI was **in progress** when checked; no new-source CI result is claimed here.
 - Preview remains on source c2d9b69, with saved clips/reports preserved and Ring disconnected. No paid job is running. Quality/independent dataset/deployment/submission gates remain open.
+
+### Owner-requested evaluation reset
+
+The owner questioned repeated diagnostics; paid calls are held. No approval was given for the prepared three-frame structured test. All prior scopes are closed, no paid job is running, and automatic handling detection remains unproven. [The next evaluation plan](analysis-evaluation-plan.md) requires independent licensed ordinary/rough/unclear clips, one frozen whole-clip candidate, one concrete batch request and a decision at the end. No additional selected-frame prompt probes or silent model/product changes.
+
+Qwen caption and v2 outcomes are recorded in [actual results](evaluation-results-2026-10-19.md); the four completed Qwen calls total estimated $0.00951988 before tax. Source 65996b9 passed CI run 39287990890. Latest evaluation-only changes pass five targeted tests and build, with new-source CI pending commit. Preview remains on c2d9b69, Ring disconnected, sources/reports intact.

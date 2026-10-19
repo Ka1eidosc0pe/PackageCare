@@ -91,6 +91,46 @@ const reply = (input: unknown) => ({
   stopReason: "end_turn",
 });
 describe("bounded alternative vision benchmark", () => {
+  it("selects exact prepared offsets without changing source identity or permitting missing/duplicate frames", async () => {
+    const { root, planPath: baseline } = await source();
+    try {
+      for (const offsets of [
+        [63, 999],
+        [63, 63],
+      ])
+        await expect(
+          prepareVisionBenchmark(
+            baseline,
+            path.join(root, "benchmarks"),
+            offsets,
+          ),
+        ).rejects.toThrow();
+      const prepared = await prepareVisionBenchmark(
+        baseline,
+        path.join(root, "benchmarks"),
+        [313, 63, 188],
+      );
+      const send = vi.fn().mockResolvedValue(reply(evidence("f2")));
+      const result = await runVisionBenchmark(prepared.planPath, 2, {
+        send,
+      } as any);
+      expect(prepared.frameCount).toBe(3);
+      expect(result.state).toBe("complete");
+      const content = send.mock.calls[0][0].input.messages[0].content;
+      expect(content.filter((c: any) => c.image)).toHaveLength(3);
+      expect(
+        content
+          .filter((c: any) => c.text?.startsWith("Evidence ID"))
+          .map((c: any) => c.text),
+      ).toEqual([
+        "Evidence ID f1; offset 63 ms.",
+        "Evidence ID f2; offset 188 ms.",
+        "Evidence ID f3; offset 313 ms.",
+      ]);
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
   it("rejects changed evidence, altered models and inadequate scope before a request, and prevents replay after success", async () => {
     const { root, planPath: baseline } = await source();
     try {
@@ -150,7 +190,11 @@ describe("bounded alternative vision benchmark", () => {
       const prompt = JSON.stringify(first.messages);
       expect(prompt).not.toContain("private-annotation-not-a-prompt");
       expect(prompt).not.toContain('"expected"');
-      const verify = send.mock.calls[1][0].input.messages[0].content[0].text;
+      expect(first.messages[0].content.at(-1).text).toContain(
+        "Include visible facts even when they are not concerning",
+      );
+      const verify =
+        send.mock.calls[1][0].input.messages[0].content.at(-1).text;
       expect(verify).toContain('"evidenceIds":["f4"]');
       await expect(
         runVisionBenchmark(prepared.planPath, 2, client),
@@ -230,6 +274,32 @@ describe("bounded alternative vision benchmark", () => {
       } as any);
       expect(result.state).toBe("complete");
       expect(send).toHaveBeenCalledTimes(2);
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
+  it("stops after an empty first response without spending on verification or presenting a completed assessment", async () => {
+    const { root, planPath: baseline } = await source();
+    try {
+      const prepared = await prepareVisionBenchmark(
+        baseline,
+        path.join(root, "benchmarks"),
+      );
+      const send = vi
+        .fn()
+        .mockResolvedValue(reply({ observations: [], limitations: [] }));
+      const result = await runVisionBenchmark(prepared.planPath, 2, {
+        send,
+      } as any);
+      expect(result).toMatchObject({
+        state: "failed",
+        attemptedRequests: 1,
+        receivedResponses: 1,
+        diagnostic: { stage: "evidence" },
+        usage: { inputTokens: 100, outputTokens: 20 },
+      });
+      expect(result.actual).toBeUndefined();
+      expect(send).toHaveBeenCalledTimes(1);
     } finally {
       await fs.rm(root, { recursive: true, force: true });
     }

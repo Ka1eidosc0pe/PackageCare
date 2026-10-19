@@ -20,7 +20,7 @@ import type { Analysis, Asset } from "../../shared/domain.js";
 
 // Evaluation only. This does not expand the application model allowlist.
 export const VISION_BENCHMARK_MODEL = "qwen.qwen3-vl-235b-a22b";
-export const VISION_BENCHMARK_VERSION = "packagecare-vision-json-v1";
+export const VISION_BENCHMARK_VERSION = "packagecare-vision-json-v2";
 const scopeSchema = z.object({
   kind: z.literal("packagecare-vision-benchmark-v1"),
   model: z.literal(VISION_BENCHMARK_MODEL),
@@ -34,6 +34,15 @@ const scopeSchema = z.object({
   retries: z.literal(0),
   storage: z.literal("local"),
   baselinePlanSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  selectedFrameOffsets: z
+    .array(z.number().int().nonnegative())
+    .min(1)
+    .max(20)
+    .refine(
+      (offsets) => new Set(offsets).size === offsets.length,
+      "Frame offsets must be distinct",
+    )
+    .optional(),
   baseline: evaluationPlanSchema,
 });
 const hash = (bytes: Buffer) =>
@@ -53,7 +62,19 @@ function input(scope: z.infer<typeof scopeSchema>) {
   const entry = scope.baseline.cases[0];
   const frames = entry.assets
     .filter((a) => a.kind === "frame")
+    .filter(
+      (a) =>
+        !scope.selectedFrameOffsets ||
+        scope.selectedFrameOffsets.includes(a.offsetMs!),
+    )
     .sort((a, b) => a.offsetMs! - b.offsetMs!);
+  if (
+    scope.selectedFrameOffsets &&
+    frames.length !== scope.selectedFrameOffsets.length
+  )
+    throw new Error(
+      "Selected offsets must match existing prepared frames exactly.",
+    );
   if (
     !frames.length ||
     frames.length > 20 ||
@@ -87,6 +108,7 @@ async function verifyAssets(media: MediaStore, assets: Asset[]) {
 export async function prepareVisionBenchmark(
   baselinePlanPath: string,
   outputParent = path.resolve("data/vision-benchmarks"),
+  selectedFrameOffsets?: number[],
 ) {
   const bytes = await fs.readFile(baselinePlanPath);
   const scope = scopeSchema.parse({
@@ -102,6 +124,7 @@ export async function prepareVisionBenchmark(
     retries: 0,
     storage: "local",
     baselinePlanSha256: hash(bytes),
+    selectedFrameOffsets,
     baseline: JSON.parse(bytes.toString()),
   });
   const { entry, frames } = input(scope);
@@ -172,6 +195,7 @@ export async function runVisionBenchmark(
     references.map((r) => ({ ...r.asset, id: r.alias })),
     false,
   ).tools[0].toolSpec.inputSchema.json;
+  Object.assign(schema.properties.observations, { minItems: 1, maxItems: 3 });
   const output = path.join(root, "results.json"),
     journal = path.join(root, "responses.jsonl");
   const result = {
@@ -215,7 +239,7 @@ export async function runVisionBenchmark(
       }));
       const content: any[] = [
         {
-          text: `${pass === "observe" ? "Inspect this complete ordered image sequence and describe visible package actions." : "Independently check the proposed observations against this complete sequence. Reject unsupported claims, weaken ambiguous descriptions, and include missed visible actions."} Clip duration ${entry.durationMs} ms. Return only a JSON object matching this schema: ${JSON.stringify(schema)}. No tools, prose, markdown, or guessed image times. ${VISUAL_EVIDENCE_RULES}${pass === "verify" ? `\nProposal to verify: ${JSON.stringify(proposal)}` : ""}`,
+          text: `Ordered images from a ${entry.durationMs} ms clip. Each image has an evidence ID and an offset from the start.`,
         },
       ];
       for (const r of references)
@@ -228,6 +252,9 @@ export async function runVisionBenchmark(
             },
           },
         );
+      content.push({
+        text: `${pass === "observe" ? "Inspect the images above and describe actual visible parcels and handling." : "Independently inspect the images above, then check the proposed observations below. Reject unsupported claims, weaken ambiguous descriptions, and include missed visible actions."} Compare earlier and later images: describe parcels relative to visible hands and surfaces, changes in support or position, and what cannot be tracked. Include visible facts even when they are not concerning. Return 1–3 observations; if no parcel or handling can be established, use visibility_insufficient with a specific limitation. Never invent an action to fill an observation. ${VISUAL_EVIDENCE_RULES}\nReturn only a JSON object matching this schema: ${JSON.stringify(schema)}. No tools, prose, markdown, or guessed image times.${pass === "verify" ? `\nProposal to verify: ${JSON.stringify(proposal)}` : ""}`,
+      });
       if (result.attemptedRequests >= requestLimit)
         throw new Error("Approved request boundary reached.");
       result.attemptedRequests++;
@@ -281,6 +308,12 @@ export async function runVisionBenchmark(
       stage = "json";
       const decoded = parseVisionJson(text);
       stage = "evidence";
+      if (
+        !z
+          .object({ observations: z.array(z.unknown()).min(1) })
+          .safeParse(decoded).success
+      )
+        throw new Error("No observations returned");
       const analysis = parseEvidenceResponse(
         decoded,
         references,
