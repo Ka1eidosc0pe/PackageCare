@@ -10,6 +10,7 @@ PackageCare links handling observations to footage, lets the recipient correct o
 - Sample deliveries are original **synthetic animations with scripted observations**. They are not real Ring footage, live AI output, or an accuracy evaluation.
 - Ring and Bedrock adapters plus AWS infrastructure source are included. **Actual Ring WHEP playback and browser capture are verified locally; Bedrock accuracy and deployed AWS behavior remain unverified.** AWS runtime access and a real two-pass synthetic connectivity/schema smoke succeeded on October 19. Playground provides live Package/Vehicle/Motion streams and does not support custom uploads; the organizer permits clearly labeled separate scenario footage. A separately approved two-pass diagnostic also succeeded on five frames from a real Ring Package capture and abstained because placement was absent. Dense processing remains under validation. See [the live checkpoint](docs/live-validation-2026-10-19.md) and [footage source catalog](docs/footage-sources.md).
 - Follow [the PRD](prd.md), [development log](docs/development-log.md), [verification status](docs/progress.md), and [acceptance audit](docs/acceptance-audit.md) for scope, evidence and remaining gates.
+- For the owner-requested specialist continuation, start with [the Astra handoff](handoff.md): current code/runtime, complete experiment findings, local data/reproduction, AWS access and closed spending scopes. Useful handling detection remains unresolved.
 
 ## Local setup
 
