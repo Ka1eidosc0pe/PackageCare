@@ -13,6 +13,7 @@ from experiments.local_cv.prepare_tracking import prepare_tracking
 from experiments.local_cv.seed_policy import select_new_seeds
 from experiments.local_cv.score_tracking import score, POLICY
 from experiments.local_cv.reverse_prefix import derive_jobs, merge_prefix_object
+from experiments.local_cv.replay_prefix import seed_eligibility
 
 
 class LocalCvPreparation(unittest.TestCase):
@@ -171,6 +172,34 @@ class LocalCvTrackingPreparation(unittest.TestCase):
 
 
 class ReversePrefixIntegrity(unittest.TestCase):
+    def test_reverse_seed_needs_positive_mask_fully_inside_image(self):
+        obj = {"box": [10, 10, 20, 20], "areaPixels": 100, "objectScoreLogit": 4}
+        self.assertTrue(seed_eligibility(obj, 100, 80)["eligible"])
+        for box in (
+            [0, 10, 20, 20],
+            [10, 0, 20, 20],
+            [10, 10, 100, 20],
+            [10, 10, 20, 80],
+            [0, 0, 100, 80],
+        ):
+            with self.subTest(box=box):
+                decision = seed_eligibility({**obj, "box": box}, 100, 80)
+                self.assertFalse(decision["eligible"])
+                self.assertEqual(decision["reason"], "seed_touches_image_boundary")
+
+    def test_seed_visibility_failure_cannot_pass_the_geometry_guard(self):
+        obj = {"box": [10, 10, 20, 20], "areaPixels": 100, "objectScoreLogit": 4}
+        for changed in (
+            {"box": None},
+            {"areaPixels": 0},
+            {"objectScoreLogit": -1},
+            {"objectScoreLogit": float("nan")},
+        ):
+            with self.subTest(changed=changed):
+                self.assertFalse(
+                    seed_eligibility({**obj, **changed}, 100, 80)["eligible"]
+                )
+
     def fixture(self):
         cases, result = [], []
         for ci in range(2):

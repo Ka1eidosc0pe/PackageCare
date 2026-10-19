@@ -110,3 +110,14 @@ data/cv-env/bin/python experiments/local_cv/reverse_prefix.py run \
 ```
 
 At most 128 local single-object calls per prepared completion batch; the actual frozen two-source scope has 37. Original forward masks/objects are preserved, reverse raw masks saved separately, and possible duplicates withheld from the derived view using the existing policy. Unavailable MPS/unsupported operations stop without fallback/retry. Use the same `score_tracking.py --mode tracking` and `review_masks.py` on the new derived run; added masks identify their later seed offset. No ML inference is added to CI.
+
+**The unfiltered experiment showed mask spill from boundary-truncated seeds; it is not adopted.** A post-hoc development guard replays the saved masks without loading a model:
+
+```sh
+data/cv-env/bin/python experiments/local_cv/replay_prefix.py \
+  --plan /absolute/path/to/completion-scope/plan.json \
+  --run /absolute/path/to/completion-scope/attempt-1 \
+  --output /absolute/path/to/new-interior-replay
+```
+
+Only positive seed masks strictly inside image boundaries qualify; other jobs remain in the audit record but cannot add derived prefix masks. The helper checks the complete raw prediction sequence/conditioning times and mask identities/shapes/areas/envelopes, seals input digests, preserves forward evidence and refuses existing output. It uses NumPy/Pillow for saved-file replay, **no model calls or networking**. Scoring/review work on the emitted `plan.json` and `attempt-1/`. This guard was selected from observed failures; it needs independent validation and still admits interior background candidates. Eighteen dependency-free checks run in CI; they do not establish model accuracy.

@@ -74,6 +74,8 @@ The owner chose tracking validation before training. A [local SAM2 extension](do
 
 [Additional-source validation](docs/tracking-validation.md) used two further recordings and visual annotations frozen before inference. Target-box coverage rose from 2/8 to 4/8 scoreable office frames and 8/10 to 10/10 porch frames, with retained evaluated IDs within continuity segments. Fourteen unscorable frames, approximate single-agent annotations, early acquisition misses and persistent false seeds limit this result. It supports further localization work, not a handling-quality claim or training commitment.
 
+[Offline reverse completion](docs/reverse-tracking.md) then raised office coverage to 7/8 using later automatic seeds, with explicit future-conditioning labels. Visual review also exposed leg spill from boundary-truncated seeds; a zero-model saved-mask replay withholds those additions using an interior-seed guard. This is reused development evidence, not independent validation, live detection or a handling classifier. Original forward evidence remains intact; false parcel semantics still need work.
+
 Recipient notes and footage text are treated as data. Model output is schema-checked, cited frames/time ranges are validated, and candidate observations receive a verification pass. The model returns structured observations; image time bounds are derived from cited frame offsets rather than guessed times. This limits unsupported output; it does not establish a measured detection accuracy.
 
 ### AWS deployment
