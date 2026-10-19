@@ -72,6 +72,8 @@ A subsequent [local CV prerequisite](docs/local-cv-feasibility.md) completed 48 
 
 The owner chose tracking validation before training. A [local SAM2 extension](docs/sam2-tracking.md) follows the automatically seeded carton through the detector miss and visibly airborne frames. Conservative duplicate-seed gating and local Apple GPU inference reduced this development run from 299.824 s to 207.105 s, retaining the reviewed moving/control parcels. False semantic seeds, occlusion, runtime and independent accuracy remain unresolved. No handling classifier or production adapter is adopted from these development examples.
 
+[Additional-source validation](docs/tracking-validation.md) used two further recordings and visual annotations frozen before inference. Target-box coverage rose from 2/8 to 4/8 scoreable office frames and 8/10 to 10/10 porch frames, with retained evaluated IDs within continuity segments. Fourteen unscorable frames, approximate single-agent annotations, early acquisition misses and persistent false seeds limit this result. It supports further localization work, not a handling-quality claim or training commitment.
+
 Recipient notes and footage text are treated as data. Model output is schema-checked, cited frames/time ranges are validated, and candidate observations receive a verification pass. The model returns structured observations; image time bounds are derived from cited frame offsets rather than guessed times. This limits unsupported output; it does not establish a measured detection accuracy.
 
 ### AWS deployment
