@@ -31,3 +31,25 @@ Predeclare generic release/drop and placement class-ID groups from the native vo
 This test asks whether a generic temporal component contains a useful discriminating signal for the next pipeline stage. It cannot pass Gate B, replace the twelve distinct normal/rough/unclear clips or authorize training/deployment. Same five development sources are reused; no held-out or independent-review claim. Results follow the single frozen run.
 
 Twenty-one dependency-free scope/scoring/lineage checks pass locally; three new checks cover all-frame/label separation, source reuse/tamper refusal and complete finite native scores. CI runs these without ML packages/models. No paid scope is open; app/preview and saved reports are unchanged.
+
+## Whole-clip result
+
+One frozen local run completed all **five calls / eighty input frames in 4.477 s** after model load. Per-case processing 1.639 / 0.703 / 0.712 / 0.696 / 0.714 s, including input preparation/checkpointing. Recorded allocator/driver memory approximately 1,445 / 2,113 MiB after each call; not peak memory or application/cloud latency. No failure, retry or CPU fallback. Full native rankings/logits and actual input arrays remain in ignored `data/local-action-pilot/attempt-1/`.
+
+| Source | Native top class | Best generic release rank | Best generic placement rank | Product implication |
+|---|---|---:|---:|---|
+| Van loading | Piling objects up | 7 | 2 | Whole-clip scene/action context dominates the brief toss; no useful release detection established. |
+| Postal placement | Placing similar objects with existing objects | 20 | 1 | A plausible ordinary manipulation signal, not support/damage verification. |
+| Ring already at rest | Showing an object next to another | 30 | 28 | Closed-set forced action; cannot be used as an observed handling event. |
+| Office | Closing something | 5 | 3 | Does not establish the distant parcel's obscured handling. |
+| Porch | Covering something with something | 19 | 6 | Plausible camera-covering signal, without establishing final support/contact. |
+
+No PackageCare assessments were emitted and no product adapter adopted. Source **293d32a348bb4c6ff0a93eda7a3b7d204ef5ddcf** passed [CI 39310734514](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/39310734514), including application tests/build, twenty-one stdlib checks, Ohio synthesis and full Linux runtime smoke. These checks do not establish model quality.
+
+## One bounded automatic-window comparison
+
+The whole-clip miss motivates one explicit temporal-localization test, rather than a manually chosen release frame. Prepare **32 uniform full frames per same source**; derive every 16-frame view beginning at indices **0, 8 and 16**. Every prepared source frame is covered, with eight-frame overlaps. Approximately two seconds/view; actual sampled offsets are recorded. No selected action annotation, tracker mask or box guides the views.
+
+[Frozen window scope](../evaluation/local-action-window-scope.json), SHA256 `0b9c30469f76eb66b755b129c30f498b971c1037cfb57d0ce935753d56f2217e`: **five source groups / 160 unique sampled frames / fifteen native forwards maximum**. Three deterministic groups use the **byte-identical native runner** from the completed whole-clip baseline, same weights, letterbox/normalization, dtype, MPS/SDPA and memory cap. No new model download/training. All fifteen input sheets were inspected and RGB hashes sealed before inference. Each child plan has five sources/calls; the parent seals all three children, validates exact coverage/source identity/offsets and fixes the global fifteen-call bound before any invocation. Stop the whole batch on operational failure; valid semantic misses continue.
+
+This is a new, bounded development scope after the completed five-call baseline. It does not reuse unused calls, count overlapping views as independent clips, or use a sampled window's bounds as a proven action time. No further input/model/dtype variant is part of this comparison. Results follow the single fixed batch. Twenty-three stdlib checks pass locally, including all-frame window coverage and refusal of retimed views/global-bound changes.

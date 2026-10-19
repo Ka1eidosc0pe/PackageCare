@@ -8,6 +8,7 @@ import unittest
 import uuid
 
 from experiments.local_cv.action_model import prepare, summarize
+from experiments.local_cv import action_model, action_windows
 
 
 class LocalActionInputs(unittest.TestCase):
@@ -87,6 +88,100 @@ class LocalActionInputs(unittest.TestCase):
         logits[151] = float("nan")
         with self.assertRaisesRegex(ValueError, "finite native"):
             summarize(logits, labels)
+
+
+class LocalActionWindows(unittest.TestCase):
+    def test_automatic_views_cover_all_dense_frames_without_repeating_a_source(self):
+        frames = [{"id": str(i), "offsetMs": i * 125} for i in range(32)]
+        grouped = action_windows.views(frames)
+        self.assertEqual([len(w) for w in grouped], [16, 16, 16])
+        self.assertEqual(
+            {f["id"] for w in grouped for f in w}, {f["id"] for f in frames}
+        )
+        self.assertEqual(
+            len({f["id"] for f in grouped[0]} & {f["id"] for f in grouped[1]}), 8
+        )
+        with self.assertRaisesRegex(ValueError, "Every ordered"):
+            action_windows.views(frames[:-1])
+
+    def test_dense_bundle_rejects_retimed_view_and_changed_global_call_bound(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "media").mkdir()
+            data = b"original-source"
+            (root / "media/original.mp4").write_bytes(data)
+            fingerprint = hashlib.sha256(data).hexdigest()
+            assets = [
+                {
+                    "name": "original-source.mp4",
+                    "key": "original.mp4",
+                    "sha256": fingerprint,
+                    "bytes": len(data),
+                    "kind": "video",
+                }
+            ]
+            for i in range(32):
+                identity = str(uuid.uuid4())
+                data = f"dense-{i}".encode()
+                key = f"{identity}.jpg"
+                (root / "media" / key).write_bytes(data)
+                assets.append(
+                    {
+                        "id": identity,
+                        "name": key,
+                        "key": key,
+                        "kind": "frame",
+                        "offsetMs": 62 + i * 125,
+                        "sha256": hashlib.sha256(data).hexdigest(),
+                        "bytes": len(data),
+                    }
+                )
+            evaluation = root / "dense.json"
+            evaluation.write_text(
+                json.dumps(
+                    {
+                        "cases": [
+                            {
+                                "sourceSha256": fingerprint,
+                                "durationMs": 4000,
+                                "item": {"split": "development"},
+                                "assets": assets,
+                            }
+                        ]
+                    }
+                )
+            )
+            receipt = root / "model.json"
+            receipt.write_text(
+                json.dumps(
+                    {
+                        "model": action_model.MODEL,
+                        "revision": action_model.REVISION,
+                        "files": [],
+                    }
+                )
+            )
+            output = root / "bundle"
+            report = action_windows.prepare(evaluation, receipt, output)
+            self.assertEqual(
+                (report["sources"], report["views"], report["maximumLocalCalls"]),
+                (1, 3, 3),
+            )
+            action_windows.inspect(output / "plan.json", require_final=False)
+            child = output / "window-1/plan.json"
+            before = child.read_bytes()
+            plan = json.loads(before)
+            plan["cases"][0]["frames"][0]["offsetMs"] += 1
+            child.write_text(json.dumps(plan))
+            with self.assertRaisesRegex(ValueError, "Dense coverage"):
+                action_windows.inspect(output / "plan.json", require_final=False)
+            child.write_bytes(before)
+            parent = output / "plan.json"
+            bundle = json.loads(parent.read_text())
+            bundle["maximumLocalCalls"] = 2
+            parent.write_text(json.dumps(bundle))
+            with self.assertRaisesRegex(ValueError, "complete fixed"):
+                action_windows.inspect(parent, require_final=False)
 
 
 if __name__ == "__main__":
