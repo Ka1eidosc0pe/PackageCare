@@ -121,3 +121,26 @@ data/cv-env/bin/python experiments/local_cv/replay_prefix.py \
 ```
 
 Only positive seed masks strictly inside image boundaries qualify; other jobs remain in the audit record but cannot add derived prefix masks. The helper checks the complete raw prediction sequence/conditioning times and mask identities/shapes/areas/envelopes, seals input digests, preserves forward evidence and refuses existing output. It uses NumPy/Pillow for saved-file replay, **no model calls or networking**. Scoring/review work on the emitted `plan.json` and `attempt-1/`. This guard was selected from observed failures; it needs independent validation and still admits interior background candidates. Eighteen dependency-free checks run in CI; they do not establish model accuracy.
+
+## Generic temporal-action prerequisite
+
+[Fixed local action baseline](../../docs/local-action-baseline.md) uses pretrained V-JEPA 2 ViT-L, all sixteen full frames per clip, at most five distinct clips and five local calls. It ranks generic native classes, without prompts, tracker masks, expected answers or PackageCare verdicts. Preparation strips labels; preview seals the actual letterboxed RGB inputs before inference.
+
+```sh
+python3 experiments/local_cv/action_model.py prepare \
+  --parents /absolute/path/to/local-detector-plan.json /absolute/path/to/another-plan.json \
+  --output /absolute/path/to/new-action-scope
+
+# Public pinned ~1.5 GB model; no inference or media upload.
+HF_HOME=./data/local-cv-cache data/cv-env/bin/python experiments/local_cv/fetch_model.py \
+  --actions --model-dir data/local-action-small-model --receipt-dir /absolute/path/to/new-action-scope
+
+data/cv-env/bin/python experiments/local_cv/action_model.py preview \
+  --plan /absolute/path/to/new-action-scope/plan.json
+# Inspect all contact sheets, then use the FINAL digest printed by preview.
+data/cv-env/bin/python experiments/local_cv/action_model.py run \
+  --plan /absolute/path/to/new-action-scope/plan.json --plan-sha256 FINAL_PREVIEW_DIGEST \
+  --model-dir data/local-action-small-model --output /absolute/path/to/new-action-scope/attempt-1
+```
+
+Offline/local-only safetensors, MPS float32/SDPA/four threads, no fallback, training or retries. All 174 logits/ranks are retained; semantic misses continue, operational failure stops. Native action scores are not calibrated concern probabilities, and the model cannot natively abstain. Full-frame letterboxing differs from publisher center cropping, so public benchmark scores do not transfer. Twenty-one dependency-free checks now run with `python3 -m unittest discover -s tests -p 'test_local_*.py'`; no ML dependency/model enters CI.

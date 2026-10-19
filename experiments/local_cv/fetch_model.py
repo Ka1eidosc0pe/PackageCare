@@ -14,10 +14,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-dir", type=Path, required=True)
     parser.add_argument("--receipt-dir", type=Path, required=True)
-    parser.add_argument(
+    choice = parser.add_mutually_exclusive_group()
+    choice.add_argument(
         "--tracker",
         action="store_true",
         help="Fetch pinned SAM2.1 Tiny instead of the detector",
+    )
+    choice.add_argument(
+        "--actions",
+        action="store_true",
+        help="Fetch the pinned local V-JEPA 2 classifier",
     )
     args = parser.parse_args()
     from huggingface_hub import snapshot_download
@@ -29,6 +35,10 @@ if __name__ == "__main__":
         model = "facebook/sam2.1-hiera-tiny"
         revision = "de431c4043854a71d8101e17995dfe596bf101a5"
         expected = "48c14467e5cf9e51870511feb72c89688e82dd74523142c0538b663e193ac2a7"
+    if args.actions:
+        model = "facebook/vjepa2-vitl-fpc16-256-ssv2"
+        revision = "4aa02df83918538fc21cfaf576382fa20e489a80"
+        expected = "35aeab96e8513d9cc60ee08c1642dd121c86452c926ce3599b3317896a320396"
     root = Path(
         snapshot_download(
             model,

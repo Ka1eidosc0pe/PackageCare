@@ -20,7 +20,7 @@ jobs:
       - run: npm run build
       - run: npm test
       - name: Check local CV evidence preparation without model dependencies
-        run: python3 -m unittest discover -s tests -p 'test_local_cv.py'
+        run: python3 -m unittest discover -s tests -p 'test_local_*.py'
       - run: npm run infra:synth -- --quiet
   container:
     runs-on: ubuntu-24.04
