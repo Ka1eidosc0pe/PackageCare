@@ -68,6 +68,8 @@ The owner requires explicit approval before any potentially billable operation, 
 
 An evaluation-only [Qwen3-VL benchmark](docs/model-benchmark-plan.md) recorded empty structured replies and a useful three-frame caption, without establishing handling quality. The owner-approved [fixed three-case pilot](docs/handling-pilot.md) then stopped on its first empty-observation reply; it did not reach the annotated toss or either control case. Estimated returned-usage cost was $0.00111707 before tax. Its scope is closed; no follow-up variants ran. Preparation, validation and mocked tests make no model calls. The application model allowlist remains unchanged.
 
+A subsequent [local CV prerequisite](docs/local-cv-feasibility.md) completed 48 offline parcel/hand localization inferences without training or cloud spending. It found useful candidates but also missed the relevant moving carton and produced persistent false boxes. Conservative candidate association does not yet establish release/placement evidence. [Reproduction helpers](experiments/local_cv/README.md) remain separate from the application; useful handling quality and a task-specific training corpus are still unproven.
+
 Recipient notes and footage text are treated as data. Model output is schema-checked, cited frames/time ranges are validated, and candidate observations receive a verification pass. The model returns structured observations; image time bounds are derived from cited frame offsets rather than guessed times. This limits unsupported output; it does not establish a measured detection accuracy.
 
 ### AWS deployment

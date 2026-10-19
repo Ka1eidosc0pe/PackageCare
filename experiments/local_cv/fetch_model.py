@@ -1,0 +1,61 @@
+"""Fetch one public, pinned checkpoint for LOCAL use; never uploads user media."""
+
+import os
+
+os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+os.environ["HF_HUB_DISABLE_XET"] = "1"
+os.environ["DO_NOT_TRACK"] = "1"
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--model-dir", type=Path, required=True)
+    parser.add_argument("--receipt-dir", type=Path, required=True)
+    args = parser.parse_args()
+    from huggingface_hub import snapshot_download
+
+    model = "IDEA-Research/grounding-dino-tiny"
+    revision = "a2bb814dd30d776dcf7e30523b00659f4f141c71"
+    root = Path(
+        snapshot_download(
+            model,
+            revision=revision,
+            token=False,
+            allow_patterns=["*.json", "*.txt", "model.safetensors", "README.md"],
+            local_dir=args.model_dir,
+        )
+    )
+    files = [
+        {
+            "file": p.name,
+            "bytes": p.stat().st_size,
+            "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+        }
+        for p in sorted(root.iterdir())
+        if p.is_file()
+    ]
+    if not any(
+        e["file"] == "model.safetensors"
+        and e["sha256"]
+        == "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3"
+        for e in files
+    ):
+        raise ValueError("Checkpoint digest mismatch")
+    receipt = args.receipt_dir / "model-receipt.json"
+    if receipt.exists():
+        raise FileExistsError("Existing receipt preserved")
+    receipt.write_text(
+        json.dumps({"model": model, "revision": revision, "files": files}, indent=2)
+    )
+    print(
+        json.dumps(
+            {
+                "receipt": str(receipt),
+                "files": len(files),
+                "bytes": sum(e["bytes"] for e in files),
+            }
+        )
+    )
