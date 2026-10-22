@@ -466,7 +466,9 @@ export default function App() {
                       await refresh();
                       setSelected(result.id);
                       setNotice(
-                        "Uploaded footage queued for Bedrock analysis.",
+                        status?.analysis?.provider === "local_classifier"
+                          ? "Uploaded footage queued for local classifier analysis."
+                          : "Uploaded footage queued for Bedrock analysis.",
                       );
                     });
                   e.target.value = "";
@@ -1184,7 +1186,9 @@ function DeliveryWorkspace({
                   Analysis:{" "}
                   {d.runs.at(-1)?.provider === "scripted_fixture"
                     ? "Scripted sample; no model invoked"
-                    : d.runs.at(-1)?.model}
+                    : d.runs.at(-1)?.provider === "local_classifier"
+                      ? `Local handling classifier (trained on synthetic clips; not validated on real deliveries), ${d.runs.at(-1)?.model}`
+                      : d.runs.at(-1)?.model}
                   . Visible handling and recipient-confirmed damage are
                   separate.
                 </p>
@@ -1923,13 +1927,22 @@ function Connections({
             <span className="service-icon aws">aws</span>
             <div>
               <h2>Analysis & storage</h2>
-              <p>Amazon Bedrock + local or AWS persistence</p>
+              <p>
+                {status?.analysis?.provider === "local_classifier"
+                  ? "Local handling classifier"
+                  : "Amazon Bedrock"}{" "}
+                + local or AWS persistence
+              </p>
             </div>
           </div>
           <dl className="connection-facts">
             <div>
               <dt>Analysis provider</dt>
-              <dd>Amazon Bedrock</dd>
+              <dd>
+                {status?.analysis?.provider === "local_classifier"
+                  ? "Local handling classifier (trained on synthetic clips; no cloud call)"
+                  : "Amazon Bedrock"}
+              </dd>
             </div>
             <div>
               <dt>Model</dt>

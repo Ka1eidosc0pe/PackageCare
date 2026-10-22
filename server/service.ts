@@ -464,7 +464,14 @@ export class PackageCare {
   }
   async observe(id: string) {
     const d = await this.get(id);
-    if (d.runs.some((r) => r.proposal && r.provider === "bedrock")) return;
+    if (
+      d.runs.some(
+        (r) =>
+          r.proposal &&
+          (r.provider === "bedrock" || r.provider === "local_classifier"),
+      )
+    )
+      return;
     await this.store.change(id, (c) => ({
       ...required(c),
       state: "analyzing",

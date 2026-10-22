@@ -2,6 +2,7 @@ import { createStore } from "./store.js";
 import { MediaStore } from "./media.js";
 import { PackageCare } from "./service.js";
 import { RingError } from "./ring.js";
+import { analyzerFromEnv } from "./local-analysis.js";
 import { WorkflowStore, StaleWorkflow } from "./workflow-store.js";
 const root = "/tmp/packagecare";
 export interface WorkerEvent {
@@ -18,9 +19,12 @@ export async function handler(event: WorkerEvent) {
     !["retrieve", "observe", "verify", "fail"].includes(event.phase)
   )
     throw new Error("Invalid workflow task");
+  const media = new MediaStore(root);
   const service = new PackageCare(
     new WorkflowStore(createStore(root), event.id, event.generation),
-    new MediaStore(root),
+    media,
+    undefined,
+    analyzerFromEnv(media),
   );
   return runWorkerTask(service, event);
 }

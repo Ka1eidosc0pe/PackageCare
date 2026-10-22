@@ -1,4 +1,5 @@
 import { bedrockModel } from "./aws.js";
+import { LocalClassifierAnalyzer } from "./local-analysis.js";
 import express from "express";
 import multer from "multer";
 import archiver from "archiver";
@@ -160,20 +161,27 @@ export function createApp(service: PackageCare, cloudUploads?: CloudUploads) {
   });
   app.get("/api/status", async (_req, res) => {
     const records = await service.store.list();
+    const local =
+      service.analyzer instanceof LocalClassifierAnalyzer
+        ? service.analyzer
+        : undefined;
     res.json({
       ring: {
         connected: !!service.ring.token,
         source: process.env.RING_SOURCE_TYPE || "ring_simulator",
       },
       analysis: {
-        provider: "bedrock",
-        model: bedrockModel(),
+        provider: local ? "local_classifier" : "bedrock",
+        label: local ? local.label : "Amazon Bedrock",
+        model: local
+          ? path.relative(process.cwd(), local.classifier)
+          : bedrockModel(),
         verified: records.some(
           (d) =>
             d.state === "ready" &&
             d.runs.some(
               (r) =>
-                r.provider === "bedrock" &&
+                r.provider === (local ? "local_classifier" : "bedrock") &&
                 r.finishedAt &&
                 r.verification &&
                 !r.failure,

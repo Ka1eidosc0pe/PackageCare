@@ -37,6 +37,8 @@ export function processingErrorMessage(error: {
       : "Bedrock is rate limited. Check the model's quotas before retrying.";
   if (error?.name === "ModelOutputError")
     return "Bedrock returned an invalid evidence response. No assessment was saved. Review model diagnostics before retrying.";
+  if (error?.name === "LocalClassifierError")
+    return "The local handling classifier failed. No assessment was saved. Your source footage is preserved; check the local Python environment and retry.";
   if (error?.name === "ServiceUnavailableException")
     return "Bedrock is temporarily unavailable. Your source footage is preserved. Retry this delivery later.";
   return "Processing failed. Check account access, media format, and server logs; then retry.";

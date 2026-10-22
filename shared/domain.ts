@@ -57,7 +57,7 @@ export interface Asset {
 }
 export interface Run {
   id: string;
-  provider: "scripted_fixture" | "bedrock";
+  provider: "scripted_fixture" | "bedrock" | "local_classifier";
   model: string;
   promptVersion: string;
   startedAt: string;
@@ -66,6 +66,8 @@ export interface Run {
   usage?: Record<string, number>;
   proposal?: Analysis;
   verification?: Analysis;
+  // Local classifier only: the numeric scores printed by experiments/synthetic/infer.py.
+  raw?: unknown;
   failure?: {
     stage: "tool" | "schema" | "evidence" | "truncated" | "processing";
     window?: number;

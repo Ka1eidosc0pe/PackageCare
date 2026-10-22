@@ -4,6 +4,7 @@ import { createApp } from "./app.js";
 import { createStore } from "./store.js";
 import { MediaStore } from "./media.js";
 import { PackageCare } from "./service.js";
+import { analyzerFromEnv } from "./local-analysis.js";
 import { purgeExpired, purgeOrphans } from "./maintenance.js";
 const root = path.resolve(process.env.DATA_DIR || "data"),
   host = process.env.HOST || "127.0.0.1";
@@ -14,7 +15,13 @@ if (
   throw new Error(
     "Configure PACKAGECARE_PASSWORD and SESSION_SECRET before exposing the server.",
   );
-const service = new PackageCare(createStore(root), new MediaStore(root));
+const media = new MediaStore(root);
+const service = new PackageCare(
+  createStore(root),
+  media,
+  undefined,
+  analyzerFromEnv(media),
+);
 const cleanup = () =>
   purgeExpired(
     service.store,

@@ -216,6 +216,10 @@ export function failedAnalysisRun(error: unknown): Run | undefined {
     ? (error as any)[failedRunKey]
     : undefined;
 }
+export function attachFailedRun<E>(error: E, run: Run): E {
+  if (error && typeof error === "object") (error as any)[failedRunKey] = run;
+  return error;
+}
 export interface Analyzer {
   analyze(
     d: Delivery,
