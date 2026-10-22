@@ -1,0 +1,434 @@
+[
+ {
+  "id": "k-toss-000",
+  "label": "toss",
+  "template": 1,
+  "attributes": {
+   "camera": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor",
+   "setting": "a farmhouse with a wide painted porch and wooden railings",
+   "lighting": "overcast daylight",
+   "courier": "a delivery driver in a plain brown uniform",
+   "parcel": "a medium cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor, at a farmhouse with a wide painted porch and wooden railings, overcast daylight. A delivery driver in a plain brown uniform approaches holding a medium cardboard box and, without stepping onto the porch, throws it overhand onto the porch; it sails through the air and skids across the floor. The courier walks away quickly. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-toss-001",
+  "label": "toss",
+  "template": 3,
+  "attributes": {
+   "camera": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps",
+   "setting": "a brick townhouse with a narrow stoop and iron railing",
+   "lighting": "harsh midday sun",
+   "courier": "a delivery driver in a plain navy uniform and cap",
+   "parcel": "a large cardboard box held with both arms"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps, at a brick townhouse with a narrow stoop and iron railing, harsh midday sun. A delivery driver in a plain navy uniform and cap stands at the bottom of the steps and lobs a large cardboard box held with both arms up onto the porch; it arcs through the air, lands on its corner and flips over. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-toss-002",
+  "label": "toss",
+  "template": 0,
+  "attributes": {
+   "camera": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door",
+   "setting": "an apartment building hallway with carpet and numbered doors",
+   "lighting": "night-time infrared black-and-white security footage",
+   "courier": "a courier in a plain blue t-shirt and jeans",
+   "parcel": "a flat cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door, at an apartment building hallway with carpet and numbered doors, night-time infrared black-and-white security footage. A courier in a plain blue t-shirt and jeans walks up holding a flat cardboard box, stops a few meters from the door and tosses it underhand toward the door; the package flies through the air, lands hard on the porch floor, bounces and tumbles. The courier turns and leaves. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-toss-003",
+  "label": "toss",
+  "template": 1,
+  "attributes": {
+   "camera": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door",
+   "setting": "an apartment building hallway with carpet and numbered doors",
+   "lighting": "dim warm hallway lighting",
+   "courier": "a delivery driver in a high-visibility yellow vest",
+   "parcel": "a padded plastic mailer bag"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door, at an apartment building hallway with carpet and numbered doors, dim warm hallway lighting. A delivery driver in a high-visibility yellow vest approaches holding a padded plastic mailer bag and, without stepping onto the porch, throws it overhand onto the porch; it sails through the air and skids across the floor. The courier walks away quickly. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-toss-004",
+  "label": "toss",
+  "template": 1,
+  "attributes": {
+   "camera": "Ceiling-mounted security camera footage with a steep top-down view of the doorstep",
+   "setting": "a duplex with a shared concrete landing and a welcome mat",
+   "lighting": "late afternoon sun with long shadows",
+   "courier": "a delivery worker in a dark jacket and beanie",
+   "parcel": "two stacked cardboard boxes"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Ceiling-mounted security camera footage with a steep top-down view of the doorstep, at a duplex with a shared concrete landing and a welcome mat, late afternoon sun with long shadows. A delivery worker in a dark jacket and beanie approaches holding two stacked cardboard boxes and, without stepping onto the porch, throws it overhand onto the porch; it sails through the air and skids across the floor. The courier walks away quickly. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-toss-005",
+  "label": "toss",
+  "template": 2,
+  "attributes": {
+   "camera": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor",
+   "setting": "a brick townhouse with a narrow stoop and iron railing",
+   "lighting": "light rain with a wet porch floor",
+   "courier": "a delivery driver in a high-visibility yellow vest",
+   "parcel": "a flat cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor, at a brick townhouse with a narrow stoop and iron railing, light rain with a wet porch floor. A delivery driver in a high-visibility yellow vest walks past the door and flings a flat cardboard box sideways onto the doorstep without stopping; the package is airborne for a moment, hits the ground and rolls over. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-toss-006",
+  "label": "toss",
+  "template": 3,
+  "attributes": {
+   "camera": "Grainy security camera footage from across the front yard, the front door and porch small and distant in the frame",
+   "setting": "a suburban house with a wooden porch and two concrete steps",
+   "lighting": "night-time infrared black-and-white security footage",
+   "courier": "a courier in a plain blue t-shirt and jeans",
+   "parcel": "a small cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Grainy security camera footage from across the front yard, the front door and porch small and distant in the frame, at a suburban house with a wooden porch and two concrete steps, night-time infrared black-and-white security footage. A courier in a plain blue t-shirt and jeans stands at the bottom of the steps and lobs a small cardboard box up onto the porch; it arcs through the air, lands on its corner and flips over. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-drop-000",
+  "label": "drop",
+  "template": 0,
+  "attributes": {
+   "camera": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor",
+   "setting": "a modern house with a flat concrete entryway and potted plants",
+   "lighting": "bright daylight",
+   "courier": "a courier in a plain grey polo shirt and shorts",
+   "parcel": "a flat cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor, at a modern house with a flat concrete entryway and potted plants, bright daylight. A courier in a plain grey polo shirt and shorts walks up to the door holding a flat cardboard box at chest height and simply lets go; the package falls straight down, slams onto the floor and tips over. The courier walks away. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-drop-001",
+  "label": "drop",
+  "template": 3,
+  "attributes": {
+   "camera": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps",
+   "setting": "a farmhouse with a wide painted porch and wooden railings",
+   "lighting": "late afternoon sun with long shadows",
+   "courier": "a delivery driver in a plain brown uniform",
+   "parcel": "a small cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps, at a farmhouse with a wide painted porch and wooden railings, late afternoon sun with long shadows. A delivery driver in a plain brown uniform reaches the door with a small cardboard box balanced on one hand and lets it drop from shoulder height onto the porch floor before leaving. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-drop-002",
+  "label": "drop",
+  "template": 0,
+  "attributes": {
+   "camera": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door",
+   "setting": "an apartment building hallway with carpet and numbered doors",
+   "lighting": "fluorescent hallway lighting",
+   "courier": "a delivery driver in a plain brown uniform",
+   "parcel": "a padded plastic mailer bag"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door, at an apartment building hallway with carpet and numbered doors, fluorescent hallway lighting. A delivery driver in a plain brown uniform walks up to the door holding a padded plastic mailer bag at chest height and simply lets go; the package falls straight down, slams onto the floor and tips over. The courier walks away. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-drop-003",
+  "label": "drop",
+  "template": 3,
+  "attributes": {
+   "camera": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps",
+   "setting": "a modern house with a flat concrete entryway and potted plants",
+   "lighting": "overcast daylight",
+   "courier": "a courier in a plain blue t-shirt and jeans",
+   "parcel": "a medium cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps, at a modern house with a flat concrete entryway and potted plants, overcast daylight. A courier in a plain blue t-shirt and jeans reaches the door with a medium cardboard box balanced on one hand and lets it drop from shoulder height onto the porch floor before leaving. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-drop-004",
+  "label": "drop",
+  "template": 1,
+  "attributes": {
+   "camera": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door",
+   "setting": "an apartment building hallway with carpet and numbered doors",
+   "lighting": "fluorescent hallway lighting",
+   "courier": "a delivery driver in a plain brown uniform",
+   "parcel": "two stacked cardboard boxes"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door, at an apartment building hallway with carpet and numbered doors, fluorescent hallway lighting. A delivery driver in a plain brown uniform holds two stacked cardboard boxes out at arm's length above the doormat and releases it; it drops to the floor with a hard impact. The courier leaves. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-000",
+  "label": "place",
+  "template": 6,
+  "attributes": {
+   "camera": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch and front steps",
+   "setting": "a suburban house with a wooden porch and two concrete steps",
+   "lighting": "bright daylight",
+   "courier": "a delivery driver in a high-visibility yellow vest",
+   "parcel": "a padded plastic mailer bag"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch and front steps, at a suburban house with a wooden porch and two concrete steps, bright daylight. A delivery driver in a high-visibility yellow vest arrives with a padded plastic mailer bag, kneels, sets it down softly next to the door, takes a photo of it with a phone, then leaves. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-001",
+  "label": "place",
+  "template": 4,
+  "attributes": {
+   "camera": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor",
+   "setting": "a suburban house with a wooden porch and two concrete steps",
+   "lighting": "light rain with a wet porch floor",
+   "courier": "a delivery driver in a plain navy uniform and cap",
+   "parcel": "a medium cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor, at a suburban house with a wooden porch and two concrete steps, light rain with a wet porch floor. A delivery driver in a plain navy uniform and cap carries a medium cardboard box to the door, crouches and carefully places it against the wall beside the door, adjusts it, stands up and leaves. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-002",
+  "label": "place",
+  "template": 2,
+  "attributes": {
+   "camera": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door",
+   "setting": "an apartment building hallway with carpet and numbered doors",
+   "lighting": "fluorescent hallway lighting",
+   "courier": "a delivery worker in a dark jacket and beanie",
+   "parcel": "a large cardboard box held with both arms"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door, at an apartment building hallway with carpet and numbered doors, fluorescent hallway lighting. A delivery worker in a dark jacket and beanie arrives holding a large cardboard box held with both arms in one hand, crouches low and places it on the doorstep from just above the floor, then walks away. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-003",
+  "label": "place",
+  "template": 3,
+  "attributes": {
+   "camera": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door",
+   "setting": "an apartment building hallway with carpet and numbered doors",
+   "lighting": "dim warm hallway lighting",
+   "courier": "a delivery driver in a high-visibility yellow vest",
+   "parcel": "a small cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door, at an apartment building hallway with carpet and numbered doors, dim warm hallway lighting. A delivery driver in a high-visibility yellow vest walks up holding a small cardboard box, bends down and gently sets it on the doormat with both hands, letting go only once it rests on the floor, then walks away. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-004",
+  "label": "place",
+  "template": 5,
+  "attributes": {
+   "camera": "Doorbell camera footage, wide fisheye lens at the door looking down the front walkway toward the street",
+   "setting": "a farmhouse with a wide painted porch and wooden railings",
+   "lighting": "night-time infrared black-and-white security footage",
+   "courier": "a delivery worker in a dark jacket and beanie",
+   "parcel": "a medium cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Doorbell camera footage, wide fisheye lens at the door looking down the front walkway toward the street, at a farmhouse with a wide painted porch and wooden railings, night-time infrared black-and-white security footage. A delivery worker in a dark jacket and beanie walks up the steps with a medium cardboard box, lowers it slowly onto the top step with both hands, steps back and walks away. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-005",
+  "label": "place",
+  "template": 2,
+  "attributes": {
+   "camera": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor",
+   "setting": "a small bungalow with a short brick path and a low step",
+   "lighting": "bright daylight",
+   "courier": "a delivery driver in a high-visibility yellow vest",
+   "parcel": "two stacked cardboard boxes"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Porch security camera footage from a camera in the upper corner of a covered porch, angled down across the porch floor, at a small bungalow with a short brick path and a low step, bright daylight. A delivery driver in a high-visibility yellow vest arrives holding two stacked cardboard boxes in one hand, crouches low and places it on the doorstep from just above the floor, then walks away. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-006",
+  "label": "place",
+  "template": 1,
+  "attributes": {
+   "camera": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door",
+   "setting": "an apartment building hallway with carpet and numbered doors",
+   "lighting": "dim warm hallway lighting",
+   "courier": "a delivery driver in a plain navy uniform and cap",
+   "parcel": "a small cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Apartment door camera footage, wide-angle lens looking out into a building corridor in front of the apartment door, at an apartment building hallway with carpet and numbered doors, dim warm hallway lighting. A delivery driver in a plain navy uniform and cap carries a small cardboard box toward the door, holding it close to the camera for a moment, then lowers it carefully to the floor out of the way and leaves. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-place-007",
+  "label": "place",
+  "template": 2,
+  "attributes": {
+   "camera": "Doorbell camera footage, wide fisheye lens at the door looking down the front walkway toward the street",
+   "setting": "a brick townhouse with a narrow stoop and iron railing",
+   "lighting": "overcast daylight",
+   "courier": "a delivery driver in a high-visibility yellow vest",
+   "parcel": "a padded plastic mailer bag"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Doorbell camera footage, wide fisheye lens at the door looking down the front walkway toward the street, at a brick townhouse with a narrow stoop and iron railing, overcast daylight. A delivery driver in a high-visibility yellow vest arrives holding a padded plastic mailer bag in one hand, crouches low and places it on the doorstep from just above the floor, then walks away. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-none-000",
+  "label": "none",
+  "template": 2,
+  "attributes": {
+   "camera": "Low-resolution CCTV footage from a camera mounted high on a garage, looking down across the driveway and front path from far away, so people appear small in the frame",
+   "setting": "a brick townhouse with a narrow stoop and iron railing",
+   "lighting": "late afternoon sun with long shadows",
+   "courier": "a delivery worker in a dark jacket and beanie",
+   "parcel": "a medium cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Low-resolution CCTV footage from a camera mounted high on a garage, looking down across the driveway and front path from far away, so people appear small in the frame, at a brick townhouse with a narrow stoop and iron railing, late afternoon sun with long shadows. A delivery worker in a dark jacket and beanie walks up to the door holding a medium cardboard box, knocks, waits, then turns and leaves still holding the package. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-none-001",
+  "label": "none",
+  "template": 5,
+  "attributes": {
+   "camera": "Ceiling-mounted security camera footage with a steep top-down view of the doorstep",
+   "setting": "a suburban house with a wooden porch and two concrete steps",
+   "lighting": "harsh midday sun",
+   "courier": "a courier in a plain grey polo shirt and shorts",
+   "parcel": "a medium cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Ceiling-mounted security camera footage with a steep top-down view of the doorstep, at a suburban house with a wooden porch and two concrete steps, harsh midday sun. A courier in a plain grey polo shirt and shorts picks up a medium cardboard box that was resting on the doormat, tucks it under one arm and walks inside the house. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-obscured-000",
+  "label": "obscured",
+  "template": 0,
+  "attributes": {
+   "camera": "Low-resolution CCTV footage from a camera mounted high on a garage, looking down across the driveway and front path from far away, so people appear small in the frame",
+   "setting": "a suburban house with a wooden porch and two concrete steps",
+   "lighting": "late afternoon sun with long shadows",
+   "courier": "a delivery driver in a plain navy uniform and cap",
+   "parcel": "a flat cardboard box"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Low-resolution CCTV footage from a camera mounted high on a garage, looking down across the driveway and front path from far away, so people appear small in the frame, at a suburban house with a wooden porch and two concrete steps, late afternoon sun with long shadows. A delivery driver in a plain navy uniform and cap walks up holding a flat cardboard box and goes behind a porch pillar; whatever happens to the package is hidden from view, then the courier walks away and the package is not clearly visible. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "k-obscured-001",
+  "label": "obscured",
+  "template": 3,
+  "attributes": {
+   "camera": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps",
+   "setting": "a modern house with a flat concrete entryway and potted plants",
+   "lighting": "dusk with the porch light on",
+   "courier": "a delivery worker in a dark jacket and beanie",
+   "parcel": "a large cardboard box held with both arms"
+  },
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Home security camera footage from a camera mounted high above the front door, looking down at the porch, doormat and steps, at a modern house with a flat concrete entryway and potted plants, dusk with the porch light on. A delivery worker in a dark jacket and beanie carries a large cardboard box held with both arms up to the door while the scene is very dark and blurry; it is not possible to see how the package is put down. Static camera, no camera movement, single continuous shot, realistic surveillance video quality. The camera device itself is not visible in the image.",
+   "duration": "5",
+   "aspect_ratio": "16:9"
+  }
+ }
+]

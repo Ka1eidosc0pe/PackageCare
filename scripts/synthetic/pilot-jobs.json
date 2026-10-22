@@ -1,0 +1,87 @@
+[
+ {
+  "id": "pilot-kling25-toss",
+  "label": "toss",
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Security camera footage from a video doorbell mounted beside a front door, wide-angle fisheye lens, static camera looking down and out at a front porch, steps and front walkway, slightly grainy, realistic home surveillance video, daylight. A delivery driver in a plain uniform walks up the walkway holding a medium cardboard box, stops about two meters from the door and throws the box underhand toward the door; the box flies through the air, hits the porch floor hard, bounces and tumbles to a stop. The driver turns and walks away.",
+   "duration": "5",
+   "aspect_ratio": "16:9",
+   "negative_prompt": "text, captions, logos, watermark, cartoon, animation, camera movement, cuts"
+  }
+ },
+ {
+  "id": "pilot-kling25-place",
+  "label": "place",
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Security camera footage from a video doorbell mounted beside a front door, wide-angle fisheye lens, static camera looking down and out at a front porch, steps and front walkway, slightly grainy, realistic home surveillance video, daylight. A delivery driver in a plain uniform walks up the steps holding a medium cardboard box, bends down and gently sets the box flat on the porch floor next to the door with both hands, lets go only after it rests on the floor, then stands up and walks away.",
+   "duration": "5",
+   "aspect_ratio": "16:9",
+   "negative_prompt": "text, captions, logos, watermark, cartoon, animation, camera movement, cuts"
+  }
+ },
+ {
+  "id": "pilot-kling25-drop",
+  "label": "drop",
+  "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+  "input": {
+   "prompt": "Security camera footage from a video doorbell mounted beside a front door, wide-angle fisheye lens, static camera looking down and out at a front porch, steps and front walkway, slightly grainy, realistic home surveillance video, daylight. A delivery driver in a plain uniform walks up to the door holding a medium cardboard box at chest height and simply lets go of it; the box falls straight down, slams onto the porch floor and tips over. The driver walks away.",
+   "duration": "5",
+   "aspect_ratio": "16:9",
+   "negative_prompt": "text, captions, logos, watermark, cartoon, animation, camera movement, cuts"
+  }
+ },
+ {
+  "id": "pilot-wan22-toss",
+  "label": "toss",
+  "endpoint": "fal-ai/wan/v2.2-a14b/text-to-video",
+  "input": {
+   "prompt": "Security camera footage from a video doorbell mounted beside a front door, wide-angle fisheye lens, static camera looking down and out at a front porch, steps and front walkway, slightly grainy, realistic home surveillance video, daylight. A delivery driver in a plain uniform walks up the walkway holding a medium cardboard box, stops about two meters from the door and throws the box underhand toward the door; the box flies through the air, hits the porch floor hard, bounces and tumbles to a stop. The driver turns and walks away.",
+   "negative_prompt": "text, captions, logos, watermark, cartoon, animation, camera movement, cuts",
+   "resolution": "480p",
+   "num_frames": 81,
+   "frames_per_second": 16,
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "pilot-wan22-place",
+  "label": "place",
+  "endpoint": "fal-ai/wan/v2.2-a14b/text-to-video",
+  "input": {
+   "prompt": "Security camera footage from a video doorbell mounted beside a front door, wide-angle fisheye lens, static camera looking down and out at a front porch, steps and front walkway, slightly grainy, realistic home surveillance video, daylight. A delivery driver in a plain uniform walks up the steps holding a medium cardboard box, bends down and gently sets the box flat on the porch floor next to the door with both hands, lets go only after it rests on the floor, then stands up and walks away.",
+   "negative_prompt": "text, captions, logos, watermark, cartoon, animation, camera movement, cuts",
+   "resolution": "480p",
+   "num_frames": 81,
+   "frames_per_second": 16,
+   "aspect_ratio": "16:9"
+  }
+ },
+ {
+  "id": "pilot-seedance-toss",
+  "label": "toss",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Security camera footage from a video doorbell mounted beside a front door, wide-angle fisheye lens, static camera looking down and out at a front porch, steps and front walkway, slightly grainy, realistic home surveillance video, daylight. A delivery driver in a plain uniform walks up the walkway holding a medium cardboard box, stops about two meters from the door and throws the box underhand toward the door; the box flies through the air, hits the porch floor hard, bounces and tumbles to a stop. The driver turns and walks away.",
+   "resolution": "480p",
+   "duration": "5",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  },
+  "override_usd": 0.3
+ },
+ {
+  "id": "pilot-seedance-place",
+  "label": "place",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Security camera footage from a video doorbell mounted beside a front door, wide-angle fisheye lens, static camera looking down and out at a front porch, steps and front walkway, slightly grainy, realistic home surveillance video, daylight. A delivery driver in a plain uniform walks up the steps holding a medium cardboard box, bends down and gently sets the box flat on the porch floor next to the door with both hands, lets go only after it rests on the floor, then stands up and walks away.",
+   "resolution": "480p",
+   "duration": "5",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  },
+  "override_usd": 0.3
+ }
+]
