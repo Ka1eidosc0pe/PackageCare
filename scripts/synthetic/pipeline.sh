@@ -17,9 +17,7 @@ log "augmenting (3 variants per clip)"
 for f in $S/full/clips/*.mp4; do
   [ -f "$S/full-train/$(basename "$f")" ] || cp "$f" $S/full-train/
 done
-ls $S/full/clips/*.mp4 | xargs -P 6 -I{} sh -c '
-  s=$(basename {} .mp4); [ -f data/synthetic/full-train/${s}_aug2.mp4 ] || \
-  data/cv-env/bin/python experiments/synthetic/augment.py {} data/synthetic/full-train --n 3 >/dev/null 2>&1 || echo "augment failed: $s"'
+ls $S/full/clips/*.mp4 | xargs -n 1 -P 6 bash scripts/synthetic/augment_one.sh
 
 python3 scripts/synthetic/build_labels.py $S/full-labels.json $S/full/clips $S/pilot/clips \
   --exclude m-drop-003 pilot-kling25-toss pilot-kling25-place pilot-kling25-drop pilot-wan22-toss pilot-wan22-place
