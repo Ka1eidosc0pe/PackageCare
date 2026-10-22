@@ -1,0 +1,156 @@
+{
+  "kind": "packagecare-support-transition-terminal-v1",
+  "date": "2026-10-19",
+  "model": "mistral.mistral-large-3-675b-instruct",
+  "region": "us-east-2",
+  "decision": "reject_for_adoption",
+  "paidScope": "closed",
+  "approvedTotalCeilingUSD": 2,
+  "approvedMaximumAttempts": 12,
+  "actualAttemptedRequests": 5,
+  "successfulModelResponses": 2,
+  "usage": {
+    "inputTokens": 14699,
+    "outputTokens": 1658,
+    "estimatedReturnedUsageUSD": 0.0098365,
+    "billingReconciled": false,
+    "failedRequestsReturnedUsage": false
+  },
+  "cases": [
+    {
+      "case": 0,
+      "result": "factuality_failure",
+      "derivedHeadlineAfterCaveatParserRepair": "possible_rough_handling",
+      "reason": "Correct f7/f8 held-airborne pair but false parcel identity/geometry and invented counter placement, repeated during verification."
+    },
+    {
+      "case": 1,
+      "result": "service_failure",
+      "reason": "Request body length limit exceeded before returned model output."
+    },
+    {
+      "case": 2,
+      "result": "not_run"
+    },
+    {
+      "case": 3,
+      "result": "not_run"
+    },
+    {
+      "case": 4,
+      "result": "not_run"
+    }
+  ],
+  "scopes": [
+    {
+      "directory": "data/handling-support-pilots/9e5c1b98-d096-4fd7-8d64-51e95792e37c",
+      "planSha256": "e1390469110a5d8221e20e37d76b33671d71bafd86b538b03293a34002e8f7ef",
+      "journalSha256": "350efe862e3e6d25aae104c8e261331a82ba5f036e89b604e8640e8d5f5fef4e",
+      "records": [
+        {
+          "type": "attempt",
+          "case": 0,
+          "pass": "observe",
+          "usage": null
+        },
+        {
+          "type": "failure",
+          "case": null,
+          "pass": null,
+          "usage": null
+        }
+      ]
+    },
+    {
+      "directory": "data/handling-support-pilots/3252545b-0f02-4776-8069-2ff653653b35",
+      "planSha256": "aee8886a74a203ec28e47b242efbc5eeda0133612fe87048d2061d04814d258c",
+      "journalSha256": "813b95e0a864a6649cc2fb98be5d0b51f47829c7730816a2bb1261bf1050ad6a",
+      "records": [
+        {
+          "type": "attempt",
+          "case": 0,
+          "pass": "observe",
+          "usage": null
+        },
+        {
+          "type": "failure",
+          "case": null,
+          "pass": null,
+          "usage": null
+        }
+      ]
+    },
+    {
+      "directory": "data/handling-support-pilots/73fb4e3a-3643-4ba1-bafa-7a5374cefc76",
+      "planSha256": "7a4950247704ba3eb2fb1771d166599fb262d2b4ce244cadd263fe58bdc4ee1f",
+      "journalSha256": "ff307781685ce2b672f50e8e555ae893719932d101cd99db3c450a264340bbaf",
+      "records": [
+        {
+          "type": "attempt",
+          "case": 0,
+          "pass": "observe",
+          "usage": null
+        },
+        {
+          "type": "response",
+          "case": 0,
+          "pass": "observe",
+          "usage": {
+            "inputTokens": 7051,
+            "outputTokens": 773,
+            "totalTokens": 7824
+          }
+        },
+        {
+          "type": "attempt",
+          "case": 0,
+          "pass": "verify",
+          "usage": null
+        },
+        {
+          "type": "response",
+          "case": 0,
+          "pass": "verify",
+          "usage": {
+            "inputTokens": 7648,
+            "outputTokens": 885,
+            "totalTokens": 8533
+          }
+        },
+        {
+          "type": "failure",
+          "case": null,
+          "pass": null,
+          "usage": null
+        }
+      ]
+    },
+    {
+      "directory": "data/handling-support-pilots/a06f855d-fd2b-4183-b5d1-deaf6b184113",
+      "planSha256": "0868001088b0a74ad5b1163914cf49b8d7e399f583ddcde911b24c6f71a180e2",
+      "journalSha256": "2ddbaf823fd15cc866aa53cc47fdd25535d71cc09d1a0f8be586f4aeea0a0742",
+      "records": [
+        {
+          "type": "attempt",
+          "case": 1,
+          "pass": "observe",
+          "usage": null
+        },
+        {
+          "type": "failure",
+          "case": null,
+          "pass": null,
+          "usage": null
+        }
+      ]
+    }
+  ],
+  "productionAdopted": false,
+  "gateBComplete": false,
+  "notes": [
+    "Five reused development source groups do not establish independent accuracy.",
+    "First failed request explanation was lost by initial logger; subsequent diagnostics corrected.",
+    "Six verification caveats exceeded original local maximum five; widening caveat bounds only enabled saved-response replay.",
+    "No additional paid action, deployment, S3 upload or training is authorized by unused allowance."
+  ]
+}

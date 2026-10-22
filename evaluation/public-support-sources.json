@@ -1,0 +1,105 @@
+{
+  "createdOn": "2026-10-19",
+  "cases": [
+    {
+      "id": "swns-release",
+      "sourceFile": "data/public-support-check/swns-cctv.webm",
+      "sourceSha256": "94d07d05d37f9478a7ee7bdaa734aeef253363daa2574c10e6eb095c540bfb8f",
+      "sourceStartSeconds": 2.5,
+      "durationSeconds": 4,
+      "excerptSha256": "807700e0ec838907b674b343fec7016910c7f92791c9c8096006813af22ae698",
+      "edit": "Audio removed, H.264 transcode; no crop or speed change",
+      "expected": "possible_rough_handling",
+      "sourceGroup": "swns-cctv-2019-07-11",
+      "source": {
+        "id": "swns-cctv",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Amazon_delivery_driver_THROWS_parcel_as_shocked_dad_watches_live_on_CCTV_-_SWNS_TV.webm",
+        "originalURL": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Amazon_delivery_driver_THROWS_parcel_as_shocked_dad_watches_live_on_CCTV_-_SWNS_TV.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "bytes": 1959824,
+        "sha256": "94d07d05d37f9478a7ee7bdaa734aeef253363daa2574c10e6eb095c540bfb8f",
+        "sha1": "bfd51cdbe0b93a8f79c34529846f9053960338d8",
+        "credit": "SWNS / CCTV source credited in publisher description",
+        "usage": "Private evaluation only; no training, cloud upload or redistribution",
+        "rightsNote": "Commons PD-automated rationale conflicts with publisher commercial licensing notice. Not cleared for public demo.",
+        "sourceGroup": "swns-cctv-2019-07-11",
+        "retrievedOn": "2026-10-19"
+      },
+      "annotation": {
+        "status": "single-agent provisional, frozen before candidate inference",
+        "visible": "Visible pale parcel rises from hands at roughly 3.3 s; a separate pale parcel is above the person with hands down at 3.55\u20133.60 s, then descends near the parked car. Contact is partially obscured; no force/damage inference.",
+        "actionWindow": [
+          700,
+          1300
+        ]
+      },
+      "split": "held_out_for_support_candidates",
+      "priorUse": "No known support-model inference; earlier agent visual inspection of the two CC clips means these are not pristine researcher-blind samples."
+    },
+    {
+      "id": "doorway-held",
+      "sourceFile": "data/online-footage/originals/fedex-no-knock.ogv",
+      "sourceSha256": "0d80bb4f8bb1d6585f7b143bab21901694ad9bf347f96a7b276223ff28916427",
+      "sourceStartSeconds": 20,
+      "durationSeconds": 4,
+      "excerptSha256": "80cf1c8160f9989d5b378b567ea0adda4d631bac7be7862c8daf3af4a68a6524",
+      "edit": "Audio removed, H.264 transcode; no crop or speed change",
+      "expected": "unable_to_assess",
+      "sourceGroup": "mac-manson-doorway-2012",
+      "source": {
+        "id": "fedex-no-knock",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:FedEx_fails_delivery_without_knocking.ogv",
+        "originalURL": "https://upload.wikimedia.org/wikipedia/commons/4/40/FedEx_fails_delivery_without_knocking.ogv",
+        "license": "CC BY 3.0",
+        "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+        "artistHTML": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.youtube.com/user/stabaho1\">Mac Manson</a>",
+        "availableLocally": true,
+        "file": "/Users/adityaselvam/Desktop/Aage/Hackathons/Amazon_BSS2_2026/data/online-footage/originals/fedex-no-knock.ogv",
+        "sha256": "0d80bb4f8bb1d6585f7b143bab21901694ad9bf347f96a7b276223ff28916427",
+        "bytes": 2222691
+      },
+      "annotation": {
+        "status": "single-agent provisional, frozen before candidate inference",
+        "visible": "Person approaches the door and continues holding a carton during source 20\u201324 s. Placement or release is not established in this excerpt.",
+        "actionWindow": null
+      },
+      "split": "held_out_for_support_candidates",
+      "priorUse": "No known support-model inference; earlier agent visual inspection of the two CC clips means these are not pristine researcher-blind samples."
+    },
+    {
+      "id": "yard-obscured",
+      "sourceFile": "data/online-footage/originals/usps-throw.ogv",
+      "sourceSha256": "cb4a41f6e0b13eb5fcc404a44158dc0e1034eba7f071bcbaf983db2dd5d1c1e2",
+      "sourceStartSeconds": 0,
+      "durationSeconds": 4,
+      "excerptSha256": "645fc42dee7fcc1e7ef8c923445642a4d6d02e34f8c234e6fc51df4323f011a3",
+      "edit": "Audio removed, H.264 transcode; no crop or speed change",
+      "expected": "unable_to_assess",
+      "sourceGroup": "brian-greul-yard-2017",
+      "source": {
+        "id": "usps-throw",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:USPS_delivery_person_throws_package_at_house.ogv",
+        "originalURL": "https://upload.wikimedia.org/wikipedia/commons/e/ee/USPS_delivery_person_throws_package_at_house.ogv",
+        "license": "CC BY 3.0",
+        "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+        "artistHTML": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.youtube.com/user/hotpuppy72\">Brian Greul</a>",
+        "availableLocally": true,
+        "file": "/Users/adityaselvam/Desktop/Aage/Hackathons/Amazon_BSS2_2026/data/online-footage/originals/usps-throw.ogv",
+        "sha256": "cb4a41f6e0b13eb5fcc404a44158dc0e1034eba7f071bcbaf983db2dd5d1c1e2",
+        "bytes": 37290813
+      },
+      "annotation": {
+        "status": "single-agent provisional, frozen before candidate inference",
+        "visible": "Wide camera and vegetation obscure the parcel/support relationship. The source headline is not a handling label. This excerpt is from before the later source discontinuity.",
+        "actionWindow": null
+      },
+      "split": "held_out_for_support_candidates",
+      "priorUse": "No known support-model inference; earlier agent visual inspection of the two CC clips means these are not pristine researcher-blind samples."
+    }
+  ],
+  "preparedPlan": "data/evaluations/3414c843-0610-426e-83dd-d80de62729ad/plan.json",
+  "preparedPlanSha256": "a621865de237b72da5ce952e830b94ef937058f865cbe8dcfa377e99d5333792",
+  "framesPerCase": 32,
+  "testScope": "Three manually bounded excerpts from distinct recordings, not full-recording automatic localization or the 12-clip gate. One positive and two handling-unclear controls; no new controlled-placement case.",
+  "inferencePerformed": false,
+  "publicationAuthorized": false
+}

@@ -146,3 +146,32 @@ data/cv-env/bin/python experiments/local_cv/action_model.py run \
 Offline/local-only safetensors, MPS float32/SDPA/four threads, no fallback, training or retries. All 174 logits/ranks are retained; semantic misses continue, operational failure stops. Native action scores are not calibrated concern probabilities, and the model cannot natively abstain. Full-frame letterboxing differs from publisher center cropping, so public benchmark scores do not transfer. Twenty-one dependency-free checks now run with `python3 -m unittest discover -s tests -p 'test_local_*.py'`; no ML dependency/model enters CI.
 
 The bounded temporal-window follow-up uses `action_windows.py prepare --evaluation DENSE_32_FRAME_EVALUATION --model-receipt EXISTING_ACTION_RECEIPT --output NEW_SCOPE`, followed by `action_windows.py preview --plan NEW_SCOPE/plan.json`. It derives all three half-overlap 16-frame views from every source's 32 uniformly prepared frames. Inspect the actual views, then invoke `action_windows.py run --plan NEW_SCOPE/plan.json --plan-sha256 FINAL_BUNDLE_DIGEST --model-dir data/local-action-small-model --output NEW_SCOPE/run-1`. This uses the unchanged native runner; global calls are exactly three times source count, at most fifteen. The wrapper validates every child/input before dispatch and stops on any failure without retry. Twenty-three dependency-free checks include temporal coverage and tamper/bound refusal. Views remain grouped by original source; their bounds are not action annotations.
+## Native-image support-transition experiment
+
+`support_vlm.py` is a local-only five-source diagnostic, separate from the generic action classifier and the production worker. It uses the same support-evidence contract as `server/handling-evidence.ts`, all sixteen frames per source, source hashes checked before loading, local-only model loading, and a fresh output directory. Expected labels and annotated action times stay out of prompts. Runtime pins are in `requirements-vlm.txt`; use an isolated `data/vlm-env` on Apple Silicon.
+
+Checkpoint: `mlx-community/Qwen3.8-27B-4bit`, revision `10c35caafbb80f7dc6a7a432cdd11af10a6d4818`, Apache-2.0. Download only public JSON/Jinja/safetensors files, without enabling remote Python code. The approximately 16 GB checkpoint requires substantial local memory; the runner caps MLX allocation at 25 GiB. This is not an AWS deployment or a production backend.
+
+Export the prompt and schema to local JSON without running inference:
+
+```sh
+node --import tsx --input-type=module - <<'JS'
+import {HANDLING_PROMPT, handlingJsonSchema} from './server/handling-evidence.ts';
+import {writeFileSync} from 'node:fs';
+writeFileSync('data/local-vlm-evaluation/contract.json', JSON.stringify({
+  prompt: HANDLING_PROMPT,
+  schema: handlingJsonSchema(Array.from({length:16}, (_,i) => `f${i+1}`))
+}));
+JS
+
+data/vlm-env/bin/python experiments/local_cv/support_vlm.py \
+  data/evaluations/0ef88f1a-1706-4db9-b566-2fee42954f20/plan.json \
+  data/local-vlm-evaluation/contract.json data/local-models/Qwen3.8-27B-4bit \
+  data/local-vlm-evaluation/NEW_RUN
+
+node --import tsx scripts/score-local-support.ts \
+  data/evaluations/0ef88f1a-1706-4db9-b566-2fee42954f20/plan.json \
+  data/local-vlm-evaluation/NEW_RUN
+```
+
+Raw replies and runtime metrics are preserved. The scorer strips only a complete thinking prefix or outer JSON fence, never repairs content, and rejects truncated/invalid outputs. Headline matches require separate visual factuality review. See `docs/handling-support-pilot.md` for the terminal outcomes and remaining independent-data gate.

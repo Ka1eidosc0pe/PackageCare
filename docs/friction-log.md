@@ -151,3 +151,11 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Submission note:** Our observability/contract issue, not a provider defect. The original dense failure cause/cost are unknown; successful sparse output does not establish detection quality.
 
 - **PC-F012 follow-up:** Dense v5 journaling captured seven responses and the exact failure: missing top-level limitations. Prompt v6 treats absent annotations as optional with explicit warnings, while rejecting malformed values and missing critical evidence/action fields. Seven saved replies replay locally without provider calls; live v6 dense processing remains unverified.
+
+## October 19 — evidence coverage versus model quality
+
+The historical Qwen pilot stopped on an empty first-window answer before reaching the later annotated release. This conflates a usable abstention with a transport/schema failure and prevents mixed-case quality assessment. The new candidate sends the complete sixteen-frame sequence in each call and accepts an empty event list only with a concrete limitation. Native structured JSON addresses formatting separately from factuality. Support witnesses and raw results still need visual inspection. Local HTTP tests initially failed under the sandbox (`listen EPERM`); the authorized localhost-capable rerun passed, without any AWS inference.
+
+## October 19 — Mistral image/body limits and correlated visual errors
+
+Generic image/Converse availability did not reveal this endpoint's three-image cap or total-body rejection. The first error logger omitted the service message; fixed and regression-tested. Packing full frames satisfied image count but larger postal sheets failed body buffering. Native JSON constraints worked on the van yet observation/verification repeated materially false parcel descriptions and a placement. Structural compliance and repeated agreement are not factual reliability. Paid scope closed; raw receipts retained. See `handling-support-pilot.md`.
