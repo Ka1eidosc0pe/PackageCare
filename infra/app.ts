@@ -186,6 +186,9 @@ const handler = new lambda.DockerImageFunction(stack, "Api", {
   environment: {
     ...common,
     PACKAGECARE_STATE_MACHINE: workflow.stateMachineArn,
+    // Status/labels only: the API never analyzes; the Worker runs the classifier at this path.
+    PACKAGECARE_ANALYZER: "local",
+    PACKAGECARE_CLASSIFIER: "/var/task/models/classifier.joblib",
   },
   logGroup: new logs.LogGroup(stack, "ApiLogs", {
     retention: logs.RetentionDays.ONE_WEEK,

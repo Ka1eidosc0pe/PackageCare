@@ -1475,9 +1475,16 @@ function DeliveryWorkspace({
               const file = e.target.files?.[0];
               if (file)
                 act("photo", async () => {
+                  // Save pending review edits first so the photo never races an unsaved draft.
                   if (dirty)
-                    throw new Error("Save your review before adding a photo.");
+                    update(
+                      await api(`/deliveries/${d.id}/review`, {
+                        method: "PUT",
+                        body: JSON.stringify({ ...draft, revision: d.revision }),
+                      }),
+                    );
                   update(await uploadFile(file, d.id));
+                  onNotice(dirty ? "Review saved and photo added." : "Photo added.");
                 });
               e.target.value = "";
             }}
@@ -2093,20 +2100,37 @@ function Connections({
               </dd>
             </div>
           </dl>
-          <p>
-            Local analysis uses the {AWS_PROFILE_NAME} profile in{" "}
-            {APPLICATION_REGION}. AWS deployments use an execution role. Check
-            model quotas and obtain spending approval before live analysis.
-          </p>
-          <div className="setup-code">
-            <code>
-              AWS_PROFILE={AWS_PROFILE_NAME}
-              <br />
-              AWS_REGION={APPLICATION_REGION}
-              <br />
-              BEDROCK_MODEL_ID={BEDROCK_MODEL}
-            </code>
-          </div>
+          {status?.analysis?.provider === "local_classifier" ? (
+            <>
+              <p>
+                Handling analysis runs on this machine: frozen V-JEPA 2 video
+                features and a classifier trained on AI-generated doorbell
+                clips. The AWS deployment runs the same classifier in a Lambda
+                worker in {APPLICATION_REGION}.
+              </p>
+              <div className="setup-code">
+                <code>PACKAGECARE_ANALYZER=local</code>
+              </div>
+            </>
+          ) : (
+            <>
+              <p>
+                Local analysis uses the {AWS_PROFILE_NAME} profile in{" "}
+                {APPLICATION_REGION}. AWS deployments use an execution role.
+                Check model quotas and obtain spending approval before live
+                analysis.
+              </p>
+              <div className="setup-code">
+                <code>
+                  AWS_PROFILE={AWS_PROFILE_NAME}
+                  <br />
+                  AWS_REGION={APPLICATION_REGION}
+                  <br />
+                  BEDROCK_MODEL_ID={BEDROCK_MODEL}
+                </code>
+              </div>
+            </>
+          )}
           <p className="subtle-copy">
             Sample deliveries use scripted observations and never call Bedrock.
             They verify product interactions, not detection accuracy.

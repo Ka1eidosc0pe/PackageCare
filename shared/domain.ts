@@ -160,7 +160,7 @@ export const reviewSchema = z.object({
 });
 export const labels: Record<Assessment, string> = {
   no_concern_observed: "No concern observed",
-  possible_rough_handling: "Handling review",
+  possible_rough_handling: "Possible rough handling",
   unable_to_assess: "Unable to assess",
 };
 export const sourceLabels: Record<Source, string> = {
