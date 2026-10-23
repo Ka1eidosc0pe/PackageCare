@@ -981,6 +981,7 @@ function DeliveryWorkspace({
     replayRef.current = { start, end };
     setReplay(true);
     setActive(moment.id);
+    v.scrollIntoView({ behavior: "smooth", block: "nearest" });
     v.currentTime = start / 1000;
     v.playbackRate = 0.5;
     setPosition(start);
@@ -1011,6 +1012,7 @@ function DeliveryWorkspace({
     if (replay) stopReplay();
     setActive(o.id);
     if (video.current) {
+      video.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
       video.current.currentTime = o.startMs / 1000;
       video.current.pause();
     }
@@ -1060,6 +1062,33 @@ function DeliveryWorkspace({
             "failed",
             "media_unavailable",
           ].includes(d.state) && <ProcessingStepper d={d} />}
+          {d.state === "awaiting_analysis" && (
+            <div className="capture-ready">
+              <span className="capture-ready-icon" aria-hidden="true">
+                <Camera size={20} />
+              </span>
+              <div className="capture-ready-text">
+                <strong>Clip saved</strong>
+                <p>
+                  Review the captured footage, then start a handling analysis.
+                </p>
+              </div>
+              <button
+                className="button primary"
+                disabled={!!busy}
+                onClick={() =>
+                  act("analyze", async () => {
+                    await api(`/deliveries/${d.id}/analyze`, {
+                      method: "POST",
+                    });
+                    update(await api(`/deliveries/${d.id}`));
+                  })
+                }
+              >
+                Analyze clip <ArrowRight size={15} />
+              </button>
+            </div>
+          )}
           <VerdictBanner
             d={d}
             moment={moment}
@@ -1186,29 +1215,6 @@ function DeliveryWorkspace({
               Browser recording from Ring live view. The preserved file is the
               browser capture, not a native Ring recording download.
             </p>
-          )}
-          {d.state === "awaiting_analysis" && (
-            <div className="processing">
-              <Camera size={24} />
-              <h3>Clip saved</h3>
-              <p>
-                Review the captured footage, then start a handling analysis.
-              </p>
-              <button
-                className="button primary"
-                disabled={!!busy}
-                onClick={() =>
-                  act("analyze", async () => {
-                    await api(`/deliveries/${d.id}/analyze`, {
-                      method: "POST",
-                    });
-                    update(await api(`/deliveries/${d.id}`));
-                  })
-                }
-              >
-                Analyze clip <ArrowRight size={15} />
-              </button>
-            </div>
           )}
           {["failed", "media_unavailable"].includes(d.state) && (
             <div className="processing error">

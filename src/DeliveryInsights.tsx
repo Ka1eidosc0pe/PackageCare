@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -389,19 +389,20 @@ const STEPS = [
 export function ProcessingStepper({ d }: { d: Delivery }) {
   const current =
     d.state === "analyzing" ? 1 : d.state === "verifying" ? 2 : 0;
+  // Elapsed time since processing became visible (a saved Ring clip may be analysed long after capture).
+  const [started] = useState(Date.now());
   const [now, setNow] = useState(Date.now());
+  const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
+    box.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     return () => clearInterval(t);
   }, []);
-  const secs = Math.max(
-    0,
-    Math.round((now - new Date(d.createdAt).getTime()) / 1000),
-  );
+  const secs = Math.max(0, Math.round((now - started) / 1000));
   const elapsed =
     secs >= 60 ? `${Math.floor(secs / 60)} min ${secs % 60} s` : `${secs} s`;
   return (
-    <div className="stepper" role="status" aria-live="polite">
+    <div className="stepper" ref={box} role="status" aria-live="polite">
       <div className="stepper-head">
         <strong>Preparing your delivery review</strong>
         <span>Elapsed {elapsed}</span>
