@@ -4,6 +4,12 @@
 
 ![Delivery review](docs/media/delivery-review.jpg)
 
+## Try it
+
+- **Live app on AWS:** https://v98w5ez7g7.execute-api.us-east-2.amazonaws.com. The workspace password is in the Devpost submission's testing instructions. Four AI-generated demo deliveries are already analyzed. To test new footage, choose **Import footage** with any clip from [`samples/`](samples/). Analysis takes about 1.5 minutes; the first upload after the app has been idle can take about 8 minutes while the Lambda container starts.
+- **Demo video:** linked from the Devpost submission.
+- **Run locally:** see [Run it locally](#run-it-locally). Ring live view runs locally with a temporary Ring Developer Playground token.
+
 ## What it does
 
 1. **Connects to Ring.** Official Partner API: token connection, device discovery, live view over WHEP, and in-browser capture of a 12-second clip. The original bytes are kept and the clip is labeled as a browser recording.
