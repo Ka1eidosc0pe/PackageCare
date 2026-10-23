@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   LocalClassifierAnalyzer,
   LOCAL_LIMITATIONS,
+  signalStrength,
   type InferOutput,
 } from "../server/local-analysis.js";
 import { failedAnalysisRun } from "../server/analysis.js";
@@ -64,6 +65,13 @@ const win = (start: number, rough: number, placement: number) => ({
 });
 
 describe("local classifier analyzer", () => {
+  it("describes peak window scores in plain language", () => {
+    expect(signalStrength(0.95)).toBe("Strong signal");
+    expect(signalStrength(0.8)).toBe("Strong signal");
+    expect(signalStrength(0.7)).toBe("Moderate signal");
+    expect(signalStrength(0.4)).toBe("Weak signal");
+  });
+
   it("maps a confident rough clip to a supported concern at the peak window", async () => {
     const { d, analyzer, exec } = setup({
       clip_probs: { rough: 0.86, placement: 0.1, none: 0.04 },
@@ -82,6 +90,8 @@ describe("local classifier analyzer", () => {
       endMs: 3500,
     });
     expect(o.description).toMatch(/tossed or dropped/);
+    expect(o.description).toMatch(/Strong signal/);
+    expect(o.description).not.toMatch(/\d\.\d\d|score/);
     expect(o.description).not.toMatch(/driver|courier|damage|intent/i);
     const frames = d.assets.filter((a) => o.evidenceIds.includes(a.id));
     expect(frames.length).toBe(4);
@@ -110,6 +120,7 @@ describe("local classifier analyzer", () => {
     });
     const { analysis } = await analyzer.analyze(d, "observe");
     expect(analysis.observations[0].verification).toBe("ambiguous");
+    expect(analysis.observations[0].description).toMatch(/Moderate signal/);
     expect(analysis.assessment).toBe("unable_to_assess");
   });
 

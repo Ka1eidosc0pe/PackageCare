@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { RingLiveView } from "./RingLiveView";
 import {
+  ActivityTrack,
+  ProcessingStepper,
+  VerdictBanner,
+  classifierRun,
+  keyMoment,
+  plainDescription,
+} from "./DeliveryInsights";
+import {
   APPLICATION_REGION,
   AWS_PROFILE_NAME,
   BEDROCK_MODEL,
@@ -205,6 +213,16 @@ export default function App() {
     else action();
   }
   const upload = useRef<HTMLInputElement>(null);
+  const [showSamples, setShowSamples] = useState(
+      () => localStorage.getItem("packagecare-show-samples") === "1",
+    ),
+    showSamplesRef = useRef(showSamples);
+  showSamplesRef.current = showSamples;
+  // Sample deliveries step aside once real footage exists, unless requested.
+  const listed = (list: Delivery[], show = showSamplesRef.current) =>
+    !show && list.some((d) => d.source !== "fixture")
+      ? list.filter((d) => d.source !== "fixture")
+      : list;
   async function refresh() {
     const [list, info] = await Promise.all([
       api<Delivery[]>("/deliveries"),
@@ -212,9 +230,10 @@ export default function App() {
     ]);
     setDeliveries(list);
     setStatus(info);
-    setSelected((prev) =>
-      list.some((d) => d.id === prev) ? prev : list[0]?.id,
-    );
+    setSelected((prev) => {
+      const pool = listed(list);
+      return pool.some((d) => d.id === prev) ? prev : pool[0]?.id;
+    });
     setLoading(false);
   }
   useEffect(() => {
@@ -262,11 +281,22 @@ export default function App() {
       setBusy("");
     }
   }
-  const d = deliveries.find((d) => d.id === selected),
-    pending = deliveries.filter(
+  const hasReal = deliveries.some((d) => d.source !== "fixture"),
+    hasFixtures = deliveries.some((d) => d.source === "fixture"),
+    shown = listed(deliveries, showSamples);
+  function toggleSamples() {
+    const next = !showSamples;
+    setShowSamples(next);
+    localStorage.setItem("packagecare-show-samples", next ? "1" : "0");
+    const pool = listed(deliveries, next);
+    if (!pool.some((d) => d.id === selected))
+      setSelected(pool.find((d) => matchesFilter(d, filter))?.id);
+  }
+  const d = shown.find((d) => d.id === selected),
+    pending = shown.filter(
       (d) => d.state === "ready" && !d.review.complete,
     ).length;
-  const visible = deliveries.filter(
+  const visible = shown.filter(
     (d) =>
       matchesFilter(d, filter) &&
       `${d.title} ${d.camera} ${d.review.shipment}`
@@ -279,6 +309,9 @@ export default function App() {
   async function sample() {
     await act("samples", async () => {
       await api("/samples", { method: "POST" });
+      showSamplesRef.current = true;
+      setShowSamples(true);
+      localStorage.setItem("packagecare-show-samples", "1");
       await refresh();
       setNotice("Three synthetic scenarios are ready to explore.");
     });
@@ -514,12 +547,12 @@ export default function App() {
                         navigate(() => {
                           setFilter(id);
                           if (
-                            !deliveries.some(
+                            !shown.some(
                               (d) => d.id === selected && matchesFilter(d, id),
                             )
                           )
                             setSelected(
-                              deliveries.find((d) => matchesFilter(d, id))?.id,
+                              shown.find((d) => matchesFilter(d, id))?.id,
                             );
                         })
                       }
@@ -527,11 +560,10 @@ export default function App() {
                       {name}
                       <span>
                         {id === "all"
-                          ? deliveries.length
+                          ? shown.length
                           : id === "review"
                             ? pending
-                            : deliveries.filter((d) => d.review.complete)
-                                .length}
+                            : shown.filter((d) => d.review.complete).length}
                       </span>
                     </button>
                   ))}
@@ -618,61 +650,73 @@ export default function App() {
                                 navigate(() => setSelected(item.id));
                             }}
                           >
-                            <div className="row-top">
-                              <span>
+                            {thumb ? (
+                              <img
+                                className="row-thumb"
+                                src={assetUrl(item, thumb.id)}
+                                alt=""
+                              />
+                            ) : (
+                              <span className="row-thumb thumb-placeholder">
+                                <Package size={20} />
+                              </span>
+                            )}
+                            <span className="row-main">
+                              <strong>{item.title}</strong>
+                              <span className="row-meta">
+                                {item.source === "fixture"
+                                  ? "Sample"
+                                  : new Date(
+                                      item.observedAt,
+                                    ).toLocaleDateString(undefined, {
+                                      month: "short",
+                                      day: "numeric",
+                                    })}
+                                {" · "}
                                 {new Date(item.observedAt).toLocaleTimeString(
                                   undefined,
                                   { hour: "numeric", minute: "2-digit" },
                                 )}
                               </span>
-                              <small>
-                                {new Date(item.observedAt).toLocaleDateString(
-                                  undefined,
-                                  { month: "short", day: "numeric" },
-                                )}
-                              </small>
-                            </div>
-                            <div className="row-content">
-                              {thumb ? (
-                                <img
-                                  src={assetUrl(item, thumb.id)}
-                                  alt="Delivery thumbnail"
+                              <Badge d={item} />
+                            </span>
+                            <span className="row-end">
+                              {item.review.complete ? (
+                                <CheckCircle2
+                                  size={15}
+                                  className="teal"
+                                  aria-label="Reviewed"
                                 />
                               ) : (
-                                <span className="thumb-placeholder">
-                                  <Package size={23} />
-                                </span>
+                                <ChevronRight size={15} aria-hidden="true" />
                               )}
-                              <div>
-                                <strong>{item.title}</strong>
-                                <span>
-                                  <Camera size={11} />
-                                  {item.camera}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="row-bottom">
-                              <Badge d={item} />
-                              {item.review.complete ? (
-                                <CheckCircle2 size={14} className="teal" />
-                              ) : (
-                                <ChevronRight size={14} />
-                              )}
-                            </div>
+                            </span>
                           </button>
                         );
                       })
                     )}
-                    <button
-                      className="load-samples"
-                      disabled={!!busy}
-                      onClick={sample}
-                    >
-                      <Plus size={13} />{" "}
-                      {deliveries.some((d) => d.source === "fixture")
-                        ? "Restore missing samples"
-                        : "Explore sample deliveries"}
-                    </button>
+                    {hasReal && hasFixtures && (
+                      <label className="sample-toggle">
+                        <input
+                          type="checkbox"
+                          checked={showSamples}
+                          onChange={() => navigate(toggleSamples)}
+                        />
+                        Show sample deliveries
+                      </label>
+                    )}
+                    {(!hasReal || !hasFixtures || showSamples) && (
+                      <button
+                        className="load-samples"
+                        disabled={!!busy}
+                        onClick={sample}
+                      >
+                        <Plus size={13} />{" "}
+                        {hasFixtures
+                          ? "Restore missing samples"
+                          : "Explore sample deliveries"}
+                      </button>
+                    )}
                   </section>
                   {d && (
                     <DeliveryWorkspace
@@ -867,6 +911,7 @@ function DeliveryWorkspace({
     [dirty, setDirty] = useState(false),
     [playing, setPlaying] = useState(false),
     [position, setPosition] = useState(0),
+    [replay, setReplay] = useState(false),
     [confirmDelete, setConfirmDelete] = useState(false);
   const video = useRef<HTMLVideoElement>(null),
     photo = useRef<HTMLInputElement>(null);
@@ -891,6 +936,64 @@ function DeliveryWorkspace({
     concerns[0] ||
     d.analysis?.observations[0];
   const reviewItems = selectedObservation ? [selectedObservation] : [];
+  const moment = keyMoment(d),
+    classifier = classifierRun(d),
+    markers =
+      d.analysis?.observations.filter(
+        (o) =>
+          o.verification !== "rejected" &&
+          !(o.startMs <= 0 && o.endMs >= d.durationMs - 1),
+      ) || [];
+  const replayRef = useRef<{ start: number; end: number } | undefined>(undefined);
+  // Smooth playhead and segment looping while the footage plays.
+  useEffect(() => {
+    if (!playing) return;
+    let frame = 0;
+    const tick = () => {
+      const v = video.current;
+      if (v) {
+        const loop = replayRef.current;
+        if (loop && v.currentTime * 1000 >= loop.end) {
+          v.currentTime = loop.start / 1000;
+        }
+        setPosition(v.currentTime * 1000);
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [playing]);
+  function stopReplay() {
+    replayRef.current = undefined;
+    setReplay(false);
+    if (video.current) video.current.playbackRate = 1;
+  }
+  function toggleReplay() {
+    const v = video.current;
+    if (!v || !moment) return;
+    if (replay) {
+      stopReplay();
+      return;
+    }
+    // Keep at least a 1-second loop so very short segments stay watchable.
+    const start = moment.startMs,
+      end = Math.min(d.durationMs || moment.endMs, Math.max(moment.endMs, start + 1000));
+    replayRef.current = { start, end };
+    setReplay(true);
+    setActive(moment.id);
+    v.currentTime = start / 1000;
+    v.playbackRate = 0.5;
+    setPosition(start);
+    void v.play().catch(() => {
+      stopReplay();
+      onNotice("Playback unavailable. Download the source footage.");
+    });
+  }
+  function seekTo(ms: number) {
+    if (replay) stopReplay();
+    if (video.current) video.current.currentTime = ms / 1000;
+    setPosition(ms);
+  }
   useEffect(() => {
     if (!dirty) return;
     const protect = (e: BeforeUnloadEvent) => {
@@ -905,6 +1008,7 @@ function DeliveryWorkspace({
     setDirty(true);
   }
   function seek(o: Observation) {
+    if (replay) stopReplay();
     setActive(o.id);
     if (video.current) {
       video.current.currentTime = o.startMs / 1000;
@@ -950,6 +1054,18 @@ function DeliveryWorkspace({
       </div>
       <div className="detail-columns">
         <div className="evidence-column">
+          {![
+            "awaiting_analysis",
+            "ready",
+            "failed",
+            "media_unavailable",
+          ].includes(d.state) && <ProcessingStepper d={d} />}
+          <VerdictBanner
+            d={d}
+            moment={moment}
+            replaying={replay}
+            onReplay={toggleReplay}
+          />
           <div className="video-wrap">
             {media ? (
               <>
@@ -959,12 +1075,19 @@ function DeliveryWorkspace({
                   poster={frames[2] ? assetUrl(d, frames[2].id) : undefined}
                   playsInline
                   controls={d.state === "awaiting_analysis"}
-                  onTimeUpdate={(e) =>
-                    setPosition(e.currentTarget.currentTime * 1000)
-                  }
+                  onTimeUpdate={(e) => {
+                    if (!playing)
+                      setPosition(e.currentTarget.currentTime * 1000);
+                  }}
                   onPlay={() => setPlaying(true)}
                   onPause={() => setPlaying(false)}
-                  onEnded={() => setPlaying(false)}
+                  onEnded={(e) => {
+                    const loop = replayRef.current;
+                    if (loop) {
+                      e.currentTarget.currentTime = loop.start / 1000;
+                      void e.currentTarget.play().catch(() => stopReplay());
+                    } else setPlaying(false);
+                  }}
                   aria-label="Source delivery footage"
                 />
                 <div className="video-top">
@@ -1000,18 +1123,28 @@ function DeliveryWorkspace({
                     <span>
                       {timecode(position)} / {timecode(d.durationMs)}
                     </span>
-                    <input
-                      aria-label="Footage position"
-                      type="range"
-                      min="0"
-                      max={d.durationMs || 1}
-                      value={position}
-                      onChange={(e) => {
-                        const t = Number(e.target.value);
-                        if (video.current) video.current.currentTime = t / 1000;
-                        setPosition(t);
-                      }}
-                    />
+                    <span className="scrub">
+                      {markers.map((o) => (
+                        <span
+                          key={o.id}
+                          className={`scrub-mark ${o.concern ? "concern" : ""}`}
+                          title={`${o.label.replaceAll("_", " ")} ${timecode(o.startMs)}–${timecode(o.endMs)}`}
+                          style={{
+                            left: `${(o.startMs / (d.durationMs || 1)) * 100}%`,
+                            width: `${Math.max(1, ((o.endMs - o.startMs) / (d.durationMs || 1)) * 100)}%`,
+                          }}
+                        />
+                      ))}
+                      <input
+                        aria-label="Footage position"
+                        type="range"
+                        min="0"
+                        max={d.durationMs || 1}
+                        value={position}
+                        onChange={(e) => seekTo(Number(e.target.value))}
+                      />
+                    </span>
+                    {replay && <span className="rate-chip">0.5×</span>}
                     <button
                       aria-label="Full screen footage"
                       onClick={() => video.current?.requestFullscreen()}
@@ -1039,6 +1172,15 @@ function DeliveryWorkspace({
               {d.source === "fixture" ? " · Animated fixture" : ""}
             </span>
           </div>
+          {classifier && d.analysis && (
+            <ActivityTrack
+              raw={classifier.raw}
+              durationMs={d.durationMs}
+              positionMs={position}
+              observations={d.analysis.observations}
+              onSeek={seekTo}
+            />
+          )}
           {d.capture && (
             <p className="subtle-copy">
               Browser recording from Ring live view. The preserved file is the
@@ -1066,24 +1208,6 @@ function DeliveryWorkspace({
               >
                 Analyze clip <ArrowRight size={15} />
               </button>
-            </div>
-          )}
-          {![
-            "awaiting_analysis",
-            "ready",
-            "failed",
-            "media_unavailable",
-          ].includes(d.state) && (
-            <div className="processing">
-              <Loader2 className="spin" size={20} />
-              <div>
-                <strong>
-                  {d.state === "verifying"
-                    ? "Checking the evidence"
-                    : "Preparing your delivery review"}
-                </strong>
-                <p>Results appear here when processing finishes.</p>
-              </div>
             </div>
           )}
           {["failed", "media_unavailable"].includes(d.state) && (
@@ -1142,7 +1266,7 @@ function DeliveryWorkspace({
                           .replaceAll("_", " ")
                           .replace(/^./, (c) => c.toUpperCase())}
                       </strong>
-                      <small>{o.description}</small>
+                      <small>{plainDescription(o.description)}</small>
                     </span>
                     <span className="timeline-play">
                       <Play size={13} />
@@ -1207,7 +1331,7 @@ function DeliveryWorkspace({
           </div>
           <Badge d={d} />
           <p className="assessment-summary">
-            {d.analysis?.summary ||
+            {(d.analysis && plainDescription(d.analysis.summary)) ||
               "Processing must finish before you can review this delivery."}
           </p>
           <div className="review-divider" />
@@ -1242,7 +1366,7 @@ function DeliveryWorkspace({
                   <Play size={12} /> {timecode(o.startMs)}–{timecode(o.endMs)}{" "}
                   <ArrowUpRight size={13} />
                 </button>
-                <p>{o.description}</p>
+                <p>{plainDescription(o.description)}</p>
                 <div className="decision-buttons">
                   {[
                     ["confirmed", "Confirm"],

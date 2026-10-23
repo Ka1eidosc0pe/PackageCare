@@ -135,7 +135,11 @@ def main():
     ap.add_argument("--stride", type=int, default=4)
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--device", default=DEFAULT_DEVICE, help="mps|cpu (default: $PACKAGECARE_DEVICE or mps)")
+    ap.add_argument("--cache", help="directory of per-video feature files; reruns skip videos already cached")
     a = ap.parse_args()
+    cache = Path(a.cache) if a.cache else None
+    if cache:
+        cache.mkdir(parents=True, exist_ok=True)
 
     import torch
 
@@ -152,7 +156,17 @@ def main():
     vidx, starts_ms, ends_ms, nframes, clip = [], [], [], [], {}
     for vi, path in enumerate(vids):
         tick = time.monotonic()
-        feats, st_ms, en_ms, n = embed_video(path, loaded, a.fps, a.stride, a.batch)
+        cached = cache / f"{Path(path).stem}.npz" if cache else None
+        if cached and cached.exists():
+            c = np.load(cached)
+            feats = {k: c[k] for k in ("enc_mean", "pooled", "logits")}
+            st_ms, en_ms, n = list(c["starts_ms"]), list(c["ends_ms"]), int(c["n"])
+        else:
+            feats, st_ms, en_ms, n = embed_video(path, loaded, a.fps, a.stride, a.batch)
+            if cached:
+                tmp = cached.with_suffix(".tmp.npz")
+                np.savez(tmp, starts_ms=st_ms, ends_ms=en_ms, n=n, **feats)
+                tmp.rename(cached)
         dur_ms = n * 1000.0 / a.fps
         for k in W:
             arr = feats[k]

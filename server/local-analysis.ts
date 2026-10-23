@@ -87,7 +87,15 @@ export function resolveClassifier(
     : path.join(ROOT, "data/synthetic/model-mini/classifier.joblib");
 }
 
-const pct = (p: number) => p.toFixed(2);
+// Plain-language strength for the peak window score. Scores are not
+// calibrated probabilities; the numbers stay available in run.raw.
+export function signalStrength(peak: number) {
+  return peak >= THRESHOLDS.supported
+    ? "Strong signal"
+    : peak >= THRESHOLDS.clip
+      ? "Moderate signal"
+      : "Weak signal";
+}
 function clampWindow(w: { start_ms: number; end_ms: number }, dur: number) {
   const endMs = Math.max(0, Math.min(dur, Math.round(w.end_ms)));
   const startMs = Math.min(endMs, Math.max(0, Math.round(w.start_ms)));
@@ -143,7 +151,7 @@ export function mapClassifierOutput(
     return {
       id: `local-${cls}`,
       label: o.label,
-      description: `${o.describe} (clip score ${pct(clip(cls))}, peak window score ${pct(score)}). Review this segment.`,
+      description: `${o.describe}. ${signalStrength(score)} in the highlighted 2-second window. Review this segment.`,
       startMs,
       endMs,
       evidenceIds: evidenceFor(assets, video, startMs, endMs),
@@ -175,9 +183,8 @@ export function mapClassifierOutput(
     observation = {
       id: "local-inconclusive",
       label: "visibility_insufficient",
-      description: `The classifier did not find a clear toss, drop, or placement in this clip (scores: ${out.classes
-        .map((c) => `${c} ${pct(clip(c))}`)
-        .join(", ")}). Review the footage.`,
+      description:
+        "The classifier did not find a clear toss, drop, or placement in this clip. Review the footage.",
       startMs: 0,
       endMs: Math.max(0, Math.round(durationMs)),
       evidenceIds: evidenceFor(assets, video, 0, durationMs),

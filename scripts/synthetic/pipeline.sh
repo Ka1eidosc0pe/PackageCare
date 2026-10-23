@@ -25,7 +25,7 @@ python3 scripts/synthetic/build_labels.py $S/xgen-labels.json $S/xgen/clips
 
 if [ ! -f $S/full-train-emb.npz ]; then
   log "embedding training clips"
-  $PY experiments/synthetic/embed.py $S/full-train-emb.npz $S/full-train --batch 8 2>&1 | tail -1
+  $PY experiments/synthetic/embed.py $S/full-train-emb.npz $S/full-train --batch 8 --cache $S/emb-cache > $S/embed-progress.log 2>&1; tail -1 $S/embed-progress.log
 fi
 if [ ! -f $S/xgen-full-emb.npz ]; then
   log "embedding Kling cross-generator clips"
