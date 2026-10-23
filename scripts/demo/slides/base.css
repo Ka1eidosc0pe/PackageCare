@@ -1,0 +1,20 @@
+@font-face { font-family: "DM Sans"; font-weight: 400; src: url(fonts/dm-sans-latin-400-normal-CW0RaeGs.woff2); }
+@font-face { font-family: "DM Sans"; font-weight: 500; src: url(fonts/dm-sans-latin-500-normal-B9HHJjqV.woff2); }
+@font-face { font-family: "DM Sans"; font-weight: 600; src: url(fonts/dm-sans-latin-600-normal-Aqo67rzb.woff2); }
+@font-face { font-family: "DM Sans"; font-weight: 700; src: url(fonts/dm-sans-latin-700-normal-DvUfVpUG.woff2); }
+:root { --teal: #0b6657; --ink: #273c36; --muted: #6f7c75; --line: #dfe6df; --surface: #f3f5f0; --amber: #b07d2a; --sage: #e7efe6; }
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; }
+body { font-family: "DM Sans", system-ui, sans-serif; color: var(--ink); background: var(--surface); padding: 110px 140px; display: flex; flex-direction: column; justify-content: center; }
+.brand { display: flex; align-items: center; gap: 16px; font-weight: 700; font-size: 34px; letter-spacing: -0.5px; }
+.mark { width: 58px; height: 58px; border-radius: 14px; background: var(--teal); display: grid; place-items: center; }
+.eyebrow { font-size: 20px; letter-spacing: 4px; text-transform: uppercase; color: var(--teal); font-weight: 600; }
+h1 { font-size: 104px; line-height: 1.02; letter-spacing: -3px; font-weight: 700; }
+h2 { font-size: 64px; letter-spacing: -1.5px; font-weight: 700; margin: 18px 0 40px; }
+p.lede { font-size: 34px; color: var(--muted); line-height: 1.4; max-width: 1250px; }
+.card { background: white; border: 1px solid var(--line); border-radius: 22px; padding: 30px 34px; }
+.chip { display: inline-block; padding: 8px 18px; border-radius: 999px; background: var(--sage); color: var(--teal); font-weight: 600; font-size: 20px; }
+.chip.amber { background: #f6ecd9; color: #8a5f16; }
+.fade { animation: fade .8s ease both; }
+.d1 { animation-delay: .5s } .d2 { animation-delay: 1.2s } .d3 { animation-delay: 1.9s } .d4 { animation-delay: 2.6s } .d5 { animation-delay: 3.3s }
+@keyframes fade { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: none } }

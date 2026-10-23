@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+.step h3 { font-size: 30px; margin: 14px 0 10px; letter-spacing: -0.5px; }
+.step p { font-size: 22px; color: var(--muted); line-height: 1.4; }
+.n { font-size: 20px; font-weight: 700; color: var(--teal); }
+.grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; margin: 40px 0 34px; }
+.grid img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px; }
+.results { display: flex; gap: 22px; }
+.results .card { flex: 1; padding: 24px 30px; }
+.big { font-size: 52px; font-weight: 700; letter-spacing: -1px; }
+.small { font-size: 21px; color: var(--muted); margin-top: 4px; }
+.label { position: absolute; top: 90px; right: 140px; }
+</style></head><body>
+<div class="eyebrow fade">How the handling model was built</div>
+<span class="chip label fade">All clips shown are AI-generated</span>
+<div class="steps" style="margin-top:34px">
+  <div class="card step fade d1"><div class="n">01</div><h3>Generate</h3><p>~500 labeled doorbell clips: toss, drop, placement, no handling, hidden.</p></div>
+  <div class="card step fade d2"><div class="n">02</div><h3>Degrade</h3><p>Fisheye, low resolution, blur, noise and heavy compression, like real cameras.</p></div>
+  <div class="card step fade d3"><div class="n">03</div><h3>Train</h3><p>Small classifier on frozen V-JEPA 2 video features, every 2-second window.</p></div>
+  <div class="card step fade d4"><div class="n">04</div><h3>Test on unseen footage</h3><p>Clips from a different generator, plus real recordings.</p></div>
+</div>
+<div class="grid fade d2">
+  <img src="frame-0.jpg"><img src="frame-1.jpg"><img src="frame-2.jpg"><img src="frame-3.jpg"><img src="frame-4.jpg"><img src="frame-6.jpg"><img src="frame-8.jpg"><img src="frame-9.jpg">
+</div>
+<div class="results">
+  <div class="card fade d4"><div class="big">14 / 15</div><div class="small">tosses and drops caught on another generator's clips</div></div>
+  <div class="card fade d4"><div class="big">0 / 6</div><div class="small">false concerns on real clips without rough handling</div></div>
+  <div class="card fade d5"><div class="big" style="color:var(--amber)">3 / 10</div><div class="small">careful placements flagged: the recipient has the final say</div></div>
+</div>
+</body></html>
