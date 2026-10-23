@@ -236,6 +236,10 @@ export default function App() {
     });
     setLoading(false);
   }
+  // Each page opens at the top (the entrance fade hides the reset), never at the previous page's scroll.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [page]);
   useEffect(() => {
     refresh().catch((e) => {
       setError(e.message);
