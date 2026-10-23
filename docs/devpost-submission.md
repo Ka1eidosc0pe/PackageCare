@@ -223,4 +223,7 @@ The local app also analyzes clips in a few seconds on Apple Silicon.
 
 - **Claude Code (Anthropic Claude):** the lead coding agent for architecture, implementation, testing, AWS deployment, the synthetic-data pipeline, demo recording and documentation, directed and reviewed by the developer.
 - **OpenAI Codex:** earlier development sessions (initial app, Ring integration and evaluation harnesses). **TODO:** confirm, and edit if you used something else.
-- **In the product and research:** Meta V-JEPA 2 (frozen video features); fal.ai-hosted Seedance, Kling and Wan (synthetic training clips) and FLUX (a demo damage photo); Amazon Bedrock Nova Lite, Qwen3-VL and Mistral Large 3, plus a local Qwen 27B via MLX (evaluated for handling analysis).
+- **Meta V-JEPA 2** (open video model, run frozen): the video features PackageCare's handling classifier is built on, used in both the local app and the AWS Lambda worker.
+- **Seedance** (via fal.ai): generated the ~490 labeled doorbell clips the classifier was trained on, and the demo clips shown in the video and in `samples/`.
+- **Kling** (via fal.ai): generated the held-out test clips from a *different* generator, used to report the cross-generator results (two early Wan pilot clips are in that test set too).
+- **FLUX** (via fal.ai): generated the damage photo used in the demo's recipient-review step.
