@@ -101,13 +101,7 @@ TypeScript, JavaScript, Python, React, Vite, Node.js, Express, FFmpeg, Sharp, Py
 
 ## GitHub repo for judging and testing
 
-https://github.com/Ka1eidosc0pe/PackageCare. The repo is private, so it must be shared with **testing@devpost.com** and **@AmazonAppDev**:
-
-```sh
-gh api -X PUT repos/Ka1eidosc0pe/PackageCare/collaborators/AmazonAppDev -f permission=pull
-```
-
-For testing@devpost.com, use GitHub → Settings → Collaborators → Add people → enter the email address. GitHub sends an email invitation.
+https://github.com/Ka1eidosc0pe/PackageCare. The repo is private. **@AmazonAppDev is a GitHub organization and can't be added as a collaborator**, so add the Amazon Developer Relations reviewers individually (Settings → Collaborators → Add people, read access): **knmeiss** (Kourtney Meiss), **giolaq** (Giovanni Laquidara), **anishamalde** (Anisha Malde), **mosesroth** (Moses Roth), **emersonsklar** (Emerson Sklar). Invite **testing@devpost.com** by email the same way.
 
 The repo has all source, infrastructure, tests, the trained classifier (`models/`), sample clips (`samples/`), the demo recording/assembly scripts, and setup instructions in the README. The 1.5 GB public V-JEPA 2 checkpoint is downloaded by a script rather than committed.
 
