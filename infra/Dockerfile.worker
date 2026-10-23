@@ -26,7 +26,7 @@ COPY --from=build /build/dist ./dist
 COPY experiments/synthetic/infer.py experiments/synthetic/embed.py experiments/synthetic/train.py ./experiments/synthetic/
 COPY data/local-action-small-model/config.json data/local-action-small-model/video_preprocessor_config.json data/local-action-small-model/model.safetensors ./models/vjepa2-vitl-fpc16-256-ssv2/
 # Override with --build-arg CLASSIFIER=data/synthetic/model/classifier.joblib once full training finishes.
-ARG CLASSIFIER=data/synthetic/model/classifier.joblib
+ARG CLASSIFIER=models/handling-classifier.joblib
 COPY ${CLASSIFIER} ./models/classifier.joblib
 COPY --chmod=755 infra/entrypoint.sh /var/task/entrypoint.sh
 # Lambda's filesystem is read-only except /tmp: every cache and scratch path lives there.

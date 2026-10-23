@@ -42,15 +42,24 @@ Defined in [infra/app.ts](infra/app.ts) (CDK, `us-east-2`). Deployment notes and
 
 ## Run it locally
 
-Requirements: Node 24+, FFmpeg/FFprobe, and for local analysis a Python 3.12 environment with the pinned ML packages (`experiments/local_cv/requirements.txt`) plus the V-JEPA 2 checkpoint in `data/local-action-small-model/`.
+Requirements: Node 24+, FFmpeg/FFprobe on PATH, Python 3.12. Tested on macOS (Apple Silicon, MPS) and Linux arm64 (CPU, in the Lambda image).
 
 ```sh
+# 1. App
 npm ci --ignore-scripts
 npm run build
+
+# 2. Classifier environment and the frozen V-JEPA 2 checkpoint (~1.5 GB, public, MIT)
+python3.12 -m venv data/cv-env
+data/cv-env/bin/pip install -r experiments/synthetic/requirements.txt
+data/cv-env/bin/python experiments/local_cv/fetch_model.py --actions \
+  --model-dir data/local-action-small-model --receipt-dir data/local-action-small-model
+
+# 3. Start with the local classifier (use PACKAGECARE_DEVICE=cpu on machines without Apple MPS)
 PACKAGECARE_ANALYZER=local DATA_DIR=data/demo PORT=3012 npm start
 ```
 
-Open http://127.0.0.1:3012 and choose **Import footage** or **Connect Ring**. `PACKAGECARE_ANALYZER=local` uses the trained classifier (the default analyzer is Amazon Bedrock Nova Lite). Sample deliveries are scripted animations and are clearly labeled as such.
+Open http://127.0.0.1:3012, choose **Import footage** and pick any clip from [`samples/`](samples/). These are AI-generated doorbell clips, never used in training, with a toss, a drop, a night-time toss, careful placements and a hidden delivery. Analysis takes a few seconds on Apple Silicon. The trained head ships in [`models/handling-classifier.joblib`](models/) (75 KB) with its held-out evaluation results. **Connect Ring** takes a temporary Ring Developer Playground token. Sample deliveries (`npm run fixtures`, then **Explore sample deliveries**) are scripted animations and are labeled as such. Without `PACKAGECARE_ANALYZER=local`, the app uses Amazon Bedrock Nova Lite instead.
 
 | Command | Purpose |
 |---|---|

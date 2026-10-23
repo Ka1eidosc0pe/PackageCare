@@ -1,53 +1,220 @@
-# Devpost submission draft
+# Devpost submission: PackageCare
 
-Copy into the Devpost form. Check against the final results in `docs/synthetic-classifier.md` before submitting. Tracks: **Ring** (primary) and the **AWS Builder** mini challenge.
+Copy each section into the matching Devpost field. Images are in [`docs/media/submission/`](media/submission/). Fill in the two placeholders marked **TODO** (the video URL, and the password copied from your local file).
 
-## Tagline
+---
 
-A clearer record of how your delivery was handled: Ring footage in, an evidence-linked handling timeline and a recipient-controlled report out.
+## Project name
 
+PackageCare
+
+## Elevator pitch (tagline)
+
+**Was your package thrown? PackageCare turns Ring footage into an evidence-linked handling timeline and a damage report you control.**
+
+Shorter alternative: *A clearer record of how your delivery was handled.*
+
+## Thumbnail
+
+`docs/media/submission/00-thumbnail.jpg` (1500×1000, 3:2)
+
+## About the project
+
+```markdown
 ## Inspiration
 
-When a package arrives damaged, the recipient is left scrubbing doorbell footage, guessing at timestamps and writing everything up by hand. Ring already tells you a package arrived. We wanted to show *how* it arrived, without turning an uncertain model guess into an accusation.
+There are few things worse than finally getting the package you've been waiting for, opening it up, and finding it damaged. The excitement turns into dread about the work it takes to sort it out: scrubbing through doorbell footage, guessing at timestamps, and writing everything up by hand. Ring already tells you a package *arrived*. We wanted to show *how* it arrived, without turning an uncertain model guess into an accusation.
 
 ## What it does
 
-- Connects to a Ring camera (Developer Playground) through the Partner API: live view over WHEP, plus in-browser capture of a 12-second clip with its original bytes preserved.
-- Scores every 2-second window of a clip for toss/drop versus placement. The strongest segment becomes a timeline observation linked to exact frames, with a one-tap slow-motion replay. When the handling isn't visible, it says "Unable to assess" instead of guessing.
-- The recipient confirms, corrects or dismisses each observation and records damage, notes and photos separately. A toss never implies damage, and damage never implies a toss.
-- Reports are previewed, frozen as versions, and exported as a ZIP: printable report, evidence frames, source video and a SHA-256 manifest. Nothing is sent automatically.
+- **Connects to Ring** through the official Partner API: live view over WHEP, plus in-browser capture of a 12-second clip with the original bytes preserved and labeled as a browser recording.
+- **Analyzes handling**: a video classifier scores every 2-second window for toss/drop versus placement. The strongest segment becomes a timeline observation linked to the exact frames, with a handling-activity chart and a one-tap slow-motion replay. When the handling isn't visible, it says **"Unable to assess"** instead of guessing.
+- **Puts the recipient in charge**: they confirm, correct or dismiss each observation and record damage, notes, a shipment reference and photos. Model observations and recipient statements stay separate, because a toss doesn't imply damage and damage doesn't prove a toss.
+- **Exports a report**: it is previewed first, frozen as a version, then exported as a ZIP with a printable report, the evidence frames, the source video and a SHA-256 manifest. Nothing is sent anywhere automatically.
 
 ## How we built it
 
-- **App:** React + Vite + TypeScript UI; Express API; FFmpeg/Sharp media preparation; strict domain validation (every observation must cite frames inside its time range).
-- **Ring:** Partner API token connection, device discovery, WHEP live view, browser recording, recording history import.
-- **Handling model:** real footage of packages being thrown is nearly impossible to license, and general multimodal models (Nova Lite, Qwen3-VL, Mistral Large 3, a local Qwen 27B) missed brief tosses or invented details. So we generated ~430 labeled doorbell clips with an AI video model (Seedance via fal.ai), degraded them to look like real cameras, extracted features with a frozen V-JEPA 2 video model, and trained a small classifier on top. We evaluate only on footage it never saw: clips from a different generator (Kling) and real recordings.
-- **AWS:** CDK stack in us-east-2. API Gateway → Lambda API. Direct presigned uploads to a private S3 bucket. Step Functions orchestrates retrieve → observe → verify on an arm64 container Lambda that runs FFmpeg, PyTorch CPU, V-JEPA 2 and our classifier. DynamoDB stores deliveries, reviews and frozen reports; EventBridge triggers a daily retention cleanup.
+- **App**: React + Vite + TypeScript UI, an Express API, FFmpeg/Sharp media preparation, and strict domain validation (every observation must cite frames inside its own time range).
+- **Ring**: Partner API token connection, device discovery, WHEP live view, browser capture and recording-history import.
+- **The handling model**: real, licensed footage of packages being thrown is nearly impossible to get, and general multimodal models (Amazon Nova Lite, Qwen3-VL, Mistral Large 3 and a local Qwen 27B) either missed brief tosses or invented details. So we:
+  1. generated ~490 labeled doorbell clips with an AI video model (Seedance via fal.ai), varying camera, setting, lighting, courier, parcel and action (toss, drop, placement, no handling, hidden);
+  2. degraded them to look like real cameras (fisheye, low resolution, blur, noise, heavy compression), giving ~2,000 training clips;
+  3. extracted features with a frozen **Meta V-JEPA 2** video model and trained a small classifier on top;
+  4. tested only on footage it had never seen: clips from a *different* generator (Kling) and real recordings.
+- **AWS (us-east-2)**: one CDK stack. Browser uploads go straight to a private S3 bucket through presigned POSTs. Step Functions orchestrates retrieve → observe → verify on an arm64 Lambda container running FFmpeg, PyTorch (CPU), V-JEPA 2 and our classifier. DynamoDB holds deliveries, reviews and frozen reports, API Gateway + Lambda serve the app, and EventBridge triggers a daily retention cleanup.
 
-## Challenges
+## Results (honest numbers)
 
-- The Ring Playground streams a package already at rest; it can't show a delivery being handled. We integrated the real Playground path and used clearly labeled AI-generated clips for handling scenarios, as the organizers allowed.
-- Generic vision-language models either abstained on obvious tosses or described things that weren't there. Training a narrow classifier on synthetic data worked far better for this one task.
-- New AWS accounts cap Lambda memory at 3 GB, so CPU video inference needed careful thread and window tuning to fit in the Lambda timeout.
+- Clips from another generator: **14 of 15 tosses and drops caught**; 23/29 correct overall.
+- Real recordings never used in training: **no false concerns on 6 real clips without rough handling**; caught the clear real toss, missed a distant CCTV throw.
+- Weakness: **3 of 10 careful placements were flagged**. That is exactly why the recipient has the final say, and why scores are shown as evidence ("strong / moderate signal"), never as a verdict.
 
-## Accomplishments
+## Challenges we ran into
 
-- An end-to-end workflow from Ring live view to an exportable, versioned evidence report.
-- A handling classifier trained without a single real training clip, tested on held-out footage from another generator and on real recordings.
-- The full AWS pipeline deployed and processing clips in ~3 minutes for about a cent each.
+- **No real handling footage.** The Ring Playground streams a parcel already at rest, and we don't own a Ring camera. Synthetic training data plus held-out testing from a different generator was our way through. Every AI-generated clip is labeled in the app, the report and the video.
+- **General vision-language models weren't reliable for this narrow task.** They abstained on obvious tosses or described things that weren't there. A small task-specific classifier on strong frozen video features worked far better.
+- **CPU video inference inside Lambda.** New AWS accounts cap Lambda memory at 3 GB (~2 vCPU), our first cloud run timed out from thread oversubscription, and cold starts on a 4 GB image needed longer FFmpeg timeouts. After tuning, a clip is analyzed in ~1.5 minutes warm, for about a cent.
+- **Restraint by design.** Making "Unable to assess" a first-class, well-presented outcome took as much work as detection.
+
+## Accomplishments we're proud of
+
+- An end-to-end workflow from a live Ring stream to an exportable, versioned, hash-manifested evidence report.
+- A handling classifier trained without a single real training clip, evaluated honestly on held-out footage.
+- The full serverless pipeline deployed on AWS and processing real uploads.
 
 ## What we learned
 
-Restraint is a feature: "unable to assess" builds more trust than a confident wrong answer. Synthetic data is a practical bootstrap for rare events, as long as you evaluate on data from somewhere else.
+"Unable to assess" builds more trust than a confident wrong answer. Synthetic data is a practical bootstrap for rare events, as long as you evaluate on data from somewhere else. And infrastructure limits (memory caps, cold starts, CPU threads) shape ML product design as much as model accuracy does.
 
 ## What's next
 
-More real, consented doorbell footage for evaluation; per-camera calibration; a recipient-approved carrier claim flow (shown in the demo only as a labeled concept).
+More real, consented doorbell footage for evaluation; per-camera calibration; and, with an authorized carrier integration, a recipient-approved hand-off of the reviewed report to the carrier's claims team (shown in the demo as a labeled concept only). PackageCare will never identify drivers or send anything without the recipient's say-so.
+```
 
-## Tool feedback
+## Built with
 
-- **Ring Partner API / Developer Playground:** WHEP live view worked well once connected. Requests: a recorded "delivery" scenario with handling, custom clip upload in the simulator, and a public capabilities page. Tokens expire quickly and can only be regenerated about every 30 minutes, which makes iteration slow.
-- **Amazon Bedrock:** in-Region Nova Lite was easy to call, with structured output. It wasn't reliable for sub-second handling in sampled frames. Some stronger models need cross-Region inference profiles that our single-Region project couldn't use, and Mistral's three-image request limit wasn't documented where we looked.
-- **AWS Lambda / CDK:** container images make shipping PyTorch practical. Friction: the 3008 MB memory cap on new accounts isn't visible in `GetAccountSettings`; CDK requires a TTY to approve IAM changes; a rolled-back create left retained resources behind. Details: `docs/friction-log.md`.
-- **Step Functions / S3 / DynamoDB:** worked as expected; presigned POST with checksums gave us safe direct uploads.
-- **fal.ai (Seedance, Kling, Wan):** Seedance gave the best surveillance-style realism per dollar (~$0.05 per 5 s clip at 480p); Kling had the best physics but looked cinematic; Wan's boxes morphed mid-throw.
+TypeScript, JavaScript, Python, React, Vite, Node.js, Express, FFmpeg, Sharp, PyTorch, Hugging Face Transformers, scikit-learn, Meta V-JEPA 2, Ring Partner API, Ring Developer Playground, WebRTC (WHEP), AWS Lambda (container images, arm64), AWS Step Functions, Amazon S3, Amazon DynamoDB, Amazon API Gateway (HTTP API), Amazon EventBridge, Amazon CloudWatch, AWS CDK, Amazon ECR, Amazon Bedrock (Nova Lite; evaluated Qwen3-VL and Mistral Large 3), Docker, fal.ai (Seedance, Kling, Wan, FLUX), Playwright, Vitest
+
+## "Try it out" links
+
+- GitHub repository: https://github.com/Ka1eidosc0pe/PackageCare (private; shared with the judges)
+- Live app on AWS: https://v98w5ez7g7.execute-api.us-east-2.amazonaws.com (password in the testing instructions)
+
+## Project media (image gallery, in this order)
+
+| File | Caption |
+|---|---|
+| `02-verdict.jpg` | A flagged delivery: "Possible rough handling" with the exact 2-second segment and slow-motion replay |
+| `03-activity-track.jpg` | Handling activity: how strongly each 2-second window looks like a toss/drop or a placement, synced to the video |
+| `04-recipient-review.jpg` | The recipient confirms the observation and records damage separately |
+| `07-exported-report.jpg` | The exported incident report: summary, key frames and recipient statement |
+| `08-report-timeline.jpg` | Report timeline and reviewed observations, with recipient decisions kept separate from model text |
+| `05-no-concern.jpg` | Restraint: a careful placement is not flagged |
+| `06-ring-capture-abstains.jpg` | A real Ring Playground capture: parcel already at rest, so PackageCare says it can't assess handling |
+| `01-deliveries.jpg` | The delivery workspace (all handling clips shown are AI-generated and labeled) |
+| `09-how-it-was-built.jpg` | Synthetic training data → frozen V-JEPA 2 features → classifier, tested on unseen footage |
+| `10-aws-architecture.jpg` | The deployed serverless architecture on AWS |
+
+## Video demo link
+
+**TODO:** paste the YouTube/Vimeo URL after uploading `data/demo-video/PackageCare-demo.mp4` (2:42, 1080p).
+
+## GitHub repo for judging and testing
+
+https://github.com/Ka1eidosc0pe/PackageCare. The repo is private, so it must be shared with **testing@devpost.com** and **@AmazonAppDev**:
+
+```sh
+gh api -X PUT repos/Ka1eidosc0pe/PackageCare/collaborators/AmazonAppDev -f permission=pull
+```
+
+For testing@devpost.com, use GitHub → Settings → Collaborators → Add people → enter the email address. GitHub sends an email invitation.
+
+The repo has all source, infrastructure, tests, the trained classifier (`models/`), sample clips (`samples/`), the demo recording/assembly scripts, and setup instructions in the README. The 1.5 GB public V-JEPA 2 checkpoint is downloaded by a script rather than committed.
+
+## Which AWS services did you incorporate and how?
+
+PackageCare's cloud backend is one AWS CDK stack in us-east-2, built around an asynchronous, serverless evidence pipeline:
+
+- **Amazon API Gateway (HTTP API) + AWS Lambda (API):** serves the React app and the Express API through serverless-express, behind a password-protected session.
+- **Amazon S3:** a private, encrypted evidence bucket. Browsers upload videos and damage photos directly through presigned POSTs with an exact size, type and SHA-256 checksum, so large files never pass through the API. Lifecycle rules clear abandoned uploads.
+- **AWS Step Functions:** orchestrates each delivery through *retrieve* (FFmpeg normalization and frame extraction), *observe* (handling analysis) and *verify*, with retries and a failure catcher that keeps the record retryable.
+- **AWS Lambda (worker, arm64 container image):** a ~4 GB image with FFmpeg, PyTorch CPU, the frozen Meta V-JEPA 2 video model and our trained classifier. It scores 2-second windows and writes evidence-linked observations, in ~1.5 minutes per clip warm, for about $0.01.
+- **Amazon DynamoDB:** deliveries, recipient reviews and immutable, versioned report snapshots.
+- **Amazon EventBridge + Lambda:** a daily retention job that expires deliveries and orphaned files after 30 days.
+- **Amazon ECR / AWS CDK / CloudFormation:** infrastructure as code and container image hosting.
+- **Amazon CloudWatch Logs:** structured, redacted operational logs.
+- **Amazon Bedrock:** in-Region Nova Lite remains a configurable analysis provider (`PACKAGECARE_ANALYZER` unset). We also evaluated Qwen3-VL and Mistral Large 3 on Bedrock before choosing the trained classifier.
+
+## Friction log link
+
+https://github.com/Ka1eidosc0pe/PackageCare/blob/main/docs/friction-log.md
+
+## Project testing link
+
+https://v98w5ez7g7.execute-api.us-east-2.amazonaws.com
+
+## Testing instructions / credentials
+
+```text
+Live app (AWS): https://v98w5ez7g7.execute-api.us-east-2.amazonaws.com
+Workspace password: TODO  (copy WORKSPACE_PASSWORD from data/aws-deploy/secrets.env)
+
+1. Sign in with the workspace password. Four AI-generated demo deliveries are already analyzed:
+   a toss, a drop, a careful placement (no concern) and a hidden delivery (unable to assess).
+2. Open the "wooden porch daylight" delivery: see the verdict, click the timeline observation to seek,
+   press "Replay moment", open "Why?" for the scores.
+3. Review it: Confirm, set damage, add notes/a photo, tick "finished", Save, Preview report, Finalize,
+   and download the evidence bundle (ZIP with report.html, frames, video and a SHA-256 manifest).
+4. To analyze new footage: Import footage → any clip from the repo's samples/ folder (AI-generated).
+   Processing takes ~1.5 minutes; the very first upload after idle can take ~8 minutes (cold start of
+   a 4 GB Lambda container).
+
+Ring live view needs a temporary Ring Developer Playground token, so it runs from the local app
+(README → "Run it locally" → Connections → paste a Playground token → Capture 12-second clip).
+The local app also analyzes clips in a few seconds on Apple Silicon.
+```
+
+## Feedback Q1: Which developer tools, APIs and SDKs did you use, and for what?
+
+- **Ring Partner API + Ring Developer Playground:** token authentication, device discovery, capabilities, recording history, and WHEP live view for capturing doorbell clips.
+- **AWS CDK (TypeScript):** the whole cloud stack as code.
+- **AWS Lambda (container images, arm64) + Lambda Runtime Interface Client:** the API and the PyTorch/FFmpeg analysis worker.
+- **AWS Step Functions, Amazon S3, Amazon DynamoDB, Amazon API Gateway, Amazon EventBridge, Amazon CloudWatch, Amazon ECR:** orchestration, evidence storage, records, HTTP API, retention and logs.
+- **AWS SDK for JavaScript v3:** S3 presigned POSTs, DynamoDB, Step Functions and Bedrock Runtime from the app.
+- **Amazon Bedrock (Converse API):** Nova Lite as a configurable analyzer; evaluated Qwen3-VL and Mistral Large 3.
+- **AWS CLI + `aws login` (new AWS experience):** authentication and read-only checks.
+- **fal.ai API:** generating synthetic doorbell training clips (Seedance, Kling, Wan) and one damage photo (FLUX).
+- **Hugging Face Hub / Transformers + PyTorch + scikit-learn:** frozen Meta V-JEPA 2 features and a trained classifier head.
+- **FFmpeg / Sharp:** video normalization, frame extraction and augmentation.
+- **Playwright:** scripted, reproducible recording of the demo video.
+- **Vitest, Docker, GitHub Actions:** tests and container builds.
+
+## Feedback Q2: What worked well?
+
+- **Ring Partner API:** once connected, WHEP live view was dependable and low-latency, and the REST endpoints (devices, capabilities, history) were simple and consistent. The official starter repo was the most useful reference.
+- **AWS CDK:** one TypeScript stack defined everything. `cdk diff` made each deploy reviewable, and image-only redeploys took minutes.
+- **Lambda container images:** made it practical to ship PyTorch + FFmpeg + a 1.5 GB model to serverless, with no separate ML hosting. arm64 kept costs down.
+- **Step Functions:** clean retries and failure catching, so a failed step never lost an uploaded source.
+- **S3 presigned POST with checksums:** safe direct browser uploads with exact size/type/hash enforcement.
+- **DynamoDB:** simple, conditional writes made report versioning and concurrent-edit protection straightforward.
+- **Amazon Bedrock:** in-Region Nova Lite was quick to call with structured output, and read-only availability/pricing checks were easy to script.
+- **fal.ai:** one key for many video models, a simple queue API, and a pricing API that let us enforce a hard spend cap. Seedance had the best surveillance-style realism per dollar (~$0.05 per clip).
+- **V-JEPA 2 on Hugging Face:** pinned revisions and safetensors; features were strong enough that a linear head worked.
+
+## Feedback Q3: What needs work?
+
+- **Ring Developer Playground:**
+  - There's only an at-rest Package scene, with no delivery being handled and no custom clip upload, so handling scenarios can't be simulated.
+  - Tokens expire within minutes and regenerate only about every 30 minutes, which makes iterating and recording a demo slow.
+  - There's no public capabilities page describing scenes and media limits.
+  - Live view returned an unexpected session `Location` format that our first validation rejected; documenting its form would help.
+- **AWS Lambda:**
+  - New accounts are capped at 3008 MB of memory, but `GetAccountSettings` doesn't show this. We only found out from a failed deploy, which rolled the stack back and left retained resources behind.
+  - The Runtime Interface Client v4 needs autotools in slim images, and its `_HANDLER` startup contract isn't clearly documented for custom base images.
+- **AWS CDK:**
+  - Approving IAM changes needs a TTY, and that fails silently when stdout is piped (e.g. through `tee`).
+  - A rolled-back first create leaves `RETAIN` resources orphaned, with no warning.
+- **Amazon Bedrock:**
+  - A newly authorized model returned "too many tokens per day" on the very first call, with zero quota and no clear onboarding path.
+  - Mistral Large 3's three-image limit and request-body limit weren't documented where we looked.
+  - Stronger models need cross-Region inference profiles that a single-Region project can't use.
+  - Native video sampling at 1 fps misses sub-second handling events.
+- **New AWS experience (`aws login`):** sessions expire after a few hours and the error surfaces late (e.g. mid-deploy as "Unable to resolve AWS account").
+- **fal.ai:** throughput depends on account concurrency, which isn't visible up front. Wan's physics (morphing boxes) made it unusable for our task.
+
+## Feedback Q4: How was your onboarding experience (0 to hello world)?
+
+- **Ring:** account and Playground setup were quick, and the official hello-world starter got device discovery working in under an hour. Getting to a playable WHEP stream took longer (about half a day), mostly because of session/location handling and short-lived tokens.
+- **AWS (new AWS experience):** `aws login` with a named profile was painless. Bedrock hello-world took minutes once quota existed, but the first project hit a zero daily-token quota. Lambda + CDK hello-world was fast; the PyTorch container worker took most of a day because of the memory cap, cold starts and thread tuning.
+- **fal.ai:** under 10 minutes: API key, one queue request, a downloaded clip.
+- **Hugging Face / V-JEPA 2:** under an hour from download to features on Apple Silicon.
+
+## Feedback Q5: Would you build with these again? Yes/No, and why?
+
+**Yes.** Ring's Partner API gave a clean, official path to real camera streams, and AWS let one developer ship a complete, reliable, scalable evidence pipeline (storage, orchestration, ML inference and records) as a single reviewable stack for pennies per clip. We'd love to see the Ring simulator support custom or handling scenarios, and Lambda's account limits surfaced earlier. Both would make the next build faster.
+
+## Which AI tools did you use while working on this project?
+
+- **Claude Code (Anthropic Claude):** the lead coding agent for architecture, implementation, testing, AWS deployment, the synthetic-data pipeline, demo recording and documentation, directed and reviewed by the developer.
+- **OpenAI Codex:** earlier development sessions (initial app, Ring integration and evaluation harnesses). **TODO:** confirm, and edit if you used something else.
+- **In the product and research:** Meta V-JEPA 2 (frozen video features); fal.ai-hosted Seedance, Kling and Wan (synthetic training clips) and FLUX (a demo damage photo); Amazon Bedrock Nova Lite, Qwen3-VL and Mistral Large 3, plus a local Qwen 27B via MLX (evaluated for handling analysis).

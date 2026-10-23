@@ -1,0 +1,114 @@
+[
+  {
+    "clip": "loading-development.mp4",
+    "expected": "rough",
+    "probs": {
+      "none": 0.036,
+      "placement": 0.0,
+      "rough": 0.964
+    },
+    "peak_rough_window_ms": [
+      500.0,
+      2500.0
+    ],
+    "peak_rough_window_p": 1.0
+  },
+  {
+    "clip": "postal-placement-development.mp4",
+    "expected": "placement",
+    "probs": {
+      "none": 0.999,
+      "placement": 0.0,
+      "rough": 0.001
+    },
+    "peak_rough_window_ms": [
+      2000.0,
+      4000.0
+    ],
+    "peak_rough_window_p": 0.0
+  },
+  {
+    "clip": "ring-at-rest-development.mp4",
+    "expected": "none",
+    "probs": {
+      "none": 1.0,
+      "placement": 0.0,
+      "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+      1000.0,
+      3000.0
+    ],
+    "peak_rough_window_p": 0.0
+  },
+  {
+    "clip": "office.mp4",
+    "expected": "unclear",
+    "probs": {
+      "none": 0.995,
+      "placement": 0.0,
+      "rough": 0.005
+    },
+    "peak_rough_window_ms": [
+      1000.0,
+      3000.0
+    ],
+    "peak_rough_window_p": 0.418
+  },
+  {
+    "clip": "porch.mp4",
+    "expected": "unclear",
+    "probs": {
+      "none": 0.805,
+      "placement": 0.0,
+      "rough": 0.195
+    },
+    "peak_rough_window_ms": [
+      2000.0,
+      4000.0
+    ],
+    "peak_rough_window_p": 0.247
+  },
+  {
+    "clip": "swns-release.mp4",
+    "expected": "rough",
+    "probs": {
+      "none": 1.0,
+      "placement": 0.0,
+      "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+      1000.0,
+      3000.0
+    ],
+    "peak_rough_window_p": 0.0
+  },
+  {
+    "clip": "doorway-held.mp4",
+    "expected": "unclear",
+    "probs": {
+      "none": 1.0,
+      "placement": 0.0,
+      "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+      2000.0,
+      4000.0
+    ],
+    "peak_rough_window_p": 0.0
+  },
+  {
+    "clip": "yard-obscured.mp4",
+    "expected": "unclear",
+    "probs": {
+      "none": 1.0,
+      "placement": 0.0,
+      "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+      1000.0,
+      3000.0
+    ],
+    "peak_rough_window_p": 0.0
+  }
+]

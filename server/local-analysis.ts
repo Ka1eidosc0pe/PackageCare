@@ -87,10 +87,11 @@ export function resolveClassifier(
   configured = process.env.PACKAGECARE_CLASSIFIER,
 ) {
   if (configured) return path.resolve(configured);
-  const preferred = path.join(ROOT, "data/synthetic/model/classifier.joblib");
-  return existsSync(preferred)
-    ? preferred
-    : path.join(ROOT, "data/synthetic/model-mini/classifier.joblib");
+  // A freshly trained model (data/, git-ignored) wins; otherwise use the committed release model.
+  const trained = path.join(ROOT, "data/synthetic/model/classifier.joblib");
+  return existsSync(trained)
+    ? trained
+    : path.join(ROOT, "models/handling-classifier.joblib");
 }
 
 // Plain-language strength for the peak window score. Scores are not

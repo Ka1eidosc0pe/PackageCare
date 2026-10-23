@@ -1,0 +1,296 @@
+{
+  "correct": 23,
+  "scoreable": 29,
+  "clips": [
+    {
+      "clip": "k-drop-000.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-drop-001.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.031,
+        "placement": 0.001,
+        "rough": 0.968
+      }
+    },
+    {
+      "clip": "k-drop-002.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-drop-003.mp4",
+      "expected": "rough",
+      "predicted": "none",
+      "probs": {
+        "none": 1.0,
+        "placement": 0.0,
+        "rough": 0.0
+      }
+    },
+    {
+      "clip": "k-drop-004.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.049,
+        "placement": 0.0,
+        "rough": 0.951
+      }
+    },
+    {
+      "clip": "k-none-000.mp4",
+      "expected": "none",
+      "predicted": "none",
+      "probs": {
+        "none": 1.0,
+        "placement": 0.0,
+        "rough": 0.0
+      }
+    },
+    {
+      "clip": "k-none-001.mp4",
+      "expected": "none",
+      "predicted": "none",
+      "probs": {
+        "none": 0.997,
+        "placement": 0.003,
+        "rough": 0.0
+      }
+    },
+    {
+      "clip": "k-obscured-000.mp4",
+      "expected": "none",
+      "predicted": "none",
+      "probs": {
+        "none": 1.0,
+        "placement": 0.0,
+        "rough": 0.0
+      }
+    },
+    {
+      "clip": "k-obscured-001.mp4",
+      "expected": "none",
+      "predicted": "none",
+      "probs": {
+        "none": 1.0,
+        "placement": 0.0,
+        "rough": 0.0
+      }
+    },
+    {
+      "clip": "k-place-000.mp4",
+      "expected": "placement",
+      "predicted": "none",
+      "probs": {
+        "none": 0.813,
+        "placement": 0.042,
+        "rough": 0.145
+      }
+    },
+    {
+      "clip": "k-place-001.mp4",
+      "expected": "placement",
+      "predicted": "none",
+      "probs": {
+        "none": 0.645,
+        "placement": 0.207,
+        "rough": 0.149
+      }
+    },
+    {
+      "clip": "k-place-002.mp4",
+      "expected": "placement",
+      "predicted": "placement",
+      "probs": {
+        "none": 0.231,
+        "placement": 0.734,
+        "rough": 0.035
+      }
+    },
+    {
+      "clip": "k-place-003.mp4",
+      "expected": "placement",
+      "predicted": "placement",
+      "probs": {
+        "none": 0.0,
+        "placement": 1.0,
+        "rough": 0.0
+      }
+    },
+    {
+      "clip": "k-place-004.mp4",
+      "expected": "placement",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.002,
+        "placement": 0.0,
+        "rough": 0.998
+      }
+    },
+    {
+      "clip": "k-place-005.mp4",
+      "expected": "placement",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.001,
+        "placement": 0.041,
+        "rough": 0.958
+      }
+    },
+    {
+      "clip": "k-place-006.mp4",
+      "expected": "placement",
+      "predicted": "placement",
+      "probs": {
+        "none": 0.006,
+        "placement": 0.819,
+        "rough": 0.176
+      }
+    },
+    {
+      "clip": "k-place-007.mp4",
+      "expected": "placement",
+      "predicted": "placement",
+      "probs": {
+        "none": 0.032,
+        "placement": 0.894,
+        "rough": 0.074
+      }
+    },
+    {
+      "clip": "k-toss-000.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-toss-001.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-toss-002.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-toss-003.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-toss-004.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-toss-005.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "k-toss-006.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "pilot-kling25-drop.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "pilot-kling25-place.mp4",
+      "expected": "placement",
+      "predicted": "placement",
+      "probs": {
+        "none": 0.002,
+        "placement": 0.997,
+        "rough": 0.0
+      }
+    },
+    {
+      "clip": "pilot-kling25-toss.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    },
+    {
+      "clip": "pilot-wan22-place.mp4",
+      "expected": "placement",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.003,
+        "placement": 0.112,
+        "rough": 0.885
+      }
+    },
+    {
+      "clip": "pilot-wan22-toss.mp4",
+      "expected": "rough",
+      "predicted": "rough",
+      "probs": {
+        "none": 0.0,
+        "placement": 0.0,
+        "rough": 1.0
+      }
+    }
+  ]
+}

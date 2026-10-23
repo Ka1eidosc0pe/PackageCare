@@ -1,0 +1,5 @@
+# Handling classifier (embed / train / infer). Install on top of experiments/local_cv/requirements.txt
+# (torch 2.14.1, transformers 5.20.1, numpy, pillow, huggingface-hub).
+-r ../local_cv/requirements.txt
+scikit-learn==1.9.1
+joblib==1.6.0
