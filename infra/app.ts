@@ -121,8 +121,9 @@ const worker = new lambda.DockerImageFunction(stack, "Worker", {
     cmd: ["lambda/worker.handler"],
   }),
   architecture: arm.architecture,
-  timeout: Duration.minutes(10),
-  memorySize: 10240,
+  // New accounts cap Lambda memory at 3008 MB (~2 vCPU); CPU inference needs the full 15 minutes.
+  timeout: Duration.minutes(15),
+  memorySize: 3008,
   ephemeralStorageSize: Size.gibibytes(2),
   environment: { ...common, PACKAGECARE_ANALYZER: "local" },
   reservedConcurrentExecutions: 2,

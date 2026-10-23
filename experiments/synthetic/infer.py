@@ -10,6 +10,7 @@ window = concat(w, w). Scores are classifier outputs, not calibrated probabiliti
 import argparse
 import hashlib
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -26,7 +27,7 @@ def main():
     ap.add_argument("--model", required=True, help="classifier.joblib from train.py")
     ap.add_argument("--model-dir", default=DEFAULT_MODEL_DIR, help="default: $PACKAGECARE_MODEL_DIR or data/local-action-small-model")
     ap.add_argument("--fps", type=float, default=8.0)
-    ap.add_argument("--stride", type=int, default=4)
+    ap.add_argument("--stride", type=int, default=int(os.environ.get("PACKAGECARE_STRIDE", "4")))
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--device", default=DEFAULT_DEVICE, choices=["mps", "cpu"],
                     help="default: $PACKAGECARE_DEVICE or mps (no silent fallback)")

@@ -37,6 +37,7 @@ ENV DATA_DIR=/tmp/packagecare \
     PACKAGECARE_CLASSIFIER=/var/task/models/classifier.joblib \
     PACKAGECARE_MODEL_DIR=/var/task/models/vjepa2-vitl-fpc16-256-ssv2 \
     PACKAGECARE_DEVICE=cpu \
+    PACKAGECARE_STRIDE=8 \
     PACKAGECARE_FFMPEG=/usr/bin/ffmpeg \
     FFMPEG_PATH=/usr/bin/ffmpeg \
     HF_HUB_OFFLINE=1 \
