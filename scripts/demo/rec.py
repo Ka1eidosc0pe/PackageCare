@@ -3,7 +3,9 @@
 
     REC_ENV/bin/python scripts/demo/rec.py TAKE [TAKE ...] [--out data/demo-video/takes]
 
-Takes: title home s2 s3 s4 s5 s6 s7 built aws roadmap end. The cloud takes log in with the workspace password
+Takes: title home ring cloud built aws roadmap end. "ring" (local app, screens 2-3) and "cloud" (deployed app,
+screens 4-7) are single continuous takes; each writes TAKE.marks.json with the second at which every screen
+starts, so assemble.py can trim the off-camera setup and split screens without any reload or jump. The cloud takes log in with the workspace password
 from the ignored data/aws-deploy/secrets.env (never printed). The Ring takes use the local app on :3013, which
 must already be connected to Ring from its Connections page. A visible cursor is injected because headless
 Chromium draws none. Each take records at natural speed; assemble.py fits takes to the narration.
@@ -53,7 +55,11 @@ class Take:
                                        record_video_size=size, storage_state=storage, accept_downloads=True)
         self.ctx.add_init_script(CURSOR_JS)
         self.page = self.ctx.new_page()
+        self.t0, self.marks = time.monotonic(), {}
         LIVE.append(self)
+
+    def mark(self, label):
+        self.marks[label] = round(time.monotonic() - self.t0, 2)
 
     def wait(self, s):
         self.page.wait_for_timeout(int(s * 1000))
@@ -61,9 +67,18 @@ class Take:
     def cursor(self):
         self.page.evaluate(CURSOR_JS)
 
+    def reveal(self, locator):
+        """Smoothly scroll the target into view when it is not fully visible (no instant jumps)."""
+        visible = locator.evaluate("""el => { const r = el.getBoundingClientRect();
+            return r.top >= 70 && r.bottom <= window.innerHeight - 10; }""")
+        if not visible:
+            locator.evaluate("el => el.scrollIntoView({behavior: 'smooth', block: 'center'})")
+            self.wait(0.9)
+
     def point(self, locator, click=True, pause=0.35):
         self.cursor()
-        locator.scroll_into_view_if_needed()
+        locator.wait_for()
+        self.reveal(locator)
         box = locator.bounding_box()
         x, y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
         self.page.evaluate(f"window.__cursor.style.left='{x}px';window.__cursor.style.top='{y}px'")
@@ -82,7 +97,8 @@ class Take:
         self.ctx.close()
         dst = self.out / f"{self.name}.webm"
         shutil.move(video.path(), dst)
-        print("wrote", dst)
+        (self.out / f"{self.name}.marks.json").write_text(json.dumps(self.marks, indent=1))
+        print("wrote", dst, self.marks)
 
 
 def login(browser, out):
@@ -99,40 +115,48 @@ def login(browser, out):
     return str(state)
 
 
-def delivery(t, title):
-    t.point(t.page.get_by_role("button", name=title).first)
+def select(t, title, show=True):
+    """Open a delivery from the list; show=False selects it off-camera (before the take's first mark)."""
+    btn = t.page.get_by_role("button", name=title).first
+    t.point(btn) if show else btn.click()
     t.page.get_by_role("heading", name=title).wait_for()
-    t.wait(0.6)
+    t.wait(0.7)
+
+
+def top(t):
+    t.page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})"); t.wait(0.8)
 
 
 def slide(b, out, name, seconds):
     t = Take(b, name, out, size=SIZE)
     t.page.goto(f"file://{SLIDES}/{name}.html")
+    t.mark("start")
     t.wait(seconds)
     t.close()
 
 
 def run(take, b, out, state):
-    p = None
     if take in ("title", "built", "aws", "roadmap", "end"):
         return slide(b, out, take, {"title": 8, "built": 14, "aws": 14, "roadmap": 12, "end": 6}[take])
     if take == "home":
         t = Take(b, take, out, state); p = t.page
-        p.goto(CLOUD); p.get_by_text("Delivery review").first.wait_for(); t.wait(2)
+        p.goto(CLOUD); p.get_by_text("Delivery review").first.wait_for(); t.wait(1.2)
+        t.mark("start")
         for name in ["AI-generated - townhouse stoop overcast", "AI-generated - bungalow in rain",
                      "AI-generated - wooden porch daylight"]:
-            t.point(p.get_by_role("button", name=name).first, click=False); t.wait(1.6)
-        t.point(p.get_by_role("tab", name="To review").first, click=False); t.wait(1.5)
-        t.point(p.get_by_role("button", name="Import footage"), click=False); t.wait(2)
+            t.point(p.get_by_role("button", name=name).first, click=False); t.wait(1.4)
+        t.point(p.get_by_role("tab", name="To review").first, click=False); t.wait(1.2)
+        t.point(p.get_by_role("button", name="Import footage"), click=False); t.wait(1.5)
         return t.close()
-    if take == "s2":  # local app, Ring live view -> capture 12-second clip
+    if take == "ring":  # local app: Ring live view -> 12 s capture -> analyze -> result, one continuous take
         t = Take(b, take, out); p = t.page
-        p.goto(LOCAL); p.get_by_text("Delivery review").first.wait_for(); t.wait(1)
-        t.point(p.get_by_role("button", name="Connections"))
-        t.wait(1)
+        p.goto(LOCAL); p.get_by_text("Delivery review").first.wait_for()
+        p.get_by_role("button", name="Connections").click()  # set the scene off-camera
+        p.get_by_text("Playground access token").wait_for(); t.wait(1)
         if not p.locator("select", has=p.locator("option", has_text="Choose a device")).count():
-            t.point(p.get_by_role("button", name="Refresh devices"))
-        p.locator("select", has=p.locator("option", has_text="Choose a device")).first.wait_for(); t.wait(1.2)
+            p.get_by_role("button", name="Refresh devices").click()
+        p.locator("select", has=p.locator("option", has_text="Choose a device")).first.wait_for(); t.wait(1)
+        t.mark("start")
         for _ in range(2):  # device, then camera component if the device has several
             for sel in p.locator("select").all():
                 first = sel.locator("option").first.inner_text() if sel.locator("option").count() else ""
@@ -140,38 +164,36 @@ def run(take, b, out, state):
                         and first in ("Choose a device", "Select a component")):
                     t.point(sel, click=False); sel.select_option(index=1); t.wait(1.2)
         t.point(p.get_by_role("button", name="Capture 12-second clip"))
-        # live stream actually playing, then recording runs and is saved
         p.wait_for_function("() => [...document.querySelectorAll('video')].some(v => v.currentTime > 0.5 && !v.paused)",
                             timeout=60000)
         p.get_by_role("button", name="Cancel recording").wait_for(timeout=30000)
         p.get_by_role("button", name="Cancel recording").wait_for(state="hidden", timeout=60000)
-        t.wait(3)
-        return t.close()
-    if take == "s3":  # local app, analyze the saved Ring clip → unable to assess
-        t = Take(b, take, out); p = t.page
-        p.goto(LOCAL); p.get_by_text("Delivery review").first.wait_for(); t.wait(1)
-        t.point(p.get_by_role("button", name="Analyze clip").first)
-        p.get_by_text("Unable to assess").first.wait_for(timeout=180000)
+        analyze = p.get_by_role("button", name="Analyze clip")
+        analyze.wait_for(timeout=60000); t.wait(1.5)
+        t.mark("saved")
+        t.point(analyze, pause=0.5)
+        p.locator(".stepper").wait_for(timeout=30000); t.wait(2.5)
+        t.mark("wait_from")
+        p.locator(".verdict").wait_for(timeout=240000)
+        t.mark("wait_to")
         t.wait(1)
-        t.point(p.get_by_role("region", name="Handling assessment"), click=False)
-        t.wait(4)
+        t.point(p.locator(".verdict"), click=False); t.wait(4)
+        t.mark("end")
         return t.close()
-    if take == "s4":
+    if take == "cloud":  # deployed app: screens 4-7 in one continuous take
         t = Take(b, take, out, state); p = t.page
-        p.goto(CLOUD); p.get_by_text("Delivery review").first.wait_for(); t.wait(1)
-        delivery(t, "AI-generated - wooden porch daylight")
-        t.point(p.get_by_role("region", name="Handling assessment"), click=False); t.wait(2.5)
+        p.goto(CLOUD); p.get_by_text("Delivery review").first.wait_for()
+        select(t, "AI-generated - wooden porch daylight", show=False); t.wait(0.6)
+        t.mark("s4")
+        t.point(p.locator(".verdict"), click=False); t.wait(2)
         t.point(p.get_by_text("Why?", exact=True).first, pause=2.5)
         t.point(p.get_by_role("region", name="Handling activity (classifier)"), click=False); t.wait(1.5)
         t.point(p.get_by_role("button", name=re.compile(r"^\d\d:\d\d\.\d Possible airborne release")).first, pause=1.5)
-        p.mouse.wheel(0, -2000); t.wait(0.8)
+        top(t)
+        t.point(p.get_by_text("Why?", exact=True).first, pause=0.6)  # fold the scores away before replaying
         t.point(p.get_by_role("button", name="Replay moment"), pause=7)
         t.point(p.get_by_role("button", name=re.compile("replay|stop", re.I)).first, pause=1)
-        return t.close()
-    if take == "s5":
-        t = Take(b, take, out, state); p = t.page
-        p.goto(CLOUD); p.get_by_text("Delivery review").first.wait_for(); t.wait(0.5)
-        delivery(t, "AI-generated - wooden porch daylight")
+        t.mark("s5")
         t.point(p.get_by_role("button", name="Confirm", exact=True), pause=1.2)
         damage = p.locator("select").filter(has=p.locator("option[value=observed]"))
         t.point(damage, click=False); damage.select_option("observed"); t.wait(1)
@@ -181,12 +203,8 @@ def run(take, b, out, state):
         t.point(p.get_by_role("button", name="Add damage photos"), click=False)
         p.locator("input[type=file][accept^=image]").set_input_files(str(ROOT / "data/demo-video/damage-photo.jpg"))
         p.get_by_text("photo added", exact=False).first.wait_for(timeout=60000)
-        t.wait(3)
-        return t.close()
-    if take == "s6":
-        t = Take(b, take, out, state); p = t.page
-        p.goto(CLOUD); p.get_by_text("Delivery review").first.wait_for(); t.wait(0.5)
-        delivery(t, "AI-generated - wooden porch daylight")
+        t.wait(2)
+        t.mark("s6")
         t.point(p.get_by_text("I've finished reviewing this delivery."), pause=0.6)
         t.point(p.get_by_role("button", name="Save review"), pause=1.5)
         t.point(p.get_by_role("button", name="Preview report"), pause=2)
@@ -197,15 +215,16 @@ def run(take, b, out, state):
         with p.expect_download() as dl:
             t.point(p.get_by_role("link", name="Download evidence bundle"), pause=1)
         dl.value.save_as(str(out / "bundle.zip"))
-        t.wait(1.5)
-        return t.close()
-    if take == "s7":
-        t = Take(b, take, out, state); p = t.page
-        p.goto(CLOUD); p.get_by_text("Delivery review").first.wait_for(); t.wait(0.5)
-        delivery(t, "AI-generated - bungalow in rain")
-        t.point(p.get_by_role("region", name="Handling assessment"), click=False); t.wait(3)
-        delivery(t, "AI-generated - farmhouse porch sunset")
-        t.point(p.get_by_role("region", name="Handling assessment"), click=False); t.wait(3)
+        t.wait(1.2)
+        t.mark("s6_close")
+        p.keyboard.press("Escape"); t.wait(0.8)
+        top(t)
+        t.mark("s7")
+        select(t, "AI-generated - bungalow in rain")
+        t.point(p.locator(".verdict"), click=False); t.wait(3)
+        select(t, "AI-generated - farmhouse porch sunset")
+        t.point(p.locator(".verdict"), click=False); t.wait(3)
+        t.mark("end")
         return t.close()
     raise SystemExit(f"unknown take {take}")
 
@@ -219,7 +238,7 @@ def main():
     out = Path(a.out); (out / "raw").mkdir(parents=True, exist_ok=True)
     with sync_playwright() as pw:
         b = pw.chromium.launch(headless=not a.headed, args=["--autoplay-policy=no-user-gesture-required"])
-        state = login(b, out) if any(t in ("home", "s4", "s5", "s6", "s7") for t in a.takes) else None
+        state = login(b, out) if any(t in ("home", "cloud") for t in a.takes) else None
         for take in a.takes:
             t0 = time.time()
             try:

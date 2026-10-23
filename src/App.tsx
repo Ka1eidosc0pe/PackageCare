@@ -981,7 +981,12 @@ function DeliveryWorkspace({
     replayRef.current = { start, end };
     setReplay(true);
     setActive(moment.id);
-    v.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    // After the replay state re-renders, bring the whole video into view.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        v.scrollIntoView({ behavior: "smooth", block: "center" }),
+      ),
+    );
     v.currentTime = start / 1000;
     v.playbackRate = 0.5;
     setPosition(start);
