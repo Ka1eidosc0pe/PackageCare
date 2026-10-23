@@ -1,5 +1,17 @@
 # AWS deployment notes
 
+**Status (October 23, 2026): deployed and smoke-tested** in `us-east-2` with the `pkgcare` profile, owner-approved with a $5 ceiling. Stack `PackageCare`: HTTP API → API Lambda; private S3 evidence bucket with direct presigned uploads; Step Functions (retrieve → observe → verify); arm64 container Worker Lambda (3008 MB, 15 min) running FFmpeg, PyTorch CPU, V-JEPA 2 and the trained handling head; DynamoDB; daily retention Lambda.
+
+Smoke test (`python3 scripts/cloud-smoke.py <ApplicationUrl> <clip>`): an AI-generated 6-second toss clip went upload → S3 → Step Functions → Worker → DynamoDB and returned `possible_rough_handling`, with a supported 4.0–6.0 s observation, 196 s end to end (observe ≈174 s). Estimated Lambda cost ≈ $0.01 per short clip; ECR holds ~2.1 GB of images (~$0.21/month).
+
+Deploy: `bash scripts/deploy.sh` (interactive; CDK asks before IAM changes). The workspace password is generated into the ignored `data/aws-deploy/secrets.env`. Ring parameters are optional, because Playground tokens are short-lived.
+
+Teardown: `npx cdk destroy PackageCare --profile pkgcare --app 'node --import tsx infra/app.ts'`, then empty and delete the retained evidence bucket and DynamoDB table. A failed first create also left an empty retained bucket `packagecare-evidence4cc26d68-zmyatjordxq0` and table `PackageCare-DeliveriesBF2F7293-G4DVFFGEY64X`; delete those too. The CDKToolkit bootstrap stack can be removed last.
+
+## Earlier notes (historical)
+
+# AWS deployment notes
+
 **Status:** The owner connected AWS project credentials under `pkgcare` and confirmed `us-east-2`. Free metadata checks verify Nova Lite authorization/availability, and the application's SDK resolves the temporary login credentials. The owner-approved smoke attempt reached Bedrock but its first request was throttled by zero daily-token quota; no model result returned. No AWS upload, deployment or resource creation has been performed. Earlier source passed the Linux Lambda runtime smoke in [CI](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38990693461); current Ohio-only source `724c773` passed all checks and the container runtime smoke in [CI run 38996783402](https://github.com/Ka1eidosc0pe/PackageCare/actions/runs/38996783402).
 
 ## Intended topology
