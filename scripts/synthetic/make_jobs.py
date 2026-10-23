@@ -59,6 +59,10 @@ ACTIONS = {
         "reaches the door with {parcel} balanced on one hand and lets it drop from shoulder height onto the porch floor before leaving.",
     ],
     "place": [
+        "walks up quickly at night holding {parcel}, bends down in one smooth motion and sets it on the floor with both hands still on it, then walks away briskly.",
+        "steps onto the porch holding {parcel}, squats, rests it on the floor and slides it a little toward the door with both hands before standing up and leaving.",
+        "carries {parcel} in both arms, bends at the waist and lowers it the last few centimeters onto the doormat without letting go early, then leaves.",
+        "arrives holding two packages, sets the first one down gently, places the second one carefully on top, then walks away.",
         "walks up quickly holding {parcel}, bends and sets it down briskly but with both hands on it until it touches the floor, then hurries off.",
         "carries {parcel} toward the door, holding it close to the camera for a moment, then lowers it carefully to the floor out of the way and leaves.",
         "arrives holding {parcel} in one hand, crouches low and places it on the doorstep from just above the floor, then walks away.",

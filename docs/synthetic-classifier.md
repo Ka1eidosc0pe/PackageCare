@@ -28,7 +28,7 @@ Seedance for training data; Kling for the cross-generator held-out set and demo 
 - Real clips: van toss → rough (0.85) ✓; Ring at-rest → none ✓; postal conveyor placement → rough ✗ (warehouse, out of domain); distant SWNS CCTV throw → none ✗ (subject tiny in frame); unclear office/doorway/yard → none (acceptable abstention); camera-filling porch carton → rough ✗.
 - Response: the full set adds distant CCTV views, near-miss placements and an obscured class.
 
-## Full set (in progress at time of writing)
+## Full set and final model (v2)
 
 - `scripts/synthetic/full-jobs.json`: 400 Seedance clips (toss 95, drop 75, place 130, none 60, obscured 40), estimated $19.44, cap $22.
 - `scripts/synthetic/xgen-jobs.json`: 24 Kling clips for held-out cross-generator testing, $8.40, cap $9.
@@ -36,6 +36,35 @@ Seedance for training data; Kling for the cross-generator held-out set and demo 
 - `scripts/synthetic/pipeline.sh` runs unattended after generation: 3 augmentations per clip → embed → train on mini + full → score real and cross-generator sets. Output: `data/synthetic/model/{classifier.joblib,real-eval.json,xgen-eval.json}`, log `data/synthetic/pipeline.log`.
 
 If generation is interrupted, rerun the same `fal_generate.py` command: completed clips are skipped and already-submitted requests are fetched rather than paid for again. Then rerun `pipeline.sh` (finished steps are skipped).
+
+## Final results (October 23)
+
+Training: 487 Seedance source clips (400 full set + 27 mini + 60 extra placements) × augmentation = 1,975 clips; rough 740 / placement 805 / none 430. Grouped synthetic CV accuracy 90%.
+
+**Cross-generator held-out (Kling 2.5 Turbo + pilot Kling/Wan, 29 clips): 23/29.**
+
+| Expected → predicted | rough | placement | none |
+|---|---|---|---|
+| rough (15) | 14 | 0 | 1 |
+| placement (10) | 3 | 5 | 2 |
+| none / obscured (4) | 0 | 0 | 4 |
+
+v1 (before the extra placements) scored 22/29 with the same placement→rough errors. The extra placement clips were added *after* seeing those errors, so the v2 re-score is not fully blind. The three remaining false alarms are genuine gentle placements (a top-down camera, a quick night-time set-down, a Wan clip), all scored ≥0.9 rough. **The model can flag a normal placement, which is why recipient review exists.**
+
+**Real held-out clips (8, never trained on):**
+
+| Clip | Label | Model | Outcome |
+|---|---|---|---|
+| FedEx van loading toss | rough | rough 0.96, peak window 0.5–2.5 s | ✓ detected |
+| SWNS distant CCTV throw | rough | none 1.00 | ✗ missed (subject tiny in frame) |
+| Postal conveyor placement | placement | none 1.00 | abstained (warehouse, out of domain) |
+| Ring Playground parcel at rest | none | none 1.00 | ✓ |
+| Office (railing-obscured) | unclear | none 0.99 | ✓ abstained |
+| Porch (camera-filling carton) | unclear | none 0.81 | ✓ abstained |
+| Doorway (person holding carton) | unclear | none 1.00 | ✓ abstained |
+| Yard (no clear handling) | unclear | none 1.00 | ✓ abstained |
+
+No false concerns on the six real clips without rough handling; 1 of 2 real rough clips caught. Eight clips is anecdotal, not an accuracy estimate. Machine-readable summary: `evaluation/synthetic-classifier-results.json`.
 
 ## Honest limitations
 

@@ -40,7 +40,7 @@ n = len(a["videos"])
 out = {k: a[k] for k in ("labels", "meta")}
 for k in a.files:
     if k in out: continue
-    out[k] = np.concatenate([a[k], b[k] + (n if k == "window_video_idx" else 0)])
+    out[k] = np.concatenate([a[k], b[k] + n if k == "window_video_idx" else b[k]])
 np.savez_compressed("data/synthetic/train-all-emb.npz", **out)
 labels = json.load(open("data/synthetic/full-labels.json")) | json.load(open("data/synthetic/mini-labels.json"))
 json.dump(labels, open("data/synthetic/all-labels.json", "w"))

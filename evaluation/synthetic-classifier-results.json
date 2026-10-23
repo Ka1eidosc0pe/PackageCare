@@ -1,0 +1,433 @@
+{
+ "kind": "packagecare-synthetic-classifier-v2",
+ "date": "2026-10-23",
+ "backbone": "facebook/vjepa2-vitl-fpc16-256-ssv2 (frozen), attentive-pooler features, 8 fps, 2 s windows, 0.5 s hop",
+ "head": "StandardScaler + LogisticRegression(C=0.5, balanced), features = max+mean over windows",
+ "training": {
+  "generator": "fal-ai/bytedance/seedance/v1/pro/fast (480p)",
+  "source_clips": 487,
+  "with_augmentation": 1975,
+  "coarse_counts": {
+   "rough": 740,
+   "placement": 805,
+   "none": 430
+  },
+  "grouped_cv_accuracy_synthetic": 0.9
+ },
+ "cross_generator_heldout": {
+  "generator": "Kling 2.5 Turbo Pro (24) + Kling/Wan pilot clips (5)",
+  "correct": 23,
+  "scoreable": 29,
+  "v1_correct_before_extra_placements": 22,
+  "note": "v2 added 60 placement clips after v1's placement false alarms on this set were seen, so this re-score is not fully blind.",
+  "clips": [
+   {
+    "clip": "k-drop-000.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-drop-001.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.031,
+     "placement": 0.001,
+     "rough": 0.968
+    }
+   },
+   {
+    "clip": "k-drop-002.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-drop-003.mp4",
+    "expected": "rough",
+    "predicted": "none",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    }
+   },
+   {
+    "clip": "k-drop-004.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.049,
+     "placement": 0.0,
+     "rough": 0.951
+    }
+   },
+   {
+    "clip": "k-none-000.mp4",
+    "expected": "none",
+    "predicted": "none",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    }
+   },
+   {
+    "clip": "k-none-001.mp4",
+    "expected": "none",
+    "predicted": "none",
+    "probs": {
+     "none": 0.997,
+     "placement": 0.003,
+     "rough": 0.0
+    }
+   },
+   {
+    "clip": "k-obscured-000.mp4",
+    "expected": "none",
+    "predicted": "none",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    }
+   },
+   {
+    "clip": "k-obscured-001.mp4",
+    "expected": "none",
+    "predicted": "none",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    }
+   },
+   {
+    "clip": "k-place-000.mp4",
+    "expected": "placement",
+    "predicted": "none",
+    "probs": {
+     "none": 0.813,
+     "placement": 0.042,
+     "rough": 0.145
+    }
+   },
+   {
+    "clip": "k-place-001.mp4",
+    "expected": "placement",
+    "predicted": "none",
+    "probs": {
+     "none": 0.645,
+     "placement": 0.207,
+     "rough": 0.149
+    }
+   },
+   {
+    "clip": "k-place-002.mp4",
+    "expected": "placement",
+    "predicted": "placement",
+    "probs": {
+     "none": 0.231,
+     "placement": 0.734,
+     "rough": 0.035
+    }
+   },
+   {
+    "clip": "k-place-003.mp4",
+    "expected": "placement",
+    "predicted": "placement",
+    "probs": {
+     "none": 0.0,
+     "placement": 1.0,
+     "rough": 0.0
+    }
+   },
+   {
+    "clip": "k-place-004.mp4",
+    "expected": "placement",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.002,
+     "placement": 0.0,
+     "rough": 0.998
+    }
+   },
+   {
+    "clip": "k-place-005.mp4",
+    "expected": "placement",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.001,
+     "placement": 0.041,
+     "rough": 0.958
+    }
+   },
+   {
+    "clip": "k-place-006.mp4",
+    "expected": "placement",
+    "predicted": "placement",
+    "probs": {
+     "none": 0.006,
+     "placement": 0.819,
+     "rough": 0.176
+    }
+   },
+   {
+    "clip": "k-place-007.mp4",
+    "expected": "placement",
+    "predicted": "placement",
+    "probs": {
+     "none": 0.032,
+     "placement": 0.894,
+     "rough": 0.074
+    }
+   },
+   {
+    "clip": "k-toss-000.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-toss-001.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-toss-002.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-toss-003.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-toss-004.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-toss-005.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "k-toss-006.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "pilot-kling25-drop.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "pilot-kling25-place.mp4",
+    "expected": "placement",
+    "predicted": "placement",
+    "probs": {
+     "none": 0.002,
+     "placement": 0.997,
+     "rough": 0.0
+    }
+   },
+   {
+    "clip": "pilot-kling25-toss.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   },
+   {
+    "clip": "pilot-wan22-place.mp4",
+    "expected": "placement",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.003,
+     "placement": 0.112,
+     "rough": 0.885
+    }
+   },
+   {
+    "clip": "pilot-wan22-toss.mp4",
+    "expected": "rough",
+    "predicted": "rough",
+    "probs": {
+     "none": 0.0,
+     "placement": 0.0,
+     "rough": 1.0
+    }
+   }
+  ]
+ },
+ "real_heldout": {
+  "note": "Eight real clips, never trained on; labels assigned before inference (evaluation/real-handling-labels.json).",
+  "clips": [
+   {
+    "clip": "loading-development.mp4",
+    "expected": "rough",
+    "probs": {
+     "none": 0.036,
+     "placement": 0.0,
+     "rough": 0.964
+    },
+    "peak_rough_window_ms": [
+     500.0,
+     2500.0
+    ],
+    "peak_rough_window_p": 1.0
+   },
+   {
+    "clip": "postal-placement-development.mp4",
+    "expected": "placement",
+    "probs": {
+     "none": 0.999,
+     "placement": 0.0,
+     "rough": 0.001
+    },
+    "peak_rough_window_ms": [
+     2000.0,
+     4000.0
+    ],
+    "peak_rough_window_p": 0.0
+   },
+   {
+    "clip": "ring-at-rest-development.mp4",
+    "expected": "none",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+     1000.0,
+     3000.0
+    ],
+    "peak_rough_window_p": 0.0
+   },
+   {
+    "clip": "office.mp4",
+    "expected": "unclear",
+    "probs": {
+     "none": 0.995,
+     "placement": 0.0,
+     "rough": 0.005
+    },
+    "peak_rough_window_ms": [
+     1000.0,
+     3000.0
+    ],
+    "peak_rough_window_p": 0.418
+   },
+   {
+    "clip": "porch.mp4",
+    "expected": "unclear",
+    "probs": {
+     "none": 0.805,
+     "placement": 0.0,
+     "rough": 0.195
+    },
+    "peak_rough_window_ms": [
+     2000.0,
+     4000.0
+    ],
+    "peak_rough_window_p": 0.247
+   },
+   {
+    "clip": "swns-release.mp4",
+    "expected": "rough",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+     1000.0,
+     3000.0
+    ],
+    "peak_rough_window_p": 0.0
+   },
+   {
+    "clip": "doorway-held.mp4",
+    "expected": "unclear",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+     2000.0,
+     4000.0
+    ],
+    "peak_rough_window_p": 0.0
+   },
+   {
+    "clip": "yard-obscured.mp4",
+    "expected": "unclear",
+    "probs": {
+     "none": 1.0,
+     "placement": 0.0,
+     "rough": 0.0
+    },
+    "peak_rough_window_ms": [
+     1000.0,
+     3000.0
+    ],
+    "peak_rough_window_p": 0.0
+   }
+  ]
+ }
+}
