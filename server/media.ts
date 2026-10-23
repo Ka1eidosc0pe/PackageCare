@@ -183,7 +183,7 @@ export async function inspectVideo(file: string) {
       "json",
       file,
     ],
-    { timeout: 15000, maxBuffer: 100000 },
+    { timeout: 60000, maxBuffer: 100000 },
   );
   const info = JSON.parse(stdout);
   let durationMs = Math.round(Number(info.format?.duration) * 1000);
@@ -210,7 +210,7 @@ export async function inspectVideo(file: string) {
         "json",
         file,
       ],
-      { timeout: 15000, maxBuffer: 4 * 1024 * 1024 },
+      { timeout: 60000, maxBuffer: 4 * 1024 * 1024 },
     );
     const ends = (JSON.parse(packets.stdout).packets || [])
       .map((p: any) => Number(p.pts_time) + (Number(p.duration_time) || 0))
@@ -303,7 +303,7 @@ export async function prepareVideo(
           "3",
           frame,
         ],
-        { timeout: 15000, maxBuffer: 100000 },
+        { timeout: 60000, maxBuffer: 100000 },
       );
       const extracted = await media.put(
         await fs.readFile(frame),
