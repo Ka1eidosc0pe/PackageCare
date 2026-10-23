@@ -43,6 +43,7 @@ def main():
     classes = [str(c) for c in clf.classes_]
     loaded = load_model(a.model_dir, a.device)
     t_load = time.monotonic() - t0
+    print(f"loaded in {t_load:.1f}s on {loaded[1]} with {torch.get_num_threads()} threads", file=sys.stderr, flush=True)
 
     feats, starts, ends, n = embed_video(a.video, loaded, a.fps, a.stride, a.batch)
     w = feats[feature]

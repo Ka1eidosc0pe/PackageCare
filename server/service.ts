@@ -417,6 +417,11 @@ export class PackageCare {
           event: "processing_failed",
           deliveryId: id,
           errorType: error?.name || "Error",
+          // First line only, redacted of anything token-shaped; enough to diagnose media/tooling failures.
+          errorMessage: String(error?.message ?? "")
+            .split("\n")[0]
+            .replace(/[A-Za-z0-9+/=_-]{32,}/g, "[redacted]")
+            .slice(0, 300),
           ...(failedAnalysisRun(error)
             ? { analysisDiagnostic: failedAnalysisRun(error)!.failure }
             : {}),

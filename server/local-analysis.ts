@@ -69,7 +69,13 @@ const defaultExec: Exec = (file, args) =>
     execFile(
       file,
       args,
-      { timeout: 10 * 60_000, maxBuffer: 20 * 1024 * 1024, cwd: ROOT },
+      {
+        timeout: Number(
+          process.env.PACKAGECARE_INFER_TIMEOUT_MS || 10 * 60_000,
+        ),
+        maxBuffer: 20 * 1024 * 1024,
+        cwd: ROOT,
+      },
       (error, stdout, stderr) =>
         error
           ? reject(Object.assign(error, { stderr: String(stderr) }))
@@ -167,8 +173,7 @@ export function mapClassifierOutput(
     observation = observe("rough", {
       label: "possible_airborne_release",
       concern: true,
-      describe:
-        "Motion consistent with a package being tossed or dropped",
+      describe: "Motion consistent with a package being tossed or dropped",
     });
   else if (
     clip("placement") >= THRESHOLDS.clip &&
@@ -286,7 +291,22 @@ export class LocalClassifierAnalyzer implements Analyzer {
           ...(modelDir ? ["--model-dir", path.resolve(modelDir)] : []),
           file,
         ]));
-      } catch {
+      } catch (error) {
+        // Diagnostic tail only (timings, Python exception line); never footage or credentials.
+        const e = error as {
+          killed?: boolean;
+          signal?: string;
+          stderr?: string;
+        };
+        console.error(
+          JSON.stringify({
+            event: "local_classifier_failed",
+            killed: !!e.killed,
+            signal: e.signal,
+            stderrTail: String(e.stderr ?? "").slice(-600),
+            wallMs: Date.now() - t0,
+          }),
+        );
         throw new LocalClassifierError(
           "The local handling classifier failed. No assessment was saved.",
         );
