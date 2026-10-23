@@ -125,16 +125,27 @@ def run(take, b, out, state):
         t.point(p.get_by_role("tab", name="To review").first, click=False); t.wait(1.5)
         t.point(p.get_by_role("button", name="Import footage"), click=False); t.wait(2)
         return t.close()
-    if take == "s2":  # local app, Ring live view → capture 12-second clip
+    if take == "s2":  # local app, Ring live view -> capture 12-second clip
         t = Take(b, take, out); p = t.page
         p.goto(LOCAL); p.get_by_text("Delivery review").first.wait_for(); t.wait(1)
         t.point(p.get_by_role("button", name="Connections"))
-        p.get_by_text("Live view").first.wait_for(); t.wait(1)
+        t.wait(1)
+        if not p.locator("select", has=p.locator("option", has_text="Choose a device")).count():
+            t.point(p.get_by_role("button", name="Refresh devices"))
+        p.locator("select", has=p.locator("option", has_text="Choose a device")).first.wait_for(); t.wait(1.2)
+        for _ in range(2):  # device, then camera component if the device has several
+            for sel in p.locator("select").all():
+                first = sel.locator("option").first.inner_text() if sel.locator("option").count() else ""
+                if (sel.is_visible() and not sel.input_value() and sel.locator("option").count() > 1
+                        and first in ("Choose a device", "Select a component")):
+                    t.point(sel, click=False); sel.select_option(index=1); t.wait(1.2)
         t.point(p.get_by_role("button", name="Capture 12-second clip"))
-        p.get_by_text("Recording", exact=False).first.wait_for(timeout=60000)
-        t.wait(14)  # 12 s capture plus save
-        p.get_by_text("Analyze clip", exact=False).first.wait_for(timeout=60000)
-        t.wait(2)
+        # live stream actually playing, then recording runs and is saved
+        p.wait_for_function("() => [...document.querySelectorAll('video')].some(v => v.currentTime > 0.5 && !v.paused)",
+                            timeout=60000)
+        p.get_by_role("button", name="Cancel recording").wait_for(timeout=30000)
+        p.get_by_role("button", name="Cancel recording").wait_for(state="hidden", timeout=60000)
+        t.wait(3)
         return t.close()
     if take == "s3":  # local app, analyze the saved Ring clip → unable to assess
         t = Take(b, take, out); p = t.page

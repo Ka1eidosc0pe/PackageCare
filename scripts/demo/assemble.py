@@ -17,6 +17,8 @@ from pathlib import Path
 SCREENS = {1: [("title", 0.35), ("home", 0.65)], 2: [("s2", 1)], 3: [("s3", 1)], 4: [("s4", 1)], 5: [("s5", 1)],
            6: [("s6", 1)], 7: [("s7", 1)], 8: [("built", 0.8), ("aws", 0.2)], 9: [("roadmap", 0.8), ("end", 0.2)]}
 SKIP_HEAD = {"home": 0.0, "s4": 1.2, "s5": 1.2, "s6": 1.2, "s7": 1.2}  # default-selection frames before the first click
+CUTS = {"s3": [(4.5, 27.5)]}  # remove waiting time (seconds in the raw take)
+SLOW_ZOOM = {"title", "built", "roadmap"}  # slides held a long time get a gentle push-in
 GAP = 0.35  # silence between screens
 MAX_SPEED = 1.6
 MIN_SPEED = 0.8  # slow footage slightly before holding a frame
@@ -33,7 +35,7 @@ def dur(path):
 
 
 def audio_for(audio_dir, n):
-    found = sorted(p for p in Path(audio_dir).glob(f"screen{n}.*") if p.suffix.lower() not in (".txt", ".md"))
+    found = sorted(p for p in Path(audio_dir).iterdir() if p.stem.lower() == f"screen{n}" and p.suffix.lower() not in (".txt", ".md"))
     if not found:
         raise SystemExit(f"missing audio for screen {n} in {audio_dir}")
     return found[0]
@@ -60,9 +62,20 @@ def main():
         subs, notes = [], []
         for i, (name, share) in enumerate(names):
             seg = tmp / f"{n}-{name}.mp4"
-            run("ffmpeg", "-y", "-ss", str(SKIP_HEAD.get(name, 0.0)), "-i", str(takes / f"{name}.webm"), "-an", "-vf",
-                "scale=1920:1080:flags=lanczos,fps=30,format=yuv420p", "-c:v", "libx264", "-crf", "16",
-                "-preset", "veryfast", str(seg))
+            src_take, head = takes / f"{name}.webm", SKIP_HEAD.get(name, 0.0)
+            base = "scale=1920:1080:flags=lanczos,fps=30,format=yuv420p"
+            if name in CUTS:  # keep the intervals around each cut, then join them
+                keep, t0 = [], head
+                for a0, a1 in CUTS[name]:
+                    keep.append((t0, a0)); t0 = a1
+                keep.append((t0, dur(src_take)))
+                chains = "".join(f"[0:v]trim={k0}:{k1},setpts=PTS-STARTPTS,{base}[k{i}];" for i, (k0, k1) in enumerate(keep))
+                fc = chains + "".join(f"[k{i}]" for i in range(len(keep))) + f"concat=n={len(keep)}:v=1:a=0[v]"
+                run("ffmpeg", "-y", "-i", str(src_take), "-an", "-filter_complex", fc, "-map", "[v]",
+                    "-c:v", "libx264", "-crf", "16", "-preset", "veryfast", str(seg))
+            else:
+                run("ffmpeg", "-y", "-ss", str(head), "-i", str(src_take), "-an", "-vf", base,
+                    "-c:v", "libx264", "-crf", "16", "-preset", "veryfast", str(seg))
             length, alloc = dur(seg), narration * share
             speed = min(MAX_SPEED, max(MIN_SPEED, length / alloc))
             alloc = max(alloc, length / MAX_SPEED)  # never cut footage: extend the screen with a pause instead
@@ -72,6 +85,13 @@ def main():
             sub = tmp / f"{n}-{i}.mp4"
             run("ffmpeg", "-y", "-i", str(seg), "-vf", f"{vf},trim=duration={alloc:.3f},setpts=PTS-STARTPTS",
                 "-c:v", "libx264", "-crf", "17", "-preset", "medium", "-r", "30", str(sub))
+            if name in SLOW_ZOOM:  # separate pass on the exactly-timed 30 fps segment: one output frame per input
+                frames = int(alloc * 30) + 1
+                zoomed = tmp / f"{n}-{i}-z.mp4"
+                run("ffmpeg", "-y", "-i", str(sub), "-vf",
+                    f"scale=2304:1296,zoompan=z='1+0.05*in/{frames}':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+                    f":s=1920x1080:fps=30", "-c:v", "libx264", "-crf", "17", "-preset", "medium", str(zoomed))
+                sub = zoomed
             subs.append(sub)
             notes.append(f"{name} {length:.1f}s@{speed:.2f}x->{alloc:.1f}s")
         lst = tmp / f"{n}.txt"
