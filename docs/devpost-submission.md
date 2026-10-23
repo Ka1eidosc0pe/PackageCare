@@ -150,62 +150,74 @@ The local app also analyzes clips in a few seconds on Apple Silicon.
 
 ## Feedback Q1: Which developer tools, APIs and SDKs did you use, and for what?
 
-- **Ring Partner API + Ring Developer Playground:** token authentication, device discovery, capabilities, recording history, and WHEP live view for capturing doorbell clips.
-- **AWS CDK (TypeScript):** the whole cloud stack as code.
-- **AWS Lambda (container images, arm64) + Lambda Runtime Interface Client:** the API and the PyTorch/FFmpeg analysis worker.
-- **AWS Step Functions, Amazon S3, Amazon DynamoDB, Amazon API Gateway, Amazon EventBridge, Amazon CloudWatch, Amazon ECR:** orchestration, evidence storage, records, HTTP API, retention and logs.
-- **AWS SDK for JavaScript v3:** S3 presigned POSTs, DynamoDB, Step Functions and Bedrock Runtime from the app.
-- **Amazon Bedrock (Converse API):** Nova Lite as a configurable analyzer; evaluated Qwen3-VL and Mistral Large 3.
-- **AWS CLI + `aws login` (new AWS experience):** authentication and read-only checks.
-- **fal.ai API:** generating synthetic doorbell training clips (Seedance, Kling, Wan) and one damage photo (FLUX).
-- **Hugging Face Hub / Transformers + PyTorch + scikit-learn:** frozen Meta V-JEPA 2 features and a trained classifier head.
-- **FFmpeg / Sharp:** video normalization, frame extraction and augmentation.
-- **Playwright:** scripted, reproducible recording of the demo video.
-- **Vitest, Docker, GitHub Actions:** tests and container builds.
+**Amazon Ring**
+- **Ring Partner API:** token authentication, device discovery, device capabilities, recording history, and WHEP live-view signaling to stream a Ring camera into the app.
+- **Ring Developer Playground:** the simulated Ring camera (Package scene) we captured real clips from, in place of a physical device.
+- **Ring API hello-world starter (AmazonAppDev/ring-api-helloworld):** reference for authentication and the first API calls.
 
-## Feedback Q2: What worked well?
+**AWS**
+- **AWS Lambda (container images, arm64):** the API (Express via serverless-express) and the analysis worker, a ~4 GB image with FFmpeg, PyTorch CPU, V-JEPA 2 and our classifier.
+- **AWS Lambda Runtime Interface Client (Node.js):** running our own Debian/Python-based container images on Lambda.
+- **AWS Step Functions:** orchestrating retrieve → observe → verify for each delivery, with retries and a failure catcher.
+- **Amazon S3:** private evidence storage; presigned POST uploads with size, type and SHA-256 checksum enforcement.
+- **Amazon DynamoDB:** deliveries, recipient reviews and immutable report versions.
+- **Amazon API Gateway (HTTP API):** the public endpoint for the app and API.
+- **Amazon EventBridge:** a daily schedule for the retention-cleanup Lambda.
+- **Amazon CloudWatch Logs:** structured, redacted logs for debugging the cloud pipeline.
+- **Amazon ECR:** hosting the Lambda container images.
+- **AWS CDK (TypeScript) and AWS CloudFormation:** the whole stack as code; `cdk diff` before every deploy.
+- **Amazon Bedrock (Converse API):** Nova Lite as a configurable analysis provider; we also evaluated Qwen3-VL and Mistral Large 3 for handling detection.
+- **AWS SDK for JavaScript v3:** S3 (including `@aws-sdk/s3-presigned-post`), DynamoDB, Step Functions and Bedrock Runtime clients in the app.
+- **AWS CLI with `aws login` (new AWS experience) and AWS Settings:** sign-in with a named profile, read-only account/model checks, and project/billing management.
 
-- **Ring Partner API:** once connected, WHEP live view was dependable and low-latency, and the REST endpoints (devices, capabilities, history) were simple and consistent. The official starter repo was the most useful reference.
-- **AWS CDK:** one TypeScript stack defined everything. `cdk diff` made each deploy reviewable, and image-only redeploys took minutes.
-- **Lambda container images:** made it practical to ship PyTorch + FFmpeg + a 1.5 GB model to serverless, with no separate ML hosting. arm64 kept costs down.
-- **Step Functions:** clean retries and failure catching, so a failed step never lost an uploaded source.
-- **S3 presigned POST with checksums:** safe direct browser uploads with exact size/type/hash enforcement.
-- **DynamoDB:** simple, conditional writes made report versioning and concurrent-edit protection straightforward.
-- **Amazon Bedrock:** in-Region Nova Lite was quick to call with structured output, and read-only availability/pricing checks were easy to script.
-- **fal.ai:** one key for many video models, a simple queue API, and a pricing API that let us enforce a hard spend cap. Seedance had the best surveillance-style realism per dollar (~$0.05 per clip).
-- **V-JEPA 2 on Hugging Face:** pinned revisions and safetensors; features were strong enough that a linear head worked.
+## Feedback Q2: For each tool, what worked well?
 
-## Feedback Q3: What needs work?
+- **Ring Partner API:** once connected, WHEP live view was dependable and low-latency, and the REST endpoints (devices, capabilities, history) were simple and consistent.
+- **Ring Developer Playground:** a quick way to get a real Ring stream without hardware; device discovery worked on the first try.
+- **Ring hello-world starter:** the clearest reference we had. It got us from token to device list quickly.
+- **AWS Lambda container images:** made it practical to ship PyTorch, FFmpeg and a 1.5 GB model to serverless, with no separate ML hosting. arm64 kept costs to about a cent per analyzed clip.
+- **AWS Step Functions:** retries and catchers meant a failed step never lost an uploaded source, and the execution history made each run easy to inspect.
+- **Amazon S3:** presigned POST with checksum conditions gave safe direct browser uploads; lifecycle rules handled abandoned uploads with zero code.
+- **Amazon DynamoDB:** conditional writes made report versioning and concurrent-edit protection straightforward.
+- **Amazon API Gateway + EventBridge:** essentially zero-configuration in CDK; both just worked.
+- **AWS CDK:** one TypeScript stack defined everything. `cdk diff` made every deploy reviewable, and image-only redeploys took minutes.
+- **Amazon Bedrock:** in-Region Nova Lite was quick to call through the Converse API with structured output; availability, pricing and model metadata were easy to check programmatically.
+- **AWS SDK for JavaScript v3:** modular clients, good TypeScript types, and the presigned-POST helper saved real work.
+- **`aws login` (new AWS experience):** browser-based sign-in to a named profile was painless, with no long-lived access keys.
+
+## Feedback Q3: For each tool, what needs work?
 
 - **Ring Developer Playground:**
-  - There's only an at-rest Package scene, with no delivery being handled and no custom clip upload, so handling scenarios can't be simulated.
-  - Tokens expire within minutes and regenerate only about every 30 minutes, which makes iterating and recording a demo slow.
-  - There's no public capabilities page describing scenes and media limits.
-  - Live view returned an unexpected session `Location` format that our first validation rejected; documenting its form would help.
+  - Only an at-rest Package scene. There's no delivery being handled and no custom clip upload, so handling scenarios can't be simulated or tested end to end.
+  - Tokens expire within minutes and can only be regenerated about every 30 minutes, which makes iterating and recording a demo slow.
+  - There's no public page describing the scenes, media formats and limits.
+- **Ring Partner API:** the WHEP session `Location` value came back in a form our first validation rejected. Documenting its format, and how long the session lasts, would help.
 - **AWS Lambda:**
-  - New accounts are capped at 3008 MB of memory, but `GetAccountSettings` doesn't show this. We only found out from a failed deploy, which rolled the stack back and left retained resources behind.
-  - The Runtime Interface Client v4 needs autotools in slim images, and its `_HANDLER` startup contract isn't clearly documented for custom base images.
-- **AWS CDK:**
-  - Approving IAM changes needs a TTY, and that fails silently when stdout is piped (e.g. through `tee`).
-  - A rolled-back first create leaves `RETAIN` resources orphaned, with no warning.
+  - New accounts are capped at 3008 MB of memory, but `GetAccountSettings` doesn't report the cap. We only found out from a failed deploy, which rolled the stack back.
+  - CPU-heavy work in a 2-vCPU function oversubscribed threads by default (our first run timed out after 10 minutes; pinning 2 threads brought it to 70 s).
+  - Cold starts on a large image needed longer timeouts. Guidance on sizing ML container images would help.
+- **Lambda Runtime Interface Client:** v4 needs autotools in slim images, and its `_HANDLER` startup contract isn't clearly documented for custom base images.
+- **AWS CDK / CloudFormation:**
+  - Approving IAM changes needs a TTY, and that fails when stdout is piped (e.g. through `tee`).
+  - A rolled-back first create left `RETAIN` resources (an empty S3 bucket and table) orphaned, with no warning.
 - **Amazon Bedrock:**
-  - A newly authorized model returned "too many tokens per day" on the very first call, with zero quota and no clear onboarding path.
+  - A newly authorized model returned "too many tokens per day" on its very first call, with zero quota and no clear path to request more.
   - Mistral Large 3's three-image limit and request-body limit weren't documented where we looked.
   - Stronger models need cross-Region inference profiles that a single-Region project can't use.
-  - Native video sampling at 1 fps misses sub-second handling events.
-- **New AWS experience (`aws login`):** sessions expire after a few hours and the error surfaces late (e.g. mid-deploy as "Unable to resolve AWS account").
-- **fal.ai:** throughput depends on account concurrency, which isn't visible up front. Wan's physics (morphing boxes) made it unusable for our task.
+  - Native video input samples at 1 fps, which misses sub-second handling such as a toss.
+- **`aws login` / new AWS experience:** sessions expire after a few hours, and the error surfaces late (mid-deploy, as "Unable to resolve AWS account to use").
 
 ## Feedback Q4: How was your onboarding experience (0 to hello world)?
 
-- **Ring:** account and Playground setup were quick, and the official hello-world starter got device discovery working in under an hour. Getting to a playable WHEP stream took longer (about half a day), mostly because of session/location handling and short-lived tokens.
-- **AWS (new AWS experience):** `aws login` with a named profile was painless. Bedrock hello-world took minutes once quota existed, but the first project hit a zero daily-token quota. Lambda + CDK hello-world was fast; the PyTorch container worker took most of a day because of the memory cap, cold starts and thread tuning.
-- **fal.ai:** under 10 minutes: API key, one queue request, a downloaded clip.
-- **Hugging Face / V-JEPA 2:** under an hour from download to features on Apple Silicon.
+- **Ring Partner API + Playground:** account and Playground setup were quick, and the hello-world starter got device discovery working in under an hour. Getting to a playable WHEP stream took about half a day, mostly session/location handling and juggling short-lived tokens.
+- **Amazon Bedrock:** minutes to the first Converse call once model access existed, but the first attempts in a new project hit a zero daily-token quota. Diagnosing that took longer than the integration itself.
+- **AWS Lambda + CDK + Step Functions + S3 + DynamoDB + API Gateway:** a basic stack was deployed in well under an hour; `cdk bootstrap` and the first deploy were smooth. Packaging the PyTorch worker took most of a day because of the memory cap, cold starts and thread tuning.
+- **AWS SDK for JavaScript v3:** under an hour per service; types and examples made it quick.
+- **`aws login`:** a few minutes. The browser sign-in to a named profile was the easiest part of the whole setup.
 
-## Feedback Q5: Would you build with these again? Yes/No, and why?
+## Feedback Q5: Would you build with these devices and services again? Yes/No, and why?
 
-**Yes.** Ring's Partner API gave a clean, official path to real camera streams, and AWS let one developer ship a complete, reliable, scalable evidence pipeline (storage, orchestration, ML inference and records) as a single reviewable stack for pennies per clip. We'd love to see the Ring simulator support custom or handling scenarios, and Lambda's account limits surfaced earlier. Both would make the next build faster.
+**Yes.** The Ring Partner API gave us a clean, official path to real camera streams, and the product only makes sense on top of Ring footage. AWS let one developer ship a complete, reliable evidence pipeline (storage, orchestration, ML inference and records) as a single reviewable CDK stack, for about a cent per clip. Next time we'd want the Ring simulator to support custom or handling scenarios, and Lambda's account limits shown before the first deploy. Both would have saved us a day.
 
 ## Which AI tools did you use while working on this project?
 
