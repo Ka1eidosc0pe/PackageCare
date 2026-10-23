@@ -39,16 +39,21 @@ const session = new CfnParameter(stack, "SessionSecret", {
   noEcho: true,
   minLength: 32,
 });
+// Ring Playground tokens are short-lived; an empty token deploys the stack with Ring disconnected.
 const token = new CfnParameter(stack, "RingToken", {
   type: "String",
   noEcho: true,
-  minLength: 20,
+  default: "",
 });
 const signing = new CfnParameter(stack, "RingHmacKey", {
   type: "String",
   noEcho: true,
+  default: "",
 });
-const account = new CfnParameter(stack, "RingAccountId", { type: "String" });
+const account = new CfnParameter(stack, "RingAccountId", {
+  type: "String",
+  default: "",
+});
 const source = new CfnParameter(stack, "RingSourceType", {
   type: "String",
   default: "ring_simulator",
