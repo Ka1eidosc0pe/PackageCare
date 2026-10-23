@@ -7,7 +7,7 @@ import {
 const [mode, file, ...args] = process.argv.slice(2);
 if (!file || !["prepare", "inspect", "run"].includes(mode))
   throw new Error(
-    "Usage: handling-pilot.ts prepare BASELINE [--resume-first-case PLAN] | inspect PLAN | run PLAN --approve-plan SHA256 --requests 10|8 (explicit owner spending approval required)",
+    "Usage: handling-pilot.ts prepare BASELINE [--resume-first-case PLAN] | inspect PLAN | run PLAN --approve-plan SHA256 --requests 10|8 (billed)",
   );
 if (mode === "prepare") {
   if (args.length && (args.length !== 2 || args[0] !== "--resume-first-case"))

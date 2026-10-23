@@ -27,18 +27,6 @@ Record real observations as work proceeds. Severity describes impact on this pro
 - **Workaround:** Implement dense, ordered image windows and native-video/sparse comparison strategies.
 - **Suggestion:** Expose configurable short-video sampling, or provide explicit guidance for subsecond action analysis and preserving time references across image windows.
 
-## PC-F003 — stale PRD stop caused dependency approval rejection
-
-- **Date:** October 16, 2026
-- **Tool:** Local execution automatic approval review
-- **Task:** Install dependencies after the new implementation goal.
-- **Expected:** The newer implementation authorization would supersede the earlier PRD-only stop.
-- **Actual:** Two installation attempts were rejected because review still treated the old stop as active, including an attempt with lifecycle scripts disabled.
-- **Severity:** Important; installation was blocked until clarification.
-- **Workaround:** Asked the user explicitly; user approved installation and continuing implementation. Installation then succeeded.
-- **Suggestion:** Ensure approval review receives the newest trusted user goal and explicit superseding authorization.
-- **Submission note:** This entry concerns the local coding environment, not an Amazon API. Include only if relevant to the tool-feedback fields.
-
 ## PC-F004 — FFmpeg expression quoting and development proxy origin
 
 - **Date:** October 16, 2026
@@ -95,7 +83,7 @@ Record real observations as work proceeds. Severity describes impact on this pro
 
 - **Date:** October 16, 2026
 - **Tool:** Our upload API and background processing implementation
-- **Task:** Audit restart and Lambda response-boundary behavior against the PRD.
+- **Task:** Audit restart and Lambda response-boundary behavior against our requirements.
 - **Expected:** Acknowledged uploads would survive a restart and be retryable.
 - **Actual:** Preparation started in a background task before the original bytes were persisted. An interrupted process could leave a delivery with no recoverable source. The same path was unsuitable for Lambda's response lifecycle.
 - **Severity:** Important; recovery could fail even though receipt was acknowledged.
@@ -107,7 +95,7 @@ Record real observations as work proceeds. Severity describes impact on this pro
 
 - **Date:** October 16, 2026
 - **Tool:** Amazon Bedrock Converse, Service Quotas, AWS CLI 2.38.1 and SDK for JavaScript v3
-- **Task:** Run the first owner-approved, bounded Ohio-only multimodal smoke test.
+- **Task:** Run a first bounded, in-Region (us-east-2) multimodal smoke test.
 - **Expected:** An authorized/available on-demand model would accept a small five-frame request and return schema-checkable output.
 - **Actual:** The first request returned HTTP 429 `ThrottlingException: Too many tokens per day, please wait before trying again.` SDK attempts = 1; retry delay = 0. No second request or model output. Bedrock availability metadata had reported AUTHORIZED/AVAILABLE. Service Quotas then reported the Nova Lite daily allocation (`L-45E0AD92`) as 0, non-adjustable. Other Nova daily entries checked also showed 0.
 - **Severity:** Blocking for live model validation.
@@ -139,7 +127,7 @@ Record real observations as work proceeds. Severity describes impact on this pro
 ### October 19 updates to earlier entries
 
 - **PC-F001:** Customization is now clarified by the organizer: live Package/Vehicle/Motion only, no custom uploads; separate authorized scenario footage is allowed with actual Playground integration. The earlier unauthenticated-reader error no longer blocks this feasibility decision.
-- **PC-F009:** AWS Support work by the owner changed the applied daily quota to 564,480,001. A real two-pass Nova Lite smoke now succeeds. Do not repeat the obsolete zero-quota workaround or infer that a paid-plan upgrade was required; project remains FREE/ACTIVE.
+- **PC-F009:** An AWS Support case changed the applied daily quota to 564,480,001. A real two-pass Nova Lite smoke now succeeds.
 
 ## PC-F012 — normal-app partial model usage was lost on failure
 
@@ -158,7 +146,7 @@ The historical Qwen pilot stopped on an empty first-window answer before reachin
 
 ## October 19 — Mistral image/body limits and correlated visual errors
 
-Generic image/Converse availability did not reveal this endpoint's three-image cap or total-body rejection. The first error logger omitted the service message; fixed and regression-tested. Packing full frames satisfied image count but larger postal sheets failed body buffering. Native JSON constraints worked on the van yet observation/verification repeated materially false parcel descriptions and a placement. Structural compliance and repeated agreement are not factual reliability. Paid scope closed; raw receipts retained. See `handling-support-pilot.md`.
+Generic image/Converse availability did not reveal this endpoint's three-image cap or total-body rejection. The first error logger omitted the service message; fixed and regression-tested. Packing full frames satisfied image count but larger postal sheets failed body buffering. Native JSON constraints worked on the van yet observation/verification repeated materially false parcel descriptions and a placement. Structural compliance and repeated agreement are not factual reliability. Paid scope closed; raw receipts retained.
 
 ## October 23 — AWS deployment (CDK, Lambda container images)
 

@@ -43,7 +43,7 @@ if (values.invoke) {
     JSON.stringify({
       invoking: false,
       ...(await prepareVisionPilot(positionals[0])),
-      note: "Review the frozen mixed-case scope and obtain spending approval before invocation.",
+      note: "Review the frozen mixed-case scope and pricing before invoking (billed).",
     }),
   );
 }

@@ -19,9 +19,9 @@
 
 ## How the handling model was built
 
-Real, licensed doorbell footage of packages being thrown is nearly impossible to get, and prompting general multimodal models (Nova, Qwen, Mistral, a local Qwen 27B) did not reliably detect brief tosses ([history](handoff.md)). So we:
+Real, licensed doorbell footage of packages being thrown is nearly impossible to get, and prompting general multimodal models (Nova, Qwen, Mistral, a local Qwen 27B) did not reliably detect brief tosses. So we:
 
-1. **Generated ~430 labeled doorbell clips** with an AI video model (Seedance via fal.ai). The prompts vary camera (fisheye doorbell, high porch, distant CCTV, apartment door), setting, lighting (day, dusk, rain, night IR), courier, parcel and action. Actions are toss, drop, careful placement, no handling, and handling hidden from view.
+1. **Generated ~490 labeled doorbell clips** with an AI video model (Seedance via fal.ai). The prompts vary camera (fisheye doorbell, high porch, distant CCTV, apartment door), setting, lighting (day, dusk, rain, night IR), courier, parcel and action. Actions are toss, drop, careful placement, no handling, and handling hidden from view.
 2. **Degraded each clip** to look like a real camera (lens distortion, low resolution, blur, noise, heavy compression).
 3. **Extracted features with a frozen [V-JEPA 2](https://huggingface.co/facebook/vjepa2-vitl-fpc16-256-ssv2) video model** and trained a small logistic-regression head on top (rough / placement / none).
 4. **Evaluated only on footage the model never saw:** clips from a *different* generator (Kling), and real recordings.
@@ -81,10 +81,11 @@ Open http://127.0.0.1:3012, choose **Import footage** and pick any clip from [`s
 
 PackageCare describes visible handling and keeps recipient statements separate. It does not identify delivery workers, infer intent or blame, assert damage to contents, detect theft, or submit complaints. Recipient-approved carrier escalation is a labeled roadmap concept only.
 
-## Logs
+## Docs
 
-- [Development log](docs/development-log.md) and [friction log](docs/friction-log.md) (tool and API feedback)
-- [Demo script](docs/demo-script.md), [submission checklist](docs/submission.md)
-- Earlier evaluation history: [handoff.md](handoff.md), [progress](docs/progress.md)
+- [Friction log](docs/friction-log.md): tool and API feedback from building this
+- [Handling classifier](docs/synthetic-classifier.md): data, training, held-out results and limitations
+- [AWS deployment](docs/deployment.md): stack, deploy, smoke test and teardown
+- [Footage sources and credits](docs/footage-sources.md)
 
 Generated clips are AI-generated and are labeled as such wherever they appear. Third-party footage used for evaluation keeps its credits ([docs/footage-sources.md](docs/footage-sources.md)) and is not redistributed in this repository.

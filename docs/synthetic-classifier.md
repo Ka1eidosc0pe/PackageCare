@@ -1,6 +1,6 @@
 # Synthetic-data handling classifier
 
-October 22, 2026. Replaces the prompt-only multimodal approach as the primary handling detector (see `handoff.md` for why those failed). Owner-approved spend on fal.ai: $5 pilot, then a $35 credit top-up for the full set.
+October 22, 2026. Replaces the prompt-only multimodal approach as the primary handling detector (general multimodal models missed brief tosses or invented details).
 
 ## Approach
 

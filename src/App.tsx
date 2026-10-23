@@ -2132,8 +2132,7 @@ function Connections({
               <p>
                 Local analysis uses the {AWS_PROFILE_NAME} profile in{" "}
                 {APPLICATION_REGION}. AWS deployments use an execution role.
-                Check model quotas and obtain spending approval before live
-                analysis.
+                Check Bedrock model access and quotas; live analysis is billed to your AWS account.
               </p>
               <div className="setup-code">
                 <code>

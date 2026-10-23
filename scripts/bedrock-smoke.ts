@@ -18,7 +18,7 @@ import { emptyReview, type Delivery } from "../shared/domain.js";
 const [file, mode] = process.argv.slice(2);
 if (!file || (mode && mode !== "--invoke"))
   throw new Error(
-    "Usage: npm run bedrock:smoke -- /path/to/clip.mp4 [--invoke]. Default only prepares local inputs. Obtain owner approval before --invoke.",
+    "Usage: npm run bedrock:smoke -- /path/to/clip.mp4 [--invoke]. Default only prepares local inputs. --invoke makes billed Bedrock calls.",
   );
 // Never use configured cloud storage/workflows for this bounded smoke test.
 const root = path.resolve("data", "bedrock-smoke", randomUUID()),

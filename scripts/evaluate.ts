@@ -15,7 +15,7 @@ const { values, positionals } = parseArgs({
 });
 if (positionals.length !== 1)
   throw new Error(
-    "Prepare: npm run evaluate -- manifest.json [--strategy dense_frames] [--split development]. After spending approval: npm run evaluate -- /path/to/plan.json --invoke --max-requests N",
+    "Prepare: npm run evaluate -- manifest.json [--strategy dense_frames] [--split development]. To invoke (billed): npm run evaluate -- /path/to/plan.json --invoke --max-requests N",
   );
 if (values.invoke) {
   if (values.strategy || values.split || values["frame-count"])
@@ -44,7 +44,7 @@ if (values.invoke) {
 } else {
   if (values["max-requests"])
     throw new Error(
-      "Request limits apply only after explicit spending approval with --invoke.",
+      "Request limits apply when invoking with --invoke (billed).",
     );
   const { planPath, plan } = await prepareEvaluation(
     positionals[0],
@@ -68,7 +68,7 @@ if (values.invoke) {
       retries: 0,
       storage: "local",
       requestedFrameCount: plan.requestedFrameCount,
-      note: "Prepared locally. Review the exact sources/call count and current pricing, then obtain owner spending approval before --invoke.",
+      note: "Prepared locally. Review the exact sources/call count and current pricing, then decide whether to --invoke (billed).",
     }),
   );
 }

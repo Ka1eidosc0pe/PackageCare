@@ -15,7 +15,7 @@ const { values, positionals } = parseArgs({
 });
 if (positionals.length !== 1)
   throw new Error(
-    "Prepare: npm run benchmark:vision -- /path/to/baseline-plan.json [--whole-clip]. After specific spending approval: npm run benchmark:vision -- /path/to/benchmark-plan.json --invoke --max-requests N",
+    "Prepare: npm run benchmark:vision -- /path/to/baseline-plan.json [--whole-clip]. To invoke (billed): npm run benchmark:vision -- /path/to/benchmark-plan.json --invoke --max-requests N",
   );
 if (values.invoke) {
   if (values["frame-offsets"] || values["whole-clip"])
@@ -44,7 +44,7 @@ if (values.invoke) {
 } else {
   if (values["max-requests"])
     throw new Error(
-      "Preparation makes no inference calls; obtain approval before invoking.",
+      "Preparation makes no inference calls; invoking is billed.",
     );
   console.log(
     JSON.stringify({
@@ -55,7 +55,7 @@ if (values.invoke) {
         values["frame-offsets"]?.split(",").map(Number),
         values["whole-clip"] ? 3 : undefined,
       )),
-      note: "Local preparation only. Review pricing and obtain owner approval before invocation.",
+      note: "Local preparation only. Review pricing before invoking (billed).",
     }),
   );
 }
