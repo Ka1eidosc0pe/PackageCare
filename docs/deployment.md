@@ -2,7 +2,14 @@
 
 **Status (October 23, 2026): deployed and smoke-tested** in `us-east-2` with the `pkgcare` profile, owner-approved with a $5 ceiling. Stack `PackageCare`: HTTP API → API Lambda; private S3 evidence bucket with direct presigned uploads; Step Functions (retrieve → observe → verify); arm64 container Worker Lambda (3008 MB, 15 min) running FFmpeg, PyTorch CPU, V-JEPA 2 and the trained handling head; DynamoDB; daily retention Lambda.
 
-Smoke test (`python3 scripts/cloud-smoke.py <ApplicationUrl> <clip>`): an AI-generated 6-second toss clip went upload → S3 → Step Functions → Worker → DynamoDB and returned `possible_rough_handling`, with a supported 4.0–6.0 s observation, 196 s end to end (observe ≈174 s). Estimated Lambda cost ≈ $0.01 per short clip; ECR holds ~2.1 GB of images (~$0.21/month).
+Smoke tests (`python3 scripts/cloud-smoke.py <ApplicationUrl> <clip>`) take each upload through S3, Step Functions, the Worker and DynamoDB. All run on the final classifier `classifier-d2ef3d57700f`, matching the local `data/synthetic/model/classifier.joblib`:
+
+| Clip (AI-generated, held out) | Container | Result | End to end |
+|---|---|---|---|
+| Townhouse drop, 6 s 1080p | cold (first call after deploy) | `possible_rough_handling`, 2.0–4.0 s supported | 484 s (inference 407 s) |
+| Bungalow placement in rain, 6 s 1080p | warm | `no_concern_observed`, controlled placement 2.0–4.0 s | 91 s (inference 70 s) |
+
+Cold starts are slow because Lambda lazy-loads the ~4 GB image, including the 1.4 GB V-JEPA 2 weights. Before a live demo, warm the worker with one upload. A first-call failure was fixed by raising the FFmpeg/FFprobe timeouts from 15 s to 60 s. Estimated Lambda cost is about $0.004–0.02 per clip; ECR holds ~2.1 GB of images (~$0.21/month).
 
 Deploy: `bash scripts/deploy.sh` (interactive; CDK asks before IAM changes). The workspace password is generated into the ignored `data/aws-deploy/secrets.env`. Ring parameters are optional, because Playground tokens are short-lived.
 
