@@ -19,6 +19,8 @@ Indexing: window_video_idx [W] -> videos[N]; window_start_ms / window_end_ms [W]
 """
 
 import argparse
+import os
+import shutil
 import subprocess
 import sys
 import time
@@ -26,13 +28,26 @@ from pathlib import Path
 
 import numpy as np
 
-FFMPEG = "/opt/homebrew/bin/ffmpeg"
+# Explicit override, then PATH (Linux/Lambda), then the Homebrew default used on the dev Mac.
+FFMPEG = os.environ.get("PACKAGECARE_FFMPEG") or shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
 SIDE = 256
 FILL = "0x7C7468"  # RGB (124,116,104), same fill as action_model.py
 MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
 T = 16
 ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DEVICE = os.environ.get("PACKAGECARE_DEVICE", "mps")
+DEFAULT_MODEL_DIR = os.environ.get("PACKAGECARE_MODEL_DIR") or str(ROOT / "data/local-action-small-model")
+
+
+def cpu_threads():
+    """Threads for CPU inference: PACKAGECARE_TORCH_THREADS, else CPUs usable by this process."""
+    if os.environ.get("PACKAGECARE_TORCH_THREADS"):
+        return max(1, int(os.environ["PACKAGECARE_TORCH_THREADS"]))
+    try:
+        return max(1, len(os.sched_getaffinity(0)))
+    except AttributeError:  # macOS
+        return max(1, os.cpu_count() or 1)
 
 
 def collect(inputs):
@@ -72,6 +87,8 @@ def load_model(model_dir, device):
     if device == "mps" and not torch.backends.mps.is_available():
         sys.exit("MPS unavailable (try running outside the sandbox); refusing silent CPU fallback. Use --device cpu explicitly.")
     dev = torch.device(device)
+    if dev.type == "cpu":
+        torch.set_num_threads(cpu_threads())
     model = AutoModelForVideoClassification.from_pretrained(
         model_dir, local_files_only=True, use_safetensors=True,
         dtype=torch.float32, attn_implementation="sdpa",
@@ -113,11 +130,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("out")
     ap.add_argument("videos", nargs="+")
-    ap.add_argument("--model-dir", default=str(ROOT / "data/local-action-small-model"))
+    ap.add_argument("--model-dir", default=DEFAULT_MODEL_DIR)
     ap.add_argument("--fps", type=float, default=8.0)
     ap.add_argument("--stride", type=int, default=4)
     ap.add_argument("--batch", type=int, default=4)
-    ap.add_argument("--device", default="mps")
+    ap.add_argument("--device", default=DEFAULT_DEVICE, help="mps|cpu (default: $PACKAGECARE_DEVICE or mps)")
     a = ap.parse_args()
 
     import torch

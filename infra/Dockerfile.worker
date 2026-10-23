@@ -1,0 +1,56 @@
+# Worker image: the Node worker plus a CPU-only Python runtime for the local handling
+# classifier (frozen V-JEPA 2 ViT-L + scikit-learn head). linux/arm64 for Lambda Graviton.
+# API and Retention keep using infra/Dockerfile.lambda.
+FROM node:24-bookworm-slim AS build
+RUN apt-get update && apt-get install -y --no-install-recommends g++ make cmake python3 unzip xz-utils autoconf automake libtool pkg-config libcurl4-openssl-dev && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY package*.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+RUN npm install aws-lambda-ric@4.0.2 --no-audit --no-fund
+COPY . .
+RUN npm run build && npx esbuild server/lambda.ts server/worker.ts server/maintenance-worker.ts --bundle --platform=node --target=node22 --format=cjs --outdir=lambda --external:sharp --external:@img/*
+
+FROM node:24-bookworm-slim AS node
+
+# Python 3.12 matches data/cv-env (the classifier joblib is pickled by scikit-learn 1.9.1 on 3.12).
+FROM python:3.12-slim-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg libcurl4 && rm -rf /var/lib/apt/lists/*
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+# pip byte-compiles at install time, so the read-only Lambda filesystem needs no .pyc writes.
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.14.1 \
+ && pip install --no-cache-dir transformers==5.20.1 numpy==2.5.4 pillow==13.0.0 scikit-learn==1.9.1 joblib==1.6.0 safetensors==0.8.0
+WORKDIR /var/task
+COPY --from=build /build/node_modules ./node_modules
+COPY --from=build /build/lambda ./lambda
+COPY --from=build /build/dist ./dist
+COPY experiments/synthetic/infer.py experiments/synthetic/embed.py experiments/synthetic/train.py ./experiments/synthetic/
+COPY data/local-action-small-model/config.json data/local-action-small-model/video_preprocessor_config.json data/local-action-small-model/model.safetensors ./models/vjepa2-vitl-fpc16-256-ssv2/
+# Override with --build-arg CLASSIFIER=data/synthetic/model/classifier.joblib once full training finishes.
+ARG CLASSIFIER=data/synthetic/model-mini/classifier.joblib
+COPY ${CLASSIFIER} ./models/classifier.joblib
+COPY --chmod=755 infra/entrypoint.sh /var/task/entrypoint.sh
+# Lambda's filesystem is read-only except /tmp: every cache and scratch path lives there.
+ENV DATA_DIR=/tmp/packagecare \
+    PACKAGECARE_ROOT=/var/task \
+    PACKAGECARE_ANALYZER=local \
+    PACKAGECARE_PYTHON=/usr/local/bin/python3.12 \
+    PACKAGECARE_CLASSIFIER=/var/task/models/classifier.joblib \
+    PACKAGECARE_MODEL_DIR=/var/task/models/vjepa2-vitl-fpc16-256-ssv2 \
+    PACKAGECARE_DEVICE=cpu \
+    PACKAGECARE_FFMPEG=/usr/bin/ffmpeg \
+    FFMPEG_PATH=/usr/bin/ffmpeg \
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1 \
+    HF_DATASETS_OFFLINE=1 \
+    HF_HUB_DISABLE_TELEMETRY=1 \
+    HF_HOME=/tmp/hf \
+    TORCH_HOME=/tmp/torch \
+    XDG_CACHE_HOME=/tmp/cache \
+    MPLCONFIGDIR=/tmp/mpl \
+    JOBLIB_TEMP_FOLDER=/tmp \
+    TMPDIR=/tmp \
+    HOME=/tmp \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+ENTRYPOINT ["/var/task/entrypoint.sh"]
+CMD ["lambda/worker.handler"]

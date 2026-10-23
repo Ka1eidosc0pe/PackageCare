@@ -32,6 +32,16 @@ const required = (d: Delivery | undefined): Delivery => {
     throw Object.assign(new Error("Delivery not found."), { status: 404 });
   return d;
 };
+/** Readable delivery title from the uploaded file name, e.g. "original-front_porch.mp4" -> "front porch". */
+export function uploadTitle(name: string | undefined) {
+  const stem = (name ?? "")
+    .replace(/^original-/, "")
+    .replace(/\.[a-z0-9]+$/i, "")
+    .replace(/[_]+/g, " ")
+    .trim();
+  return stem ? stem.slice(0, 80) : "Uploaded delivery";
+}
+
 export class PackageCare {
   running = new Set<string>();
   constructor(
@@ -150,7 +160,7 @@ export class PackageCare {
           id,
           revision: 0,
           source: "uploaded",
-          title: "Uploaded delivery",
+          title: uploadTitle(asset.name),
           camera: "Uploaded footage",
           observedAt: now,
           createdAt: now,

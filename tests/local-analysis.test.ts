@@ -209,3 +209,13 @@ describe("local classifier analyzer", () => {
     );
   });
 });
+
+import { uploadTitle } from "../server/service";
+
+describe("uploadTitle", () => {
+  it("turns the stored upload name into a readable title", () => {
+    expect(uploadTitle("original-AI-generated_porch_clip_A.mp4")).toBe("AI-generated porch clip A");
+    expect(uploadTitle("original-.mp4")).toBe("Uploaded delivery");
+    expect(uploadTitle(undefined)).toBe("Uploaded delivery");
+  });
+});

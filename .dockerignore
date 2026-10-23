@@ -1,5 +1,10 @@
 node_modules
 data
+!data/local-action-small-model/config.json
+!data/local-action-small-model/video_preprocessor_config.json
+!data/local-action-small-model/model.safetensors
+!data/synthetic/model/classifier.joblib
+!data/synthetic/model-mini/classifier.joblib
 .env
 .env.*
 !.env.example

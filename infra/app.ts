@@ -16,6 +16,7 @@ import {
   aws_iam as iam,
   aws_events as events,
   aws_events_targets as targets,
+  aws_ecr_assets as ecrAssets,
 } from "aws-cdk-lib";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import path from "node:path";
@@ -94,15 +95,31 @@ const common = {
   APP_ORIGIN: api.apiEndpoint,
 };
 const image = path.resolve(".");
+// API and Retention never need the classifier files that .dockerignore re-includes for the worker.
+// All functions are arm64: the image's native npm/ffmpeg binaries must match the Lambda
+// architecture, and an explicit platform keeps builds on Apple Silicon and x86 hosts identical.
+const arm = {
+  platform: ecrAssets.Platform.LINUX_ARM64,
+  architecture: lambda.Architecture.ARM_64,
+};
+const slim = {
+  file: "infra/Dockerfile.lambda",
+  exclude: ["data"],
+  platform: arm.platform,
+};
+// The worker runs the local handling classifier (frozen V-JEPA 2 + scikit-learn head) on CPU.
+// arm64 (Graviton) is ~20% cheaper per GB-second; 10 GB gives the 6-vCPU maximum.
 const worker = new lambda.DockerImageFunction(stack, "Worker", {
   code: lambda.DockerImageCode.fromImageAsset(image, {
-    file: "infra/Dockerfile.lambda",
+    file: "infra/Dockerfile.worker",
+    platform: arm.platform,
     cmd: ["lambda/worker.handler"],
   }),
-  timeout: Duration.minutes(5),
-  memorySize: 2048,
-  ephemeralStorageSize: Size.gibibytes(1),
-  environment: common,
+  architecture: arm.architecture,
+  timeout: Duration.minutes(10),
+  memorySize: 10240,
+  ephemeralStorageSize: Size.gibibytes(2),
+  environment: { ...common, PACKAGECARE_ANALYZER: "local" },
   reservedConcurrentExecutions: 2,
   logGroup: new logs.LogGroup(stack, "WorkerLogs", {
     retention: logs.RetentionDays.ONE_WEEK,
@@ -145,7 +162,8 @@ const workflow = new sfn.StateMachine(stack, "Processing", {
   definitionBody: sfn.DefinitionBody.fromChainable(
     retrieve.next(observe).next(verify),
   ),
-  timeout: Duration.minutes(12),
+  // Exceeds retrieve + observe + verify (+ fail) at the 10-minute worker timeout plus retries.
+  timeout: Duration.minutes(45),
   logs: {
     destination: new logs.LogGroup(stack, "WorkflowLogs", {
       retention: logs.RetentionDays.ONE_WEEK,
@@ -155,9 +173,8 @@ const workflow = new sfn.StateMachine(stack, "Processing", {
   },
 });
 const handler = new lambda.DockerImageFunction(stack, "Api", {
-  code: lambda.DockerImageCode.fromImageAsset(image, {
-    file: "infra/Dockerfile.lambda",
-  }),
+  code: lambda.DockerImageCode.fromImageAsset(image, slim),
+  architecture: arm.architecture,
   timeout: Duration.seconds(29),
   memorySize: 1024,
   environment: {
@@ -184,9 +201,10 @@ for (const fn of [handler, worker]) {
 }
 const maintenance = new lambda.DockerImageFunction(stack, "Retention", {
   code: lambda.DockerImageCode.fromImageAsset(image, {
-    file: "infra/Dockerfile.lambda",
+    ...slim,
     cmd: ["lambda/maintenance-worker.handler"],
   }),
+  architecture: arm.architecture,
   timeout: Duration.minutes(5),
   memorySize: 512,
   environment: {

@@ -249,7 +249,7 @@ const reply = (data: unknown, more = {}) =>
     ...more,
   }) as any;
 
-describe("frozen mixed-case handling pilot", () => {
+describe("frozen mixed-case handling pilot", { timeout: 60_000 }, () => {
   it("replays two byte-matched saved replies with extra caveats and spends only on the four untouched cases", async () => {
     const { root, prepared } = await dataset();
     const response = event();

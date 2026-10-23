@@ -17,21 +17,23 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from embed import ROOT, embed_video, load_model  # noqa: E402
+from embed import DEFAULT_DEVICE, DEFAULT_MODEL_DIR, embed_video, load_model  # noqa: E402
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("video")
     ap.add_argument("--model", required=True, help="classifier.joblib from train.py")
-    ap.add_argument("--model-dir", default=str(ROOT / "data/local-action-small-model"))
+    ap.add_argument("--model-dir", default=DEFAULT_MODEL_DIR, help="default: $PACKAGECARE_MODEL_DIR or data/local-action-small-model")
     ap.add_argument("--fps", type=float, default=8.0)
     ap.add_argument("--stride", type=int, default=4)
     ap.add_argument("--batch", type=int, default=4)
-    ap.add_argument("--device", default="mps")
+    ap.add_argument("--device", default=DEFAULT_DEVICE, choices=["mps", "cpu"],
+                    help="default: $PACKAGECARE_DEVICE or mps (no silent fallback)")
     a = ap.parse_args()
 
     import joblib
+    import torch
 
     t0 = time.monotonic()
     model_bytes = Path(a.model).read_bytes()
@@ -59,6 +61,7 @@ def main():
         "model_id": f"classifier-{hashlib.sha256(model_bytes).hexdigest()[:12]}",
         "feature": feature,
         "device": str(loaded[1]),
+        "threads": torch.get_num_threads(),
         "load_seconds": round(t_load, 2),
         "seconds": round(time.monotonic() - t0, 2),
     }

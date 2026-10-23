@@ -18,7 +18,13 @@ import { attachFailedRun, type Analyzer } from "./analysis.js";
 export const LOCAL_PROMPT_VERSION = "packagecare-local-classifier-v1";
 export const LOCAL_PROVIDER_LABEL =
   "Local handling classifier (trained on synthetic clips)";
-const ROOT = path.resolve(import.meta.dirname, "..");
+// The Lambda bundle is CommonJS (esbuild), where import.meta.dirname is undefined;
+// fall back to PACKAGECARE_ROOT or the working directory (/var/task in Lambda).
+const ROOT = process.env.PACKAGECARE_ROOT
+  ? path.resolve(process.env.PACKAGECARE_ROOT)
+  : import.meta.dirname
+    ? path.resolve(import.meta.dirname, "..")
+    : process.cwd();
 export const THRESHOLDS = {
   clip: 0.6,
   supported: 0.8,
@@ -200,6 +206,8 @@ export class LocalClassifierAnalyzer implements Analyzer {
       python?: string;
       classifier?: string;
       script?: string;
+      device?: string;
+      modelDir?: string;
       exec?: Exec;
     } = {},
   ) {}
@@ -248,7 +256,11 @@ export class LocalClassifierAnalyzer implements Analyzer {
         "data/cv-env/bin/python",
     );
     const script =
-      this.options.script || path.join(ROOT, "experiments/synthetic/infer.py");
+      this.options.script ||
+      process.env.PACKAGECARE_INFER_SCRIPT ||
+      path.join(ROOT, "experiments/synthetic/infer.py");
+    const device = this.options.device || process.env.PACKAGECARE_DEVICE;
+    const modelDir = this.options.modelDir || process.env.PACKAGECARE_MODEL_DIR;
     const exec = this.options.exec || defaultExec;
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "packagecare-local-"));
     const t0 = Date.now();
@@ -263,6 +275,8 @@ export class LocalClassifierAnalyzer implements Analyzer {
           script,
           "--model",
           classifier,
+          ...(device ? ["--device", device] : []),
+          ...(modelDir ? ["--model-dir", path.resolve(modelDir)] : []),
           file,
         ]));
       } catch {

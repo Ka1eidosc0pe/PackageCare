@@ -1,0 +1,74 @@
+[
+ {
+  "id": "demo-toss",
+  "label": "toss",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch, doormat and front steps, at a suburban house with a wooden porch, bright daylight. A delivery driver in a plain navy uniform walks up the front path holding a medium cardboard box, stops at the bottom of the steps and tosses the box underhand onto the porch; the box flies through the air, lands hard on the porch floor near the door, bounces and tumbles. The driver turns and walks back to the street. Static camera, no camera movement, single continuous shot, realistic doorbell camera video quality with slight compression. The camera device itself is not visible in the image. No text or logos.",
+   "resolution": "1080p",
+   "duration": "6",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  }
+ },
+ {
+  "id": "demo-place",
+  "label": "place",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch, doormat and front steps, at a suburban house with a wooden porch, bright daylight. A delivery driver in a plain navy uniform walks up the steps holding a medium cardboard box, bends down and gently sets the box on the doormat with both hands, lets go only once it rests on the mat, then walks back down the path. Static camera, no camera movement, single continuous shot, realistic doorbell camera video quality with slight compression. The camera device itself is not visible in the image. No text or logos.",
+   "resolution": "1080p",
+   "duration": "6",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  }
+ },
+ {
+  "id": "demo-drop",
+  "label": "drop",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch, doormat and front steps, at a brick townhouse with a narrow stoop, overcast daylight. A courier in a high-visibility yellow vest walks up to the door holding a cardboard box at chest height and lets go of it; the box falls straight down onto the stoop, hits hard and tips over. The courier walks away. Static camera, no camera movement, single continuous shot, realistic doorbell camera video quality with slight compression. The camera device itself is not visible in the image. No text or logos.",
+   "resolution": "1080p",
+   "duration": "6",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  }
+ },
+ {
+  "id": "demo-obscured",
+  "label": "obscured",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch, doormat and front steps, at a farmhouse with wide painted porch pillars, late afternoon sun. A delivery driver walks up holding a cardboard box and steps behind a thick porch pillar, so what happens to the box is hidden from view; the driver then walks away and the box is out of sight. Static camera, no camera movement, single continuous shot, realistic doorbell camera video quality with slight compression. The camera device itself is not visible in the image. No text or logos.",
+   "resolution": "1080p",
+   "duration": "6",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  }
+ },
+ {
+  "id": "demo-night-toss",
+  "label": "toss",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch, doormat and front steps, at a modern house with a flat concrete entryway, night-time infrared black-and-white security footage. A delivery driver walks up holding a small cardboard box and, from a few meters away, throws it toward the door; it sails through the air and skids across the concrete. The driver walks away quickly. Static camera, no camera movement, single continuous shot, realistic doorbell camera video quality with slight compression. The camera device itself is not visible in the image. No text or logos.",
+   "resolution": "1080p",
+   "duration": "6",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  }
+ },
+ {
+  "id": "demo-rain-place",
+  "label": "place",
+  "endpoint": "fal-ai/bytedance/seedance/v1/pro/fast/text-to-video",
+  "input": {
+   "prompt": "Video doorbell footage seen from the doorbell itself, mounted beside the front door at chest height, wide-angle fisheye lens looking out over the porch, doormat and front steps, at a small bungalow with a low step, light rain with a wet porch floor. A courier in a dark jacket walks up holding a padded mailer and a box, crouches and carefully places them under the porch roof beside the door, then leaves. Static camera, no camera movement, single continuous shot, realistic doorbell camera video quality with slight compression. The camera device itself is not visible in the image. No text or logos.",
+   "resolution": "1080p",
+   "duration": "6",
+   "aspect_ratio": "16:9",
+   "camera_fixed": true
+  }
+ }
+]
