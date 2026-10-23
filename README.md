@@ -2,7 +2,7 @@
 
 **A clearer record of how your delivery was handled.** PackageCare turns Ring doorbell footage into an evidence-linked handling timeline. The recipient reviews it, records damage separately, and exports a report they control. Built for the **Ring** track and the **AWS Builder** mini challenge of Amazon's 2026 developer hackathon.
 
-![Delivery review](docs/media/delivery-review.png)
+![Delivery review](docs/media/delivery-review.jpg)
 
 ## What it does
 
